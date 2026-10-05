@@ -1,0 +1,39 @@
+{
+  "name": "kampusx",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "nx serve shell",
+    "build": "nx build shell",
+    "typecheck": "tsc --noEmit -p apps/shell/tsconfig.app.json",
+    "format": "prettier --write apps libs scripts *.json *.md *.cjs",
+    "format:check": "prettier --check apps libs scripts *.json *.md *.cjs",
+    "test": "node --test scripts/validators.test.cjs",
+    "check:i18n": "node scripts/check-i18n.cjs",
+    "test:ui": "playwright test"
+  },
+  "dependencies": {
+    "@angular/common": "22.2.1",
+    "@angular/compiler": "22.2.1",
+    "@angular/core": "22.2.1",
+    "@angular/forms": "22.2.1",
+    "@angular/platform-browser": "22.2.1",
+    "@angular/router": "22.2.1",
+    "@jsverse/transloco": "8.4.0",
+    "rxjs": "7.8.2",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.1",
+    "@angular/compiler-cli": "22.2.1",
+    "@nx/angular": "23.2.1",
+    "nx": "23.2.1",
+    "typescript": "~6.0.0",
+    "tailwindcss": "3.4.19",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.21",
+    "prettier": "^3.6.2",
+    "@playwright/test": "^1.56.1",
+    "@axe-core/playwright": "^4.10.2"
+  }
+}

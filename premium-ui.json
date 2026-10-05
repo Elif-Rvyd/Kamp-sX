@@ -1,0 +1,11 @@
+{
+  "profile": "marketing-auth-preview",
+  "sourceRoots": ["apps/shell/src", "libs/shared/ui", "libs/shared/util"],
+  "locale": "tr-TR",
+  "requiredCommands": ["unit", "i18n", "browser"],
+  "commands": {
+    "unit": "npm test",
+    "i18n": "npm run check:i18n",
+    "browser": "npm run test:ui"
+  }
+}

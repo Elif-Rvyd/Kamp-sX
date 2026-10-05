@@ -1,0 +1,7 @@
+{
+  "name": "design-tokens",
+  "projectType": "library",
+  "sourceRoot": "libs/shared/design-tokens",
+  "tags": ["scope:shared", "type:tokens"],
+  "targets": {}
+}

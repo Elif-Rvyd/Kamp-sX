@@ -1,20 +1,17 @@
-## 🚀 Proje Hakkında
+# KampüsX
 
-KampüsX; üniversite öğrencilerinin kampüs hayatını, dersleri, etkinlikleri ve günlük paylaşımlarını dijital ortamda buluşturan tam donanımlı (Full-Stack) bir sosyal medya platformudur. 
+## Türkçe
 
-## ✨ Temel Özellikler
+Projenin güncel kapsamı, kurulumu, mimarisi, testleri ve ürün yol haritası
+[Türkçe README bölümünde](README.md#türkçe) açıklanır.
 
-- **Profil Yönetimi:** Kişiselleştirilebilir öğrenci profilleri.
-- **Akış (Feed):** Arkadaşların ve takip edilenlerin paylaşımlarını görebilme.
-- **Zengin Medya Paylaşımı:** Tweet, fotoğraf, müzik ve video paylaşabilme.
-- **Etkileşimler:** Retweetleme, beğenme, alıntılama, yorumlama ve arkadaşa gönderme.
-- **Anlık Mesajlaşma:** Arkadaşlarla birebir gerçek zamanlı sohbet.
+Bu dosya, repodaki eski tanıtım bağlantılarının çalışmaya devam etmesi için korunmuştur.
+Tamamlanan uygulama welcome ve auth frontend tasarımıdır; full-stack özellikler ve servisler yol haritasındadır.
 
-## 🛠️ Teknoloji Yığını
+## English
 
-- **Frontend:** Angular
-- **Backend:** Express.js (Modüler Monolit mimari)
-- **Veritabanı & Auth & Storage:** Supabase (PostgreSQL)
-- **Konteynerleştirme:** Docker & Docker Compose
-- **Dağıtım (Deployment):** Vercel
-- **Sürüm Kontrolü:** GitHub
+The current scope, setup, architecture, tests and product roadmap are documented in the
+[English README section](README.md#english).
+
+This file is retained so links to the original repository introduction continue to work.
+The implemented application is the welcome and auth frontend design; full-stack features and services remain on the roadmap.

@@ -1,0 +1,284 @@
+{
+  "common": {
+    "skip": "Skip to content",
+    "lightTheme": "Switch to light theme",
+    "darkTheme": "Switch to dark theme",
+    "language": {
+      "label": "Choose language",
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "languageCode": {
+      "tr": "TR",
+      "en": "EN"
+    },
+    "menu": "Open menu",
+    "closeMenu": "Close menu",
+    "close": "Close",
+    "back": "Back to sign in",
+    "demo": "Design preview",
+    "sample": "Sample data",
+    "plus": "+",
+    "brand": "KampüsX",
+    "title": "KampüsX — Your campus is talking",
+    "notFound": "We couldn't find this page on campus.",
+    "home": "Back to home"
+  },
+  "nav": {
+    "explore": "Explore",
+    "communities": "Communities",
+    "academic": "Academic network",
+    "about": "About",
+    "login": "Sign in",
+    "join": "Join your campus"
+  },
+  "hero": {
+    "edition": "The unofficial voice of campus.",
+    "live": "Campus pulse is live",
+    "active": "students active",
+    "universities": "universities connected",
+    "titleTop": "What’s your",
+    "titleMiddle": "campus talking",
+    "titleBottom": "about right now?",
+    "welcome": "Welcome to KampüsX.",
+    "description": "From between-class chats to your next big project. Your campus, your people, and the communities you belong to, all in one place.",
+    "sticker": "See you\nbetween classes!",
+    "roundSticker": "Students\nonly.",
+    "posterLabel": "A slice of campus life",
+    "sample": "Sample posts",
+    "scroll": "Explore campus life",
+    "verified": {
+      "title": "Real students",
+      "text": "Verified with .edu.tr"
+    },
+    "trending": {
+      "title": "Stay in the loop",
+      "text": "On your campus frequency"
+    },
+    "anonymous": {
+      "title": "Go anonymous",
+      "text": "Your voice, your choice"
+    },
+    "trends": {
+      "label": "Trending on campus",
+      "one": "#ITU_ExamSeason",
+      "two": "#METU_SpringFest",
+      "three": "#Cafeteria_Menu",
+      "four": "#ADayOnCampus",
+      "five": "#ProjectPartners",
+      "pause": "Pause trending ticker",
+      "resume": "Resume trending ticker"
+    }
+  },
+  "auth": {
+    "kicker": "You belong here.",
+    "title": "Connect with campus.",
+    "description": "One account. Your whole campus.",
+    "loginTab": "Sign in",
+    "registerTab": "Sign up",
+    "tabs": "Account actions",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHint": "At least 8 characters. Longer passwords are safer.",
+    "demoHint": "This is a design preview. No account or session is created.",
+    "secure": "A network verified with student emails",
+    "google": "Start with your Google student account",
+    "googleDemo": "Google isn't connected in this preview. Try the sign-up form instead.",
+    "divider": "or use your email",
+    "termsPrefix": "I have read and accept the terms of use and privacy policy.",
+    "termsLink": "Terms of use",
+    "privacyLink": "Privacy policy",
+    "strength": {
+      "0": "Password strength",
+      "1": "Getting started",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Strong"
+    },
+    "login": {
+      "identity": "Email or username",
+      "placeholder": "student@itu.edu.tr or @username",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "new": "New to KampüsX?",
+      "join": "Join us",
+      "success": "Your form is ready! No sign-in took place and no details were sent in this preview."
+    },
+    "register": {
+      "title": "Your next campus story.",
+      "description": "Join us with your student email.",
+      "email": "University email",
+      "emailPlaceholder": "student@itu.edu.tr",
+      "emailHint": "Only addresses ending in .edu.tr.",
+      "username": "Username",
+      "usernamePlaceholder": "@campuslife",
+      "usernameHint": "3–20 letters, numbers, or underscores.",
+      "submit": "Join KampüsX",
+      "success": "Your sign-up form is ready! No account was created in this demo."
+    },
+    "reset": {
+      "title": "Let’s reconnect.",
+      "description": "Enter your university email to preview the password reset flow.",
+      "email": "University email",
+      "placeholder": "student@itu.edu.tr",
+      "submit": "Send reset link",
+      "successTitle": "Check your email",
+      "success": "The live product will send a reset link to this address. No email was sent in this preview.",
+      "retry": "Try another email"
+    }
+  },
+  "validation": {
+    "required": "Please fill in this field.",
+    "email": "Enter a valid email address.",
+    "universityEmail": "Use your university email ending in .edu.tr.",
+    "username": "Use 3–20 letters, numbers, or underscores.",
+    "passwordLength": "Your password needs at least 8 characters."
+  },
+  "posts": {
+    "photo": {
+      "name": "Deniz Aydın",
+      "text": "One plan after the last class. 🌿",
+      "caption": "Campus, sunset, and us.",
+      "alt": "Original sunset illustration with trees and a campus building"
+    },
+    "anonymous": {
+      "name": "Someone on campus",
+      "text": "We always sit at the same library table. Today I’m asking them for coffee. Probably. 👀"
+    },
+    "poll": {
+      "name": "Ece Yılmaz",
+      "text": "What keeps you going through exam week?",
+      "one": "Coffee, obviously ☕",
+      "two": "My friends 🫶",
+      "votes": "votes · sample poll",
+      "firstPercent": "68%",
+      "secondPercent": "32%"
+    },
+    "video": {
+      "name": "Mert Kaya",
+      "text": "Rehearsal done. Next stop: spring festival. 🎸",
+      "caption": "Spring festival rehearsal",
+      "duration": "0:24",
+      "preview": "Video preview · sample content"
+    },
+    "time": "just now",
+    "verified": "Verified student",
+    "like": "Like this post",
+    "unlike": "Unlike this post",
+    "comments": "comments",
+    "share": "reposts",
+    "anonymousTag": "Anonymous",
+    "sample": "Sample post"
+  },
+  "universities": {
+    "itu": "Istanbul Technical University",
+    "metu": "Middle East Technical University",
+    "bogazici": "Boğaziçi University",
+    "ankara": "Ankara University",
+    "koc": "Koç University",
+    "hacettepe": "Hacettepe University",
+    "ege": "Ege University",
+    "istanbul": "Istanbul University"
+  },
+  "about": {
+    "number": "01",
+    "kicker": "All of campus life",
+    "title": "One campus.\nA thousand stories.",
+    "description": "More than a noticeboard. Closer than a feed. KampüsX brings university life together with the people living it.",
+    "quote": "The best ideas sometimes happen between classes.",
+    "photo": "Share a moment.",
+    "photoText": "Your campus, through your eyes.",
+    "video": "Put life in motion.",
+    "videoText": "Rehearsals, games, little discoveries.",
+    "text": "Say something.",
+    "textText": "Your ideas, questions, little confessions.",
+    "interactions": "Like, comment, repost, quote, or send a message.",
+    "feeds": {
+      "title": "Your world. Your feed.",
+      "university": "My university",
+      "department": "My department",
+      "explore": "Explore all",
+      "universityText": "What’s happening with the people in your hallways.",
+      "departmentText": "Same classes. Same questions. New connections.",
+      "exploreText": "Ideas and people beyond your campus gates.",
+      "universityPost": "Outdoor cinema at Taşkışla. Meet us tonight!",
+      "departmentPost": "Looking for final-year project partners. Design + code?",
+      "explorePost": "Which campus has a festival this week? Let’s plan a trip.",
+      "tabs": "Explore feed previews",
+      "context": "Sample feed"
+    },
+    "stats": {
+      "students": "students",
+      "universities": "universities",
+      "posts": "daily posts"
+    },
+    "trust": "Real students. Ideas shared freely.",
+    "trustText": "Meet verified students, or speak your mind in anonymous mode."
+  },
+  "communities": {
+    "number": "02",
+    "kicker": "Better together",
+    "title": "Find your people.",
+    "description": "Meet people who share your passion. Join a club, set the stage, or build an idea together.",
+    "join": "Join",
+    "members": "members",
+    "all": "8 communities · sample selection",
+    "joinDemo": "Sign up to join this community. No membership is created in this preview.",
+    "tags": {
+      "tech": "Technology",
+      "art": "Arts & culture",
+      "business": "Entrepreneurship",
+      "life": "Campus life"
+    },
+    "items": {
+      "code": "Coding Club",
+      "robotics": "Robotics Society",
+      "photo": "Photography Club",
+      "theatre": "Theatre Society",
+      "startup": "Entrepreneurship Club",
+      "music": "Music Society",
+      "sport": "Sports Society",
+      "volunteer": "Volunteering Club"
+    },
+    "sticker": "Better\ntogether!"
+  },
+  "academic": {
+    "kicker": "Academic network",
+    "title": "One idea.\nThe right team.",
+    "description": "Share your notes, find your research group, and take the first step towards your next project.",
+    "research": "Research groups",
+    "researchText": "Work with people who share your curiosity.",
+    "notes": "Lecture notes",
+    "notesText": "Knowledge grows when you share it.",
+    "projects": "Project partners",
+    "projectsText": "Your missing piece might be one campus away.",
+    "events": "Events & seminars",
+    "eventsText": "Find your next spark of inspiration.",
+    "cta": "Explore the academic network"
+  },
+  "cta": {
+    "kicker": "New semester. New connections.",
+    "title": "Your campus\nis waiting.",
+    "text": "Your conversations, ideas, and people. There’s a place for all of them.",
+    "button": "Join KampüsX",
+    "note": "Students only. Always curious.",
+    "sticker": "See you there!"
+  },
+  "footer": {
+    "tagline": "The unofficial voice of campus.",
+    "privacy": "Privacy",
+    "terms": "Terms of use",
+    "cookies": "Cookies",
+    "copyright": "© {{year}} KampüsX Inc.",
+    "made": "Made with campus spirit.",
+    "demo": "Frontend design preview"
+  },
+  "legal": {
+    "title": "This page is a design preview.",
+    "text": "Legal documents will be added before the product launches. This demo does not create accounts, send form details, or store them. Only your theme and language preferences are saved in this browser.",
+    "cookies": "This preview uses no tracking cookies. Theme and language preferences are saved in localStorage."
+  }
+}

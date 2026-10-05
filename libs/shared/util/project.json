@@ -1,0 +1,7 @@
+{
+  "name": "shared-util",
+  "projectType": "library",
+  "sourceRoot": "libs/shared/util",
+  "tags": ["scope:shared", "type:util"],
+  "targets": {}
+}

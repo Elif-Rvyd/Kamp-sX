@@ -1,0 +1,8 @@
+{
+  "name": "shared-ui",
+  "projectType": "library",
+  "sourceRoot": "libs/shared/ui",
+  "tags": ["scope:shared", "type:ui"],
+  "implicitDependencies": ["design-tokens", "shared-util"],
+  "targets": {}
+}

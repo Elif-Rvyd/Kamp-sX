@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>KampüsX</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2155e8" />
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=block"
+      rel="stylesheet"
+    />
+    <script>
+      // Apply preferences before the first paint. Storage can be unavailable in private mode.
+      try {
+        const saved = localStorage.getItem('kampusx-theme');
+        document.documentElement.classList.toggle(
+          'dark',
+          saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches,
+        );
+        document.documentElement.lang =
+          localStorage.getItem('kampusx-language') ||
+          (navigator.language.toLowerCase().startsWith('tr') ? 'tr' : 'en');
+      } catch (_) {
+        document.documentElement.classList.toggle('dark', matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+    </script>
+  </head>
+  <body>
+    <kx-root></kx-root>
+  </body>
+</html>

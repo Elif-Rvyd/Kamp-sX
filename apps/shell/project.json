@@ -1,0 +1,40 @@
+{
+  "name": "shell",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/shell/src",
+  "tags": ["scope:shell", "type:app"],
+  "implicitDependencies": ["shared-ui", "shared-util", "design-tokens"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{workspaceRoot}/dist/apps/shell"],
+      "options": {
+        "outputPath": "dist/apps/shell",
+        "browser": "apps/shell/src/main.ts",
+        "index": "apps/shell/src/index.html",
+        "tsConfig": "apps/shell/tsconfig.app.json",
+        "assets": [{ "glob": "**/*", "input": "apps/shell/src/assets", "output": "assets" }],
+        "styles": ["apps/shell/src/styles.css"]
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "all",
+          "budgets": [{ "type": "initial", "maximumWarning": "700kb", "maximumError": "1mb" }],
+          "optimization": { "scripts": true, "styles": true, "fonts": false }
+        },
+        "development": { "optimization": false, "sourceMap": true, "extractLicenses": false }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular/build:dev-server",
+      "options": { "port": 4200, "host": "127.0.0.1" },
+      "configurations": {
+        "development": { "buildTarget": "shell:build:development" },
+        "production": { "buildTarget": "shell:build:production" }
+      },
+      "defaultConfiguration": "development"
+    }
+  }
+}

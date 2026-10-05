@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "main",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "sharedGlobals": ["{workspaceRoot}/tailwind.config.cjs"]
+  },
+  "targetDefaults": {
+    "build": { "cache": true, "dependsOn": ["^build"], "inputs": ["default", "^default"] }
+  },
+  "analytics": false
+}

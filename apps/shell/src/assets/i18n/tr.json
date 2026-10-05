@@ -1,0 +1,284 @@
+{
+  "common": {
+    "skip": "İçeriğe geç",
+    "lightTheme": "Açık temaya geç",
+    "darkTheme": "Koyu temaya geç",
+    "language": {
+      "label": "Dil seçimi",
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "languageCode": {
+      "tr": "TR",
+      "en": "EN"
+    },
+    "menu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "close": "Kapat",
+    "back": "Girişe dön",
+    "demo": "Tasarım önizlemesi",
+    "sample": "Örnek veriler",
+    "plus": "+",
+    "brand": "KampüsX",
+    "title": "KampüsX — Kampüsün burada konuşuyor",
+    "notFound": "Bu sayfa kampüste bulunamadı.",
+    "home": "Ana sayfaya dön"
+  },
+  "nav": {
+    "explore": "Keşfet",
+    "communities": "Topluluklar",
+    "academic": "Akademik Ağ",
+    "about": "Hakkında",
+    "login": "Giriş yap",
+    "join": "Kampüse katıl"
+  },
+  "hero": {
+    "edition": "Kampüsün resmi olmayan sesi.",
+    "live": "Kampüs nabzı canlı",
+    "active": "öğrenci aktif",
+    "universities": "üniversite ağda",
+    "titleTop": "Şu anda",
+    "titleMiddle": "kampüsünde",
+    "titleBottom": "ne konuşuluyor?",
+    "welcome": "KampüsX’e hoş geldin.",
+    "description": "Ders arası muhabbetten hayatının projesine. Kampüsünde olan biten, tanışacağın insanlar ve ait olduğun topluluklar burada.",
+    "sticker": "Ders arası\nburadayız!",
+    "roundSticker": "Sadece\nöğrenciler.",
+    "posterLabel": "Kampüsten bir kesit",
+    "sample": "Örnek gönderiler",
+    "scroll": "Kampüsü keşfet",
+    "verified": {
+      "title": "Gerçek öğrenciler",
+      "text": ".edu.tr ile doğrulanır"
+    },
+    "trending": {
+      "title": "Gündem burada",
+      "text": "Kampüsünle aynı frekans"
+    },
+    "anonymous": {
+      "title": "İstersen anonim",
+      "text": "Söz senin, seçim senin"
+    },
+    "trends": {
+      "label": "Kampüste gündem",
+      "one": "#İTÜ_VizeTakvimi",
+      "two": "#ODTÜ_BaharŞenliği",
+      "three": "#Tabldot_Menüsü",
+      "four": "#KampüsteBirGün",
+      "five": "#ProjeArkadaşı",
+      "pause": "Trend şeridini duraklat",
+      "resume": "Trend şeridini başlat"
+    }
+  },
+  "auth": {
+    "kicker": "Senin yerin burada.",
+    "title": "Kampüsüne bağlan.",
+    "description": "Bir hesap, bütün kampüs.",
+    "loginTab": "Giriş yap",
+    "registerTab": "Kayıt ol",
+    "tabs": "Hesap işlemleri",
+    "password": "Şifre",
+    "passwordPlaceholder": "Şifreni gir",
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "passwordHint": "En az 8 karakter. Daha uzun bir şifre daha güvenlidir.",
+    "demoHint": "Bu bir tasarım önizlemesidir; hesap veya oturum oluşturulmaz.",
+    "secure": "Öğrenci e-postasıyla doğrulanmış bir ağ",
+    "google": "Google öğrenci hesabıyla başla",
+    "googleDemo": "Google bağlantısı bu önizlemede etkin değil. Kayıt formunu deneyebilirsin.",
+    "divider": "veya e-postanla",
+    "termsPrefix": "Kullanım şartlarını ve gizlilik politikasını okudum, kabul ediyorum.",
+    "termsLink": "Kullanım şartları",
+    "privacyLink": "Gizlilik politikası",
+    "strength": {
+      "0": "Şifre gücü",
+      "1": "Başlangıç",
+      "2": "Orta",
+      "3": "İyi",
+      "4": "Güçlü"
+    },
+    "login": {
+      "identity": "E-posta veya kullanıcı adı",
+      "placeholder": "ogrenci@itu.edu.tr veya @rumuz",
+      "remember": "Beni hatırla",
+      "forgot": "Şifremi unuttum",
+      "submit": "Giriş yap",
+      "new": "KampüsX’te yeni misin?",
+      "join": "Aramıza katıl",
+      "success": "Form hazır! Bu önizlemede giriş yapılmadı ve bilgiler gönderilmedi."
+    },
+    "register": {
+      "title": "Yeni bir kampüs hikâyesi.",
+      "description": "Öğrenci e-postanla aramıza katıl.",
+      "email": "Üniversite e-postası",
+      "emailPlaceholder": "ogrenci@itu.edu.tr",
+      "emailHint": "Yalnızca .edu.tr uzantılı adresler.",
+      "username": "Kullanıcı adı",
+      "usernamePlaceholder": "@kampuslu",
+      "usernameHint": "3–20 harf, rakam veya alt çizgi.",
+      "submit": "KampüsX’e katıl",
+      "success": "Kayıt formun hazır! Demo olduğu için hesap oluşturulmadı."
+    },
+    "reset": {
+      "title": "Yeniden bağlanalım.",
+      "description": "Üniversite e-postanı yaz. Şifre yenileme adımlarını birlikte tamamlayalım.",
+      "email": "Üniversite e-postası",
+      "placeholder": "ogrenci@itu.edu.tr",
+      "submit": "Sıfırlama bağlantısı gönder",
+      "successTitle": "E-postanı kontrol et",
+      "success": "Gerçek üründe sıfırlama bağlantısını bu adrese göndereceğiz. Bu önizlemede e-posta gönderilmedi.",
+      "retry": "Başka bir e-posta dene"
+    }
+  },
+  "validation": {
+    "required": "Bu alanı doldur.",
+    "email": "Geçerli bir e-posta adresi yaz.",
+    "universityEmail": ".edu.tr uzantılı üniversite e-postanı kullan.",
+    "username": "3–20 harf, rakam veya alt çizgi kullan.",
+    "passwordLength": "Şifren en az 8 karakter olmalı."
+  },
+  "posts": {
+    "photo": {
+      "name": "Deniz Aydın",
+      "text": "Son dersten sonra tek bir planımız var. 🌿",
+      "caption": "Kampüs, gün batımı ve biz.",
+      "alt": "Ağaçlar ve kampüs binasıyla özgün gün batımı illüstrasyonu"
+    },
+    "anonymous": {
+      "name": "Kampüsten biri",
+      "text": "Kütüphanede aynı masaya oturuyoruz. Bugün kahve teklif edeceğim. Galiba. 👀"
+    },
+    "poll": {
+      "name": "Ece Yılmaz",
+      "text": "Vize haftasında seni hangisi ayakta tutuyor?",
+      "one": "Kahve, tabii ki ☕",
+      "two": "Arkadaş grubum 🫶",
+      "votes": "oy · örnek anket",
+      "firstPercent": "%68",
+      "secondPercent": "%32"
+    },
+    "video": {
+      "name": "Mert Kaya",
+      "text": "Prova bitti. Şimdi sıra bahar şenliğinde. 🎸",
+      "caption": "Bahar şenliği provası",
+      "duration": "0:24",
+      "preview": "Video önizlemesi · örnek içerik"
+    },
+    "time": "az önce",
+    "verified": "Doğrulanmış öğrenci",
+    "like": "Gönderiyi beğen",
+    "unlike": "Beğeniyi kaldır",
+    "comments": "yorum",
+    "share": "yeniden paylaşım",
+    "anonymousTag": "Anonim",
+    "sample": "Örnek gönderi"
+  },
+  "universities": {
+    "itu": "İstanbul Teknik Üniversitesi",
+    "metu": "Orta Doğu Teknik Üniversitesi",
+    "bogazici": "Boğaziçi Üniversitesi",
+    "ankara": "Ankara Üniversitesi",
+    "koc": "Koç Üniversitesi",
+    "hacettepe": "Hacettepe Üniversitesi",
+    "ege": "Ege Üniversitesi",
+    "istanbul": "İstanbul Üniversitesi"
+  },
+  "about": {
+    "number": "01",
+    "kicker": "Kampüs hayatının tamamı",
+    "title": "Aynı kampüs.\nBinlerce hikâye.",
+    "description": "Bir duyurudan fazlası. Bir akıştan daha yakını. KampüsX, üniversite hayatını onu yaşayanlarla bir araya getirir.",
+    "quote": "En iyi fikirler bazen ders arasında doğar.",
+    "photo": "Bir kare paylaş.",
+    "photoText": "Kampüsün, senin gözünden.",
+    "video": "Anı hareketlendir.",
+    "videoText": "Provalar, maçlar, küçük keşifler.",
+    "text": "Bir şey söyle.",
+    "textText": "Fikrini, sorunu, o küçük itirafı.",
+    "interactions": "Beğen, yorum yap, yeniden paylaş, alıntıla veya mesajlaş.",
+    "feeds": {
+      "title": "Senin gündemin. Senin akışın.",
+      "university": "Üniversitem",
+      "department": "Bölümüm",
+      "explore": "Genel Keşfet",
+      "universityText": "Aynı koridorlardan geçen insanların gündemi.",
+      "departmentText": "Aynı dersi alanlar, aynı soruya kafa yoranlar.",
+      "exploreText": "Kampüsün sınırlarını aşan fikirler ve insanlar.",
+      "universityPost": "Taşkışla’da açık hava sineması. Bu akşam buluşuyoruz!",
+      "departmentPost": "Bitirme projesi için ekip arkadaşı arıyoruz. Tasarım + kod?",
+      "explorePost": "Bu hafta hangi kampüste festival var? Rotamızı çizelim.",
+      "tabs": "Keşfet akışı önizlemeleri",
+      "context": "Örnek akış"
+    },
+    "stats": {
+      "students": "öğrenci",
+      "universities": "üniversite",
+      "posts": "günlük paylaşım"
+    },
+    "trust": "Gerçek öğrenciler. Özgürce paylaşılan fikirler.",
+    "trustText": "Doğrulanmış üyelikle tanış, istersen anonim modda konuş."
+  },
+  "communities": {
+    "number": "02",
+    "kicker": "Birlikte daha çok",
+    "title": "Kendi insanlarını bul.",
+    "description": "Aynı tutkuyu paylaşanlarla tanış. Bir kulübe katıl, bir sahne kur, bir fikri birlikte büyüt.",
+    "join": "Katıl",
+    "members": "üye",
+    "all": "8 topluluk · örnek seçki",
+    "joinDemo": "Bu topluluğa katılmak için kayıt ol. Bu önizlemede üyelik oluşturulmaz.",
+    "tags": {
+      "tech": "Teknoloji",
+      "art": "Kültür & sanat",
+      "business": "Girişimcilik",
+      "life": "Kampüs hayatı"
+    },
+    "items": {
+      "code": "Yazılım Kulübü",
+      "robotics": "Robotik Topluluğu",
+      "photo": "Fotoğraf Kulübü",
+      "theatre": "Tiyatro Topluluğu",
+      "startup": "Girişimcilik Kulübü",
+      "music": "Müzik Topluluğu",
+      "sport": "Spor Topluluğu",
+      "volunteer": "Gönüllülük Kulübü"
+    },
+    "sticker": "Birlikte\ndaha iyi!"
+  },
+  "academic": {
+    "kicker": "Akademik ağ",
+    "title": "Bir fikir.\nDoğru ekip.",
+    "description": "Notlarını paylaş, araştırma grubunu bul, bir sonraki projenin ilk adımını at.",
+    "research": "Araştırma grupları",
+    "researchText": "Merakını paylaşanlarla çalış.",
+    "notes": "Ders notu paylaşımı",
+    "notesText": "Bilgi paylaştıkça çoğalır.",
+    "projects": "Proje arkadaşı",
+    "projectsText": "Eksik parçan belki bir kampüs ötede.",
+    "events": "Etkinlik & seminer",
+    "eventsText": "Bir sonraki ilhamını kaçırma.",
+    "cta": "Akademik ağı keşfet"
+  },
+  "cta": {
+    "kicker": "Yeni dönem, yeni bağlantılar.",
+    "title": "Kampüsün\nseni bekliyor.",
+    "text": "Muhabbetin, fikrin, topluluğun. Hepsi için bir yer var.",
+    "button": "KampüsX’e katıl",
+    "note": "Öğrencilere özel. Her zaman meraklı.",
+    "sticker": "Görüşürüz!"
+  },
+  "footer": {
+    "tagline": "Amfinin resmi olmayan sesi.",
+    "privacy": "Gizlilik",
+    "terms": "Kullanım şartları",
+    "cookies": "Çerezler",
+    "copyright": "© {{year}} KampüsX Inc.",
+    "made": "Kampüs ruhuyla tasarlandı.",
+    "demo": "Frontend tasarım önizlemesi"
+  },
+  "legal": {
+    "title": "Bu sayfa bir tasarım önizlemesi.",
+    "text": "Yasal metinler ürün yayına hazırlanmadan önce eklenecek. Bu demoda hesap oluşturulmaz; form bilgileri gönderilmez veya saklanmaz. Yalnızca tema ve dil tercihleri bu tarayıcıda tutulur.",
+    "cookies": "Bu önizlemede izleme çerezi kullanılmaz. Tema ve dil tercihleri localStorage’da saklanır."
+  }
+}
