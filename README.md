@@ -10,12 +10,40 @@ Nx 23.2.1 · Angular 22.2.1 · standalone + OnPush · Tailwind CSS 3.4 · Transl
 
 KampüsX, öğrenciler için, öğrenciler tarafından geliştirilen bir kampüs sosyal medya ve mikroblog platformudur. Kampüs hayatını, dersleri, etkinlikleri ve günlük paylaşımları bir araya getirmeyi hedefler.
 
-Bu proje welcome ve auth ekranlarının frontend tasarımıdır. Backend, API, gerçek auth,
-Native Federation, remote, Docker ve CI içermez. Görseller özgün SVG/CSS illüstrasyonlarıdır.
+Bu depo, KampüsX'in welcome ve auth ekranlarının Angular/Nx frontend kaynak kodunu,
+ortak UI kütüphanelerini, tasarım token'larını, testlerini ve yayın yapılandırmasını içerir.
+Mevcut teslimat frontend kapsamındadır; backend, API ve gerçek kimlik doğrulama sonraki aşamadadır.
+Görseller özgün SVG/CSS illüstrasyonlarıdır.
 
-### Çalıştırma
+### Canlıya alma
 
-Node.js **24.15+** (24.x) veya Angular 22 ile uyumlu Node.js 22.22.3+ kullanın.
+Kaynak dosyaları bu repodan yayın ortamına alınır. Vercel'de bu GitHub reposunu import edin
+ve **Root Directory** olarak repo kökünü (`.`) kullanın. Repodaki [vercel.json](vercel.json)
+kurulum, derleme, çıktı dizini ve Angular sayfa yönlendirmesini tanımlar.
+
+| Ayar             | Değer                        |
+| ---------------- | ---------------------------- |
+| Node.js          | 24.x, en az 24.15.0          |
+| Install Command  | `npm ci`                     |
+| Build Command    | `npm run build`              |
+| Output Directory | `dist/apps/shell/browser`    |
+| Framework Preset | Other; yapılandırmada `null` |
+
+SPA yönlendirmesi, `/auth/login` gibi adresler doğrudan açıldığında veya yenilendiğinde
+uygulamanın yüklenmesini sağlar. Son kullanıcılar yayındaki adresi açar; projeyi kendi
+bilgisayarlarında kurmaları gerekmez. Bu commit bir hosting hesabına bağlantı kurmaz;
+repo yayına alınacağı Vercel projesine bir kez bağlanmalıdır.
+
+Farklı bir statik sunucuda aynı çıktı dizinini yayınlayın ve uygulama rotalarını
+`index.html` dosyasına yönlendirin. `dist` derleme sırasında üretilir; kaynak dosyalarla
+birlikte Git'te tutulmaz.
+
+Yapılandırma referansları: [Vercel proje ayarları](https://vercel.com/docs/project-configuration/vercel-json)
+ve [Node.js sürümleri](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
+
+### Geliştirici ortamı
+
+Node.js **24.15+ (24.x)** kullanın. Aşağıdaki komutlar geliştirme ve doğrulama içindir.
 
 ```powershell
 git clone https://github.com/Elif-Rvyd/Kamp-sX.git
@@ -107,13 +135,37 @@ Nx 23.2.1 · Angular 22.2.1 · standalone + OnPush · Tailwind CSS 3.4 · Transl
 KampüsX is a campus social media and microblogging platform built for students, by students.
 It aims to bring campus life, classes, events and everyday conversations together in one place.
 
-The current implementation is the frontend design of the welcome and authentication screens.
-It does not include a backend, APIs, real authentication, Native Federation, remotes, Docker or CI.
+This repository contains the Angular/Nx frontend source for the welcome and authentication screens,
+shared UI libraries, design tokens, tests and deployment configuration. The current delivery covers
+the frontend; backend services, APIs and real authentication belong to the next phase.
 Visuals are original SVG/CSS illustrations. Social content, communities and statistics are sample data.
 
-### Getting started
+### Deployment
 
-Use Node.js **24.15+ (24.x)** or Angular 22-compatible **22.22.3+**.
+Import this GitHub repository into Vercel and use the repository root (`.`) as the **Root Directory**.
+The included [vercel.json](vercel.json) defines installation, build, output and Angular route handling.
+
+| Setting          | Value                          |
+| ---------------- | ------------------------------ |
+| Node.js          | 24.x, at least 24.15.0         |
+| Install Command  | `npm ci`                       |
+| Build Command    | `npm run build`                |
+| Output Directory | `dist/apps/shell/browser`      |
+| Framework Preset | Other; `null` in configuration |
+
+The SPA rewrite allows routes such as `/auth/login` to load when opened directly or refreshed.
+End users visit the deployed URL and do not need to install the project locally. This commit does
+not connect a hosting account; the repository must be linked to its Vercel project once.
+
+For another static host, publish the same output directory and route application paths to
+`index.html`. `dist` is generated during the build and is not stored in Git alongside the source.
+
+Configuration references: [Vercel project settings](https://vercel.com/docs/project-configuration/vercel-json)
+and [Node.js versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
+
+### Developer setup
+
+Use Node.js **24.15+ (24.x)**. The following commands are for development and verification.
 
 ```sh
 git clone https://github.com/Elif-Rvyd/Kamp-sX.git
