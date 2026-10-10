@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../../core/auth.service';
 import { TranslocoDirective } from '@jsverse/transloco';
 import {
   ButtonComponent,
@@ -86,6 +87,9 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         @if (done()) {
           <p class="success-message"><kx-icon name="check_circle" />{{ t('auth.register.success') }}</p>
         }
+        @if (errorKey()) {
+          <p class="field-message error-text" role="alert">{{ t(errorKey()) }}</p>
+        }
       </div>
     </form>
     <kx-legal-dialog #legal
@@ -93,10 +97,12 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
 })
 export class RegisterFormComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
   readonly busy = signal(false);
   readonly done = signal(false);
   readonly googleNotice = signal(false);
-  private timer?: ReturnType<typeof setTimeout>;
+  private readonly api = inject(AuthService);
+  readonly errorKey = signal('');
   readonly form = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,
@@ -109,16 +115,25 @@ export class RegisterFormComponent {
     }),
     consent: new FormControl(false, { nonNullable: true, validators: [Validators.requiredTrue] }),
   });
-  constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.timer));
-  }
-  submit() {
+
+  async submit() {
     if (this.busy() || !validateAndFocus(this.form, this.host)) return;
     this.done.set(false);
+    this.errorKey.set('');
     this.busy.set(true);
-    this.timer = setTimeout(() => {
-      this.busy.set(false);
-      this.done.set(true);
-    }, 650);
+    const v = this.form.getRawValue();
+    try {
+      const { error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim());
+      if (this.destroyRef.destroyed) return;
+      if (error) this.errorKey.set(this.api.errorKey(error));
+      else {
+        this.form.controls.password.reset();
+        this.done.set(true);
+      }
+    } catch (error) {
+      if (!this.destroyRef.destroyed) this.errorKey.set(this.api.errorKey(error));
+    } finally {
+      if (!this.destroyRef.destroyed) this.busy.set(false);
+    }
   }
 }

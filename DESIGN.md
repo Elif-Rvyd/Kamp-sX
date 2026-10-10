@@ -57,18 +57,21 @@ The reference is a university festival noticeboard meeting a student magazine co
 Turkish university students should see a real social world before choosing how to join it.
 The blue campaign poster is the memorable signature: overlapping posts, original campus
 illustration, small handwritten-feeling stickers, and a strong three-line headline.
-Forms stay familiar and quiet. Demo behavior is explained next to the form and in its result,
+Forms stay familiar and quiet. Authentication feedback describes actual outcomes,
 without preview labels in the campaign header or footer.
 
 This is a hybrid surface: the welcome route is marketing; the auth panel and `/auth/*`
-routes use shared product form controls. There is no backend, session, tracking, or OAuth connection.
+routes use shared product form controls. Email/password authentication now uses Supabase;
+social features remain previews and Google OAuth is not connected. A remembered session uses
+persistent browser storage; an unremembered session uses session storage.
 Audience evidence: the supplied KampusX-welcome-spec2.md and the user's Angular/Nx request.
 Turkish and English are equally supported. Browser language sets the initial locale;
 the explicit language choice overrides it and survives reloads.
 
 Avoid a generic dashboard card grid as the page's overall composition. The community
 directory is deliberately a consistent card grid because its items are comparable.
-Do not add invented legal policy: the legal dialog explains the preview's actual behavior.
+Do not add invented legal policy: the legal dialog states that the legal documents are not yet
+published and describes the authentication data flow without presenting a placeholder as a policy.
 
 ## Colors
 
@@ -138,7 +141,13 @@ Every consuming app imports it once after `tokens.css`; shell CSS owns campaign/
 Buttons have solid, outline, and ghost emphasis. Loading hides the stable label geometry under
 an app-owned spinner, exposes aria-busy, and disables duplicate submits. Disabled controls are honest.
 Fields associate labels, help and error text, use reactive validators, and focus the first invalid field.
-No auth values are stored. Passwords support password managers, paste and accessible reveal controls.
+Password form values are never stored by application code. Supabase owns session credentials.
+Passwords support password managers, paste and accessible reveal controls. New-password and
+confirmation fields reuse the password molecule with distinct translated labels.
+The `/auth/update-password` page waits for auth initialization and accepts only a session established
+by a password-recovery callback. Missing or expired links offer a fresh reset request. Successful
+password updates end the current session and offer sign-in with the new password; a sign-out failure
+keeps a truthful saved-password notice and retry action instead of reporting completion.
 
 The legal dialog uses native modal dialog behavior: focus isolation, Escape dismissal and focus return.
 Feed tabs use standard keyboard behavior. Auth mode selectors are native pressed buttons.
@@ -154,7 +163,8 @@ animations, reveal movement and smooth scrolling. No real video asset was suppli
 ## Do's and Don'ts
 
 - Do put campus-specific expression in the poster and editorial chapter artwork.
-- Do keep the same form validation, loading and demo confirmation behavior in every auth screen.
+- Do keep the same form validation, loading and actual-result feedback in every auth screen.
 - Do source all owned copy, aria labels, placeholders and mock content from both dictionaries.
 - Don't invent an authenticated session, OAuth result, sent email, real member count or legal policy.
+- Don't reveal whether a particular email address already has an account in reset or sign-up feedback.
 - Don't allow decorations to obscure fields or remove actions on narrow screens.

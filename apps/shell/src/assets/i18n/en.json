@@ -82,14 +82,15 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "passwordHint": "At least 8 characters. Longer passwords are safer.",
-    "demoHint": "This is a design preview. No account or session is created.",
+    "demoHint": "Sign in with your account or sign up with your university email.",
     "secure": "A network verified with student emails",
     "google": "Start with your Google student account",
-    "googleDemo": "Google isn't connected in this preview. Try the sign-up form instead.",
+    "googleDemo": "Google sign-in is not enabled yet. You can sign up with your email.",
     "divider": "or use your email",
     "termsPrefix": "I have read and accept the terms of use and privacy policy.",
     "termsLink": "Terms of use",
     "privacyLink": "Privacy policy",
+    "serverError": "We could not complete this request. Please try again.",
     "strength": {
       "0": "Password strength",
       "1": "Getting started",
@@ -98,14 +99,14 @@
       "4": "Strong"
     },
     "login": {
-      "identity": "Email or username",
-      "placeholder": "student@itu.edu.tr or @username",
-      "remember": "Remember me",
+      "identity": "University email",
+      "placeholder": "student@itu.edu.tr",
+      "remember": "Keep me signed in on this device",
       "forgot": "Forgot password?",
       "submit": "Sign in",
       "new": "New to KampüsX?",
       "join": "Join us",
-      "success": "Your form is ready! No sign-in took place and no details were sent in this preview."
+      "success": "You are signed in. Your session is active."
     },
     "register": {
       "title": "Your next campus story.",
@@ -117,17 +118,41 @@
       "usernamePlaceholder": "@campuslife",
       "usernameHint": "3–20 letters, numbers, or underscores.",
       "submit": "Join KampüsX",
-      "success": "Your sign-up form is ready! No account was created in this demo."
+      "success": "Check your email to continue. If this address is eligible for sign-up, a confirmation link will be sent."
     },
     "reset": {
       "title": "Let’s reconnect.",
-      "description": "Enter your university email to preview the password reset flow.",
+      "description": "Enter your university email to request a password reset link.",
       "email": "University email",
       "placeholder": "student@itu.edu.tr",
       "submit": "Send reset link",
       "successTitle": "Check your email",
-      "success": "The live product will send a reset link to this address. No email was sent in this preview.",
+      "success": "If an account exists for this address, a password reset link will be sent. Check your inbox and spam folder.",
       "retry": "Try another email"
+    },
+    "update": {
+      "title": "Choose a new password.",
+      "description": "Enter your new password in both fields. You will sign in again after saving it.",
+      "checking": "Checking your password reset link…",
+      "password": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Update password",
+      "successTitle": "Password updated",
+      "success": "This session has ended. You can now sign in with your new password.",
+      "requestLink": "Request a new reset link",
+      "retrySignOut": "Try signing out again"
+    },
+    "errors": {
+      "config": "Sign-in is not configured yet. Please try again later.",
+      "credentials": "The email or password is incorrect. Check your details.",
+      "unconfirmed": "Confirm your email address before signing in. Check your inbox and spam folder.",
+      "network": "We could not connect. Check your internet connection and try again.",
+      "rateLimit": "Too many attempts. Wait a moment and try again.",
+      "generic": "We could not complete this request. Please try again.",
+      "recoveryInvalid": "This password reset link is missing, invalid, or expired. Request a new link.",
+      "weakPassword": "This password was not accepted. Choose a stronger password with at least 8 characters.",
+      "signupFailed": "We could not complete sign-up. Check your details and try again.",
+      "signOut": "Your password was updated. There was a problem during sign-out. Try again to continue."
     }
   },
   "validation": {
@@ -135,7 +160,8 @@
     "email": "Enter a valid email address.",
     "universityEmail": "Use your university email ending in .edu.tr.",
     "username": "Use 3–20 letters, numbers, or underscores.",
-    "passwordLength": "Your password needs at least 8 characters."
+    "passwordLength": "Your password needs at least 8 characters.",
+    "passwordMismatch": "The passwords must match."
   },
   "posts": {
     "photo": {
@@ -277,8 +303,8 @@
     "demo": "Frontend design preview"
   },
   "legal": {
-    "title": "This page is a design preview.",
-    "text": "Legal documents will be added before the product launches. This demo does not create accounts, send form details, or store them. Only your theme and language preferences are saved in this browser.",
-    "cookies": "This preview uses no tracking cookies. Theme and language preferences are saved in localStorage."
+    "title": "Legal documents are being prepared.",
+    "text": "The terms of use and privacy policy have not been published yet. Your email and password are sent to the authentication service when you sign in or sign up. Consider this before submitting the form.",
+    "cookies": "Theme and language preferences are saved in this browser. Your sign-in preference determines whether session credentials last for the browser session or remain on this device. Detailed cookie and privacy documents have not been published yet."
   }
 }

@@ -71,6 +71,7 @@
     }
   },
   "auth": {
+    "serverError": "İşlem tamamlanamadı. Lütfen tekrar dene.",
     "kicker": "Senin yerin burada.",
     "title": "Kampüsüne bağlan.",
     "description": "Bir hesap, bütün kampüs.",
@@ -82,10 +83,10 @@
     "showPassword": "Şifreyi göster",
     "hidePassword": "Şifreyi gizle",
     "passwordHint": "En az 8 karakter. Daha uzun bir şifre daha güvenlidir.",
-    "demoHint": "Bu bir tasarım önizlemesidir; hesap veya oturum oluşturulmaz.",
+    "demoHint": "Hesabınla giriş yapabilir veya üniversite e-postanla kayıt olabilirsin.",
     "secure": "Öğrenci e-postasıyla doğrulanmış bir ağ",
     "google": "Google öğrenci hesabıyla başla",
-    "googleDemo": "Google bağlantısı bu önizlemede etkin değil. Kayıt formunu deneyebilirsin.",
+    "googleDemo": "Google ile giriş henüz etkin değil. E-posta ile kayıt olabilirsin.",
     "divider": "veya e-postanla",
     "termsPrefix": "Kullanım şartlarını ve gizlilik politikasını okudum, kabul ediyorum.",
     "termsLink": "Kullanım şartları",
@@ -98,14 +99,14 @@
       "4": "Güçlü"
     },
     "login": {
-      "identity": "E-posta veya kullanıcı adı",
-      "placeholder": "ogrenci@itu.edu.tr veya @rumuz",
-      "remember": "Beni hatırla",
+      "identity": "Üniversite e-postası",
+      "placeholder": "ogrenci@itu.edu.tr",
+      "remember": "Bu cihazda oturumumu açık tut",
       "forgot": "Şifremi unuttum",
       "submit": "Giriş yap",
       "new": "KampüsX’te yeni misin?",
       "join": "Aramıza katıl",
-      "success": "Form hazır! Bu önizlemede giriş yapılmadı ve bilgiler gönderilmedi."
+      "success": "Giriş yaptın. Oturumun açık."
     },
     "register": {
       "title": "Yeni bir kampüs hikâyesi.",
@@ -117,17 +118,41 @@
       "usernamePlaceholder": "@kampuslu",
       "usernameHint": "3–20 harf, rakam veya alt çizgi.",
       "submit": "KampüsX’e katıl",
-      "success": "Kayıt formun hazır! Demo olduğu için hesap oluşturulmadı."
+      "success": "Devam etmek için e-postanı kontrol et. Bu adresle kayıt işlemi uygunsa doğrulama bağlantısı gönderilir."
     },
     "reset": {
       "title": "Yeniden bağlanalım.",
-      "description": "Üniversite e-postanı yaz. Şifre yenileme adımlarını birlikte tamamlayalım.",
+      "description": "Şifre yenileme bağlantısını almak için üniversite e-postanı yaz.",
       "email": "Üniversite e-postası",
       "placeholder": "ogrenci@itu.edu.tr",
       "submit": "Sıfırlama bağlantısı gönder",
       "successTitle": "E-postanı kontrol et",
-      "success": "Gerçek üründe sıfırlama bağlantısını bu adrese göndereceğiz. Bu önizlemede e-posta gönderilmedi.",
+      "success": "Bu adresle kayıtlı bir hesap varsa şifre yenileme bağlantısı gönderilir. Gelen kutunu ve spam klasörünü kontrol et.",
       "retry": "Başka bir e-posta dene"
+    },
+    "update": {
+      "title": "Yeni şifreni belirle.",
+      "description": "Yeni şifreni iki alana da yaz. Kaydettikten sonra tekrar giriş yapacaksın.",
+      "checking": "Şifre yenileme bağlantısı kontrol ediliyor…",
+      "password": "Yeni şifre",
+      "confirmPassword": "Yeni şifreyi tekrar yaz",
+      "submit": "Şifreyi güncelle",
+      "successTitle": "Şifren güncellendi",
+      "success": "Bu oturum kapatıldı. Yeni şifrenle tekrar giriş yapabilirsin.",
+      "requestLink": "Yeni sıfırlama bağlantısı iste",
+      "retrySignOut": "Oturumu kapatmayı tekrar dene"
+    },
+    "errors": {
+      "config": "Giriş hizmeti henüz yapılandırılmamış. Lütfen daha sonra tekrar dene.",
+      "credentials": "E-posta veya şifre yanlış. Bilgilerini kontrol et.",
+      "unconfirmed": "Giriş yapmadan önce e-posta adresini doğrula. Gelen kutunu ve spam klasörünü kontrol et.",
+      "network": "Bağlantı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.",
+      "rateLimit": "Çok fazla deneme yaptın. Biraz bekleyip tekrar dene.",
+      "generic": "İşlem tamamlanamadı. Lütfen tekrar dene.",
+      "recoveryInvalid": "Bu şifre yenileme bağlantısı eksik, geçersiz veya süresi dolmuş. Yeni bir bağlantı iste.",
+      "weakPassword": "Bu şifre kabul edilmedi. En az 8 karakter içeren daha güçlü bir şifre seç.",
+      "signupFailed": "Kayıt işlemi tamamlanamadı. Bilgilerini kontrol edip tekrar dene.",
+      "signOut": "Şifren güncellendi. Çıkış işlemi sırasında bir sorun oldu. Devam etmek için yeniden dene."
     }
   },
   "validation": {
@@ -135,7 +160,8 @@
     "email": "Geçerli bir e-posta adresi yaz.",
     "universityEmail": ".edu.tr uzantılı üniversite e-postanı kullan.",
     "username": "3–20 harf, rakam veya alt çizgi kullan.",
-    "passwordLength": "Şifren en az 8 karakter olmalı."
+    "passwordLength": "Şifren en az 8 karakter olmalı.",
+    "passwordMismatch": "Yazdığın şifreler aynı olmalı."
   },
   "posts": {
     "photo": {
@@ -277,8 +303,8 @@
     "demo": "Frontend tasarım önizlemesi"
   },
   "legal": {
-    "title": "Bu sayfa bir tasarım önizlemesi.",
-    "text": "Yasal metinler ürün yayına hazırlanmadan önce eklenecek. Bu demoda hesap oluşturulmaz; form bilgileri gönderilmez veya saklanmaz. Yalnızca tema ve dil tercihleri bu tarayıcıda tutulur.",
-    "cookies": "Bu önizlemede izleme çerezi kullanılmaz. Tema ve dil tercihleri localStorage’da saklanır."
+    "title": "Yasal metinler hazırlanıyor.",
+    "text": "Kullanım şartları ve gizlilik politikası henüz yayımlanmadı. E-posta ve şifren giriş veya kayıt işlemi için kimlik doğrulama hizmetine gönderilir. Formu göndermeden önce bu durumu dikkate al.",
+    "cookies": "Tema ve dil tercihleri bu tarayıcıda tutulur. Oturum tercihin, giriş bilgilerinin oturum boyunca veya bu cihazda kalıcı saklanmasını belirler. Ayrıntılı çerez ve gizlilik metinleri henüz yayımlanmadı."
   }
 }

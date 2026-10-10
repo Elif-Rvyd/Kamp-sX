@@ -9,6 +9,7 @@ import {
 } from '@kampusx/shared/ui';
 import { validateAndFocus } from '@kampusx/shared/util';
 import { AuthUiService } from '../../../core/auth-ui.service';
+import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'kx-login-form',
   standalone: true,
@@ -49,6 +50,9 @@ import { AuthUiService } from '../../../core/auth-ui.service';
       @if (done()) {
         <p class="success-message"><kx-icon name="check_circle" />{{ t('auth.login.success') }}</p>
       }
+      @if (errorKey()) {
+        <p class="field-message error-text" role="alert">{{ t(errorKey()) }}</p>
+      }
     </div>
     <p class="auth-bottom">
       {{ t('auth.login.new') }}
@@ -60,25 +64,39 @@ import { AuthUiService } from '../../../core/auth-ui.service';
 })
 export class LoginFormComponent {
   readonly auth = inject(AuthUiService);
+  private readonly api = inject(AuthService);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
   readonly busy = signal(false);
   readonly done = signal(false);
-  private timer?: ReturnType<typeof setTimeout>;
+  readonly errorKey = signal('');
   readonly form = new FormGroup({
-    identity: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    identity: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     remember: new FormControl(false, { nonNullable: true }),
   });
-  constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.timer));
-  }
-  submit() {
+
+  async submit() {
     if (this.busy() || !validateAndFocus(this.form, this.host)) return;
     this.done.set(false);
+    this.errorKey.set('');
     this.busy.set(true);
-    this.timer = setTimeout(() => {
-      this.busy.set(false);
-      this.done.set(true);
-    }, 650);
+    const v = this.form.getRawValue();
+    try {
+      const { data, error } = await this.api.signIn(v.identity.trim(), v.password, v.remember);
+      if (this.destroyRef.destroyed) return;
+      if (error || !data.session) this.errorKey.set(this.api.errorKey(error));
+      else {
+        this.form.controls.password.reset();
+        this.done.set(true);
+      }
+    } catch (error) {
+      if (!this.destroyRef.destroyed) this.errorKey.set(this.api.errorKey(error));
+    } finally {
+      if (!this.destroyRef.destroyed) this.busy.set(false);
+    }
   }
 }

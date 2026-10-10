@@ -16,4 +16,8 @@ export const authRoutes: Routes = [
     data: { mode: 'reset' },
     loadComponent: () => import('./auth.page').then((m) => m.AuthPage),
   },
+  {
+    path: 'update-password',
+    loadComponent: () => import('./update-password/update-password.page').then((m) => m.UpdatePasswordPage),
+  },
 ];

@@ -10,7 +10,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
   imports: [ReactiveFormsModule, TranslocoDirective, InputDirective, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div class="form-field" *transloco="let t">
-    <label [for]="fieldId()">{{ t('auth.password') }}</label>
+    <label [for]="fieldId()">{{ t(labelKey()) }}</label>
     <div class="input-wrap password-wrap">
       <kx-icon name="lock" /><input
         kxInput
@@ -51,6 +51,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
 })
 export class PasswordFieldComponent {
   readonly fieldId = input.required<string>();
+  readonly labelKey = input('auth.password');
   readonly control = input.required<FormControl<string>>();
   readonly newPassword = input(false);
   readonly revealed = signal(false);

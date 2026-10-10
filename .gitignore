@@ -6,3 +6,6 @@ dist/
 test-results/
 playwright-report/
 *.log
+.env*
+!.env.example
+apps/shell/src/environments/environment.ts

@@ -42,7 +42,10 @@ test('auth modes retain accessible labels, unique IDs, and error associations', 
         );
         // Full-page captures start at the top so sticky chrome is not rendered mid-document.
         await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-        await page.screenshot({ path: `docs/qa/auth-${mode}-${theme}-${language}.png`, fullPage: true });
+        await page.screenshot({
+          path: test.info().outputPath(`auth-${mode}-${theme}-${language}.png`),
+          fullPage: true,
+        });
       }
     }
   }

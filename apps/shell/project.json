@@ -6,8 +6,15 @@
   "tags": ["scope:shell", "type:app"],
   "implicitDependencies": ["shared-ui", "shared-util", "design-tokens"],
   "targets": {
+    "configure-environment": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": { "command": "node scripts/generate-environment.cjs" }
+    },
     "build": {
       "executor": "@angular/build:application",
+      "cache": false,
+      "dependsOn": ["configure-environment", "^build"],
       "outputs": ["{workspaceRoot}/dist/apps/shell"],
       "options": {
         "outputPath": "dist/apps/shell",
@@ -23,16 +30,29 @@
           "budgets": [{ "type": "initial", "maximumWarning": "700kb", "maximumError": "1mb" }],
           "optimization": { "scripts": true, "styles": true, "fonts": false }
         },
-        "development": { "optimization": false, "sourceMap": true, "extractLicenses": false }
+        "development": { "optimization": false, "sourceMap": true, "extractLicenses": false },
+        "e2e": {
+          "optimization": false,
+          "sourceMap": true,
+          "extractLicenses": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/shell/src/environments/environment.ts",
+              "with": "apps/shell/src/environments/environment.e2e.ts"
+            }
+          ]
+        }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
       "executor": "@angular/build:dev-server",
+      "dependsOn": ["configure-environment"],
       "options": { "port": 4200, "host": "127.0.0.1" },
       "configurations": {
         "development": { "buildTarget": "shell:build:development" },
-        "production": { "buildTarget": "shell:build:production" }
+        "production": { "buildTarget": "shell:build:production" },
+        "e2e": { "buildTarget": "shell:build:e2e" }
       },
       "defaultConfiguration": "development"
     }
