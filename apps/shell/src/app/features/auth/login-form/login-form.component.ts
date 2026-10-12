@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoDirective } from '@jsverse/transloco';
+import { Router } from '@angular/router';
 import {
   ButtonComponent,
   FormFieldComponent,
@@ -65,6 +66,7 @@ import { AuthService } from '../../../core/auth.service';
 export class LoginFormComponent {
   readonly auth = inject(AuthUiService);
   private readonly api = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   readonly busy = signal(false);
@@ -92,6 +94,8 @@ export class LoginFormComponent {
       else {
         this.form.controls.password.reset();
         this.done.set(true);
+        const navigated = await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+        if (!navigated && !this.destroyRef.destroyed) this.errorKey.set('auth.errors.generic');
       }
     } catch (error) {
       if (!this.destroyRef.destroyed) this.errorKey.set(this.api.errorKey(error));

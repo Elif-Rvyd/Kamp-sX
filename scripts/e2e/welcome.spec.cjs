@@ -65,8 +65,8 @@ test('login validation, password reveal, and mocked authentication result', asyn
   await expect(page.locator('#login-identity')).toHaveAttribute('aria-invalid', 'true');
   await page.locator('#login-identity').fill('student@itu.edu.tr');
   await panel.getByRole('button', { name: 'Giriş yap', exact: true }).last().click();
-  await expect(panel.locator('button[type=submit]')).toBeDisabled();
-  await expect(panel.locator('.success-message')).toContainText(/giriş/i);
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.locator('.dashboard-page')).toBeVisible();
 });
 test('register validates university address and consent; Google stays local', async ({ page }) => {
   const panel = page.locator('#auth-panel');

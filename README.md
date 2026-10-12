@@ -10,10 +10,13 @@ KampüsX, üniversite öğrencilerinin kampüs hayatını, akademik çevrelerini
 
 E-posta ve şifreyle kayıt, giriş, oturum yönetimi ve şifre yenileme Supabase Auth ile entegredir. Giriş ekranında “Beni hatırla” seçeneği bulunur. Şifre yenileme, e-postayla gönderilen bağlantı üzerinden yeni şifre belirleme akışını içerir.
 
+Başarılı girişten sonra oturum korumalı ana ekran açılır. Profil çekmecesi giriş yapan hesabın kullanıcı adını gösterir ve çıkış yapmayı sağlar.
+
 ### Kullanıcı deneyimi
 
 - Kampüs gündemi, paylaşım örnekleri ve üniversite topluluklarını tanıtan karşılama ekranı.
 - Ayrı giriş, kayıt ve şifre yenileme ekranları.
+- Giriş sonrası dashboard, profil çekmecesi ve üniversite/kampüs/bölüm keşfet sekmeleri.
 - Anlık Türkçe ve İngilizce dil değişimi.
 - Açık ve koyu tema.
 - Masaüstü, tablet ve mobil ekranlara uyumlu tasarım.
@@ -37,10 +40,13 @@ KampüsX is a social platform that brings together university students' campus l
 
 Email and password registration, sign-in, session management and password recovery are integrated with Supabase Auth. The sign-in screen includes a “Remember me” option. Password recovery provides an email link that opens the new-password flow.
 
+Successful sign-in opens the session-protected home screen. The profile drawer displays the signed-in account's username and provides sign-out.
+
 ### User experience
 
 - A welcome screen introducing campus news, example posts and university communities.
 - Dedicated sign-in, registration and password recovery screens.
+- A dashboard after sign-in, a profile drawer and university/campus/department discovery tabs.
 - Instant Turkish and English language switching.
 - Light and dark themes.
 - Responsive layouts for desktop, tablet and mobile.

@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-12",
+  "realRpcAvailability": {
+    "status": 404,
+    "code": "PGRST202"
+  },
+  "localLoginHttpStatus": 200,
+  "migrationApplied": false
+}

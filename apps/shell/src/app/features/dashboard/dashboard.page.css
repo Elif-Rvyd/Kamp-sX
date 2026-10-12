@@ -1,0 +1,93 @@
+:host {
+  display: block;
+}
+.dashboard-page {
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+.dashboard-shell {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  min-height: 100dvh;
+  border-inline: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.dashboard-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(18px);
+}
+.discover-viewport {
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.discover-track {
+  display: flex;
+  transition: transform var(--motion-fast) ease-out;
+}
+.discover-panel {
+  flex: 0 0 100%;
+  min-width: 0;
+  padding: 36px 28px 28px;
+  outline-offset: -5px;
+}
+.feed-heading {
+  min-height: 204px;
+  padding-bottom: 32px;
+}
+.feed-emblem {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-control);
+  background: var(--color-soft-primary);
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+.feed-scope {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.feed-heading h1 {
+  font-size: clamp(24px, 4vw, 30px);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.04em;
+  margin-bottom: 12px;
+}
+.feed-description {
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  max-width: 54ch;
+}
+.feed-placeholder-list {
+  display: grid;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .discover-panel {
+    padding: 28px 16px 20px;
+  }
+  .feed-heading {
+    min-height: 220px;
+    padding-bottom: 28px;
+  }
+  .feed-scope {
+    font-size: 10px;
+  }
+  .feed-description {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discover-track {
+    transition: none;
+  }
+}

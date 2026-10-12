@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/auth.service';
+import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import {
   ButtonComponent,
@@ -102,6 +103,7 @@ export class RegisterFormComponent {
   readonly done = signal(false);
   readonly googleNotice = signal(false);
   private readonly api = inject(AuthService);
+  private readonly router = inject(Router);
   readonly errorKey = signal('');
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -123,12 +125,13 @@ export class RegisterFormComponent {
     this.busy.set(true);
     const v = this.form.getRawValue();
     try {
-      const { error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim());
+      const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim());
       if (this.destroyRef.destroyed) return;
       if (error) this.errorKey.set(this.api.errorKey(error));
       else {
         this.form.controls.password.reset();
         this.done.set(true);
+        if (data.session) await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
       }
     } catch (error) {
       if (!this.destroyRef.destroyed) this.errorKey.set(this.api.errorKey(error));

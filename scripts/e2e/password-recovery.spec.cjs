@@ -91,7 +91,7 @@ test('an ordinary signed-in session cannot authorize a recovery page', async ({ 
   await page.locator('#login-identity').fill(user.email);
   await page.locator('#login-password').fill('ExistingPassword123!');
   await page.locator('#auth-panel button[type=submit]').click();
-  await expect(page.locator('#auth-panel [role=status]')).toContainText('Giriş yaptın');
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto('/auth/update-password');
   await expect(page.getByRole('alert')).toContainText('geçersiz veya süresi dolmuş');
   await expect(page.locator('#update-password')).toHaveCount(0);

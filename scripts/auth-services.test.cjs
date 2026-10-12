@@ -36,7 +36,7 @@ function harness(overrides = {}, configured = true, browser = null) {
   class Router {}
   const DOCUMENT = Symbol('DOCUMENT');
   const destroyCallbacks = [];
-  const calls = { remember: [], signIn: [], signUp: [], signOut: [], updateUser: [] };
+  const calls = { remember: [], signIn: [], signUp: [], signOut: [], updateUser: [], lookup: [] };
   let authCallback;
   let unsubscribeCount = 0;
   const auth = {
@@ -67,7 +67,20 @@ function harness(overrides = {}, configured = true, browser = null) {
     ...overrides,
   };
   const supabase = {
-    client: configured ? { auth } : null,
+    client: configured
+      ? {
+          auth,
+          rpc(name, params) {
+            calls.lookup.push({ name, params });
+            return {
+              abortSignal(signal) {
+                assert.ok(signal instanceof AbortSignal);
+                return overrides.lookup ? overrides.lookup() : Promise.resolve({ data: true, error: null });
+              },
+            };
+          },
+        }
+      : null,
     setRemember(value) {
       calls.remember.push(value);
     },
@@ -134,6 +147,9 @@ function harness(overrides = {}, configured = true, browser = null) {
     },
     unsubscribeCount: () => unsubscribeCount,
     guard: (...args) => load('apps/shell/src/app/core/auth.guard.ts').authGuard(...args),
+    signedInGuard: (...args) => load('apps/shell/src/app/core/auth.guard.ts').signedInGuard(...args),
+    matchesCallback: (...args) =>
+      load('apps/shell/src/app/core/supabase-callback.ts').isSupabaseImplicitCallback(...args),
   };
 }
 
@@ -223,6 +239,92 @@ test('sign-out targets the current session', async () => {
   await service.ready;
   await service.signOut();
   assert.deepEqual(calls.signOut, [{ scope: 'local' }]);
+});
+
+test('only a confirmed missing account produces the user-not-found error after failed login', async () => {
+  const { service, calls } = harness({
+    signInWithPassword: async () => ({
+      ...anonymousResult(),
+      error: new AuthError('Invalid', 400, 'invalid_credentials'),
+    }),
+    lookup: async () => ({ data: false, error: null }),
+  });
+  const result = await service.signIn(' Student@itu.edu.tr ', 'PrivatePassword');
+  assert.equal(service.errorKey(result.error), 'auth.errors.userNotFound');
+  assert.deepEqual(calls.lookup, [
+    { name: 'kampusx_login_email_exists', params: { email_address: 'Student@itu.edu.tr' } },
+  ]);
+  assert.equal(result.data.session, null);
+});
+
+test('an existing account preserves the original incorrect-credentials error', async () => {
+  const error = new AuthError('Invalid', 400, 'invalid_credentials');
+  const { service } = harness({
+    signInWithPassword: async () => ({ ...anonymousResult(), error }),
+    lookup: async () => ({ data: true, error: null }),
+  });
+  const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
+  assert.equal(result.error, error);
+  assert.equal(service.errorKey(result.error), 'auth.errors.credentials');
+});
+
+test('missing RPC, malformed data and database errors never claim the account is absent', async () => {
+  for (const response of [
+    { data: null, error: null },
+    { data: 'false', error: null },
+    { data: [], error: null },
+    { data: false, error: { code: 'PGRST202' } },
+    { data: true, error: { code: '42501' } },
+  ]) {
+    const { service } = harness({
+      signInWithPassword: async () => ({
+        ...anonymousResult(),
+        error: new AuthError('Invalid', 400, 'invalid_credentials'),
+      }),
+      lookup: async () => response,
+    });
+    const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
+    assert.equal(service.errorKey(result.error), 'auth.errors.accountLookup');
+  }
+});
+
+test('a thrown or aborted lookup becomes a retryable account-check failure', async () => {
+  for (const reason of [
+    new TypeError('PRIVATE_NETWORK_FAILURE'),
+    new DOMException('Timeout', 'TimeoutError'),
+  ]) {
+    const { service } = harness({
+      signInWithPassword: async () => ({
+        ...anonymousResult(),
+        error: new AuthError('Invalid', 400, 'invalid_credentials'),
+      }),
+      lookup: async () => {
+        throw reason;
+      },
+    });
+    const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
+    assert.equal(service.errorKey(result.error), 'auth.errors.accountLookup');
+    assert.notEqual(result.error.message, reason.message);
+  }
+});
+
+test('successful login, unconfirmed email, rate limits and network failures skip account lookup', async () => {
+  for (const error of [
+    null,
+    new AuthError('Confirm', 400, 'email_not_confirmed'),
+    new AuthError('Wait', 429, 'over_request_rate_limit'),
+    new AuthError('Offline', 0, 'network_error'),
+  ]) {
+    const { service, calls } = harness({
+      signInWithPassword: async () => ({
+        data: { user: error ? null : user, session: error ? null : session },
+        error,
+      }),
+    });
+    const result = await service.signIn('student@itu.edu.tr', 'Password');
+    assert.equal(result.error, error);
+    assert.equal(calls.lookup.length, 0);
+  }
 });
 
 test('normal sign-in cannot authorize the password recovery form', async () => {
@@ -325,6 +427,18 @@ test('safe auth mappings distinguish useful failures without exposing arbitrary 
   assert.equal(service.errorKey(new AuthError('Retry later', 429)), 'auth.errors.rateLimit');
 });
 
+test('the email quota error takes precedence over the generic HTTP 429 error', async () => {
+  const { service } = harness();
+  assert.equal(
+    service.errorKey(new AuthError('PRIVATE_EMAIL_PROVIDER_ERROR', 429, 'over_email_send_rate_limit')),
+    'auth.errors.emailRateLimit',
+  );
+  assert.equal(
+    service.errorKey(new AuthError('PRIVATE_IP_LIMIT_ERROR', 429, 'over_request_rate_limit')),
+    'auth.errors.rateLimit',
+  );
+});
+
 test('callback cleanup removes credentials and errors while preserving unrelated URL state', async () => {
   let replacement;
   const browser = {
@@ -421,4 +535,34 @@ test('sign-out during server verification prevents a stale guard approval', asyn
   context.emit('SIGNED_OUT', null);
   verified.resolve({ data: { user }, error: null });
   assert.deepEqual(await guarded, { redirect: ['/auth/login'] });
+});
+
+test('recovery sessions keep the password reset flow instead of opening dashboard', async () => {
+  const context = harness();
+  await context.service.ready;
+  context.emit('PASSWORD_RECOVERY', session);
+  assert.deepEqual(await context.guard({}, {}), { redirect: ['/auth/update-password'] });
+  assert.deepEqual(await context.signedInGuard({}, {}), { redirect: ['/auth/update-password'] });
+});
+
+test('verified sessions skip sign-in, anonymous sessions can still sign in', async () => {
+  const anonymous = harness();
+  await anonymous.service.ready;
+  assert.equal(await anonymous.signedInGuard({}, {}), true);
+  const signedIn = harness({ getSession: async () => ({ data: { session }, error: null }) });
+  await signedIn.service.ready;
+  assert.deepEqual(await signedIn.signedInGuard({}, {}), { redirect: ['/dashboard'] });
+});
+
+test('plain login URLs retain stored sessions and only actual implicit callback parameters are detected', () => {
+  const { matchesCallback } = harness();
+  assert.equal(matchesCallback(new URL('http://localhost:4200/auth/login'), {}), false);
+  assert.equal(matchesCallback(new URL('http://localhost:4200/auth/update-password'), {}), false);
+  assert.equal(matchesCallback(new URL('http://localhost:4200/auth/login'), { access_token: 'token' }), true);
+  assert.equal(
+    matchesCallback(new URL('http://localhost:4200/auth/update-password/'), { error_description: 'expired' }),
+    true,
+  );
+  assert.equal(matchesCallback(new URL('http://localhost:4200/dashboard'), { access_token: 'token' }), false);
+  assert.equal(matchesCallback(new URL('http://localhost:4200/auth/login'), { code: 'pkce-code' }), false);
 });

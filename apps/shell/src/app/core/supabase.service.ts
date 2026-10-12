@@ -3,6 +3,7 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { BrowserAuthStorage } from './browser-auth-storage';
+import { isSupabaseImplicitCallback } from './supabase-callback';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
@@ -37,8 +38,7 @@ export class SupabaseService {
         storage: this.storage,
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: (url) =>
-          ['/auth/login', '/auth/update-password'].includes(url.pathname.replace(/\/$/, '')),
+        detectSessionInUrl: isSupabaseImplicitCallback,
       },
     });
     this.destroyRef.onDestroy(() => {

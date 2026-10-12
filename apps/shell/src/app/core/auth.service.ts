@@ -94,10 +94,26 @@ export class AuthService {
     this.connection.setRemember(remember);
     try {
       const result = await this.supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (result.error?.code === 'invalid_credentials') {
+        return { ...result, error: await this.classifyFailedLogin(email, result.error) };
+      }
       if (!result.error) this.initializationError.set(null);
       return result;
     } catch (error) {
       return { data: { user: null, session: null }, error: this.normalizeError(error) };
+    }
+  }
+
+  private async classifyFailedLogin(email: string, originalError: AuthError): Promise<AuthError> {
+    try {
+      // Only a confirmed database false means missing. No passwords reach this RPC.
+      const { data, error } = await this.supabase!.rpc('kampusx_login_email_exists', {
+        email_address: email.trim(),
+      }).abortSignal(AbortSignal.timeout(5000));
+      if (error || typeof data !== 'boolean') return this.failure('login_account_check_failed');
+      return data ? originalError : this.failure('login_user_not_found');
+    } catch {
+      return this.failure('login_account_check_failed');
     }
   }
 
@@ -167,15 +183,13 @@ export class AuthService {
     if (value?.code === 'recovery_required' || value?.code === 'otp_expired')
       return 'auth.errors.recoveryInvalid';
     if (value?.code === 'password_updated_signout_failed') return 'auth.errors.signOut';
+    if (value?.code === 'login_user_not_found') return 'auth.errors.userNotFound';
+    if (value?.code === 'login_account_check_failed') return 'auth.errors.accountLookup';
     if (value?.code === 'invalid_credentials') return 'auth.errors.credentials';
     if (value?.code === 'email_not_confirmed') return 'auth.errors.unconfirmed';
     if (value?.code === 'weak_password') return 'auth.errors.weakPassword';
-    if (
-      value?.status === 429 ||
-      value?.code === 'over_request_rate_limit' ||
-      value?.code === 'over_email_send_rate_limit'
-    )
-      return 'auth.errors.rateLimit';
+    if (value?.code === 'over_email_send_rate_limit') return 'auth.errors.emailRateLimit';
+    if (value?.status === 429 || value?.code === 'over_request_rate_limit') return 'auth.errors.rateLimit';
     if (value?.code === 'network_error' || value?.name === 'AuthRetryableFetchError')
       return 'auth.errors.network';
     return 'auth.errors.generic';

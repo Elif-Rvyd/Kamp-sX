@@ -1,0 +1,59 @@
+{
+  "dashboard": {
+    "title": "Ana sayfa — KampüsX",
+    "openProfile": "Profil menüsünü aç",
+    "closeProfile": "Profil menüsünü kapat",
+    "profileMenu": "Profil menüsü",
+    "discoverLabel": "Keşfet akışları",
+    "navigationLabel": "Ana gezinme",
+    "visualOnly": "Bu öğeler henüz etkin değil.",
+    "mock": {
+      "school": "Kırşehir Ahi Evran Üniversitesi",
+      "campus": "Teknik Bilimler MYO",
+      "department": "Bilgisayar Teknolojileri"
+    },
+    "menu": {
+      "settings": "Ayarlar",
+      "account": "Hesap",
+      "community": "Topluluk"
+    },
+    "tabs": {
+      "university": "Üniversite",
+      "campus": "Kampüs",
+      "department": "Bölüm"
+    },
+    "nav": {
+      "home": "Ana sayfa",
+      "messages": "Mesajlar",
+      "search": "Ara"
+    },
+    "feeds": {
+      "university": {
+        "title": "Üniversitende neler oluyor?",
+        "description": "Henüz paylaşım yok. Üniversitendeki konuşmalar, etkinlikler ve paylaşımlar burada bir araya gelecek."
+      },
+      "campus": {
+        "title": "Kampüsünün gündemi",
+        "description": "Henüz paylaşım yok. Kampüsündeki günlük hayat, duyurular ve buluşmalar burada yer alacak."
+      },
+      "department": {
+        "title": "Bölümündeki konuşmalar",
+        "description": "Henüz paylaşım yok. Bölümündeki dersler, projeler ve fikirler için burası senin keşfet alanın."
+      }
+    },
+    "logout": "Çıkış yap",
+    "profile": {
+      "unnamed": "Öğrenci",
+      "schoolMissing": "Okul bilgisi eklenmemiş",
+      "departmentMissing": "Bölüm bilgisi eklenmemiş"
+    }
+  },
+  "auth": {
+    "errors": {
+      "rateLimit": "İstek sınırına ulaşıldı. Biraz bekleyip tekrar dene.",
+      "emailRateLimit": "E-posta gönderim sınırına ulaşıldı. Gönderim kotası yenilendiğinde tekrar dene.",
+      "userNotFound": "Böyle bir kullanıcı yok.",
+      "accountLookup": "Hesap kontrolü tamamlanamadı. Lütfen tekrar dene."
+    }
+  }
+}

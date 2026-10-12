@@ -15,3 +15,7 @@ export * from './organisms/post-card-preview/post-card-preview.component';
 export * from './organisms/community-card/community-card.component';
 export * from './organisms/marquee-strip/marquee-strip.component';
 export * from './organisms/legal-dialog/legal-dialog.component';
+export * from './atoms/avatar/avatar.component';
+export * from './molecules/tab-strip/tab-strip.component';
+export * from './molecules/feed-skeleton/feed-skeleton.component';
+export * from './organisms/modal-drawer/modal-drawer.component';

@@ -1,0 +1,59 @@
+{
+  "dashboard": {
+    "title": "Home — KampüsX",
+    "openProfile": "Open profile menu",
+    "closeProfile": "Close profile menu",
+    "profileMenu": "Profile menu",
+    "discoverLabel": "Discovery feeds",
+    "navigationLabel": "Main navigation",
+    "visualOnly": "These items are not available yet.",
+    "mock": {
+      "school": "Kırşehir Ahi Evran University",
+      "campus": "Vocational School of Technical Sciences",
+      "department": "Computer Technologies"
+    },
+    "menu": {
+      "settings": "Settings",
+      "account": "Account",
+      "community": "Community"
+    },
+    "tabs": {
+      "university": "University",
+      "campus": "Campus",
+      "department": "Department"
+    },
+    "nav": {
+      "home": "Home",
+      "messages": "Messages",
+      "search": "Search"
+    },
+    "feeds": {
+      "university": {
+        "title": "Around your university",
+        "description": "No posts yet. Conversations, events and updates from your university will come together here."
+      },
+      "campus": {
+        "title": "Life on your campus",
+        "description": "No posts yet. Everyday moments, announcements and meetups from your campus will appear here."
+      },
+      "department": {
+        "title": "Inside your department",
+        "description": "No posts yet. Discover classes, projects and ideas shared within your department."
+      }
+    },
+    "logout": "Sign out",
+    "profile": {
+      "unnamed": "Student",
+      "schoolMissing": "University not added",
+      "departmentMissing": "Department not added"
+    }
+  },
+  "auth": {
+    "errors": {
+      "rateLimit": "The request limit was reached. Wait a moment and try again.",
+      "emailRateLimit": "The email sending limit was reached. Try again when the sending quota resets.",
+      "userNotFound": "No such user exists.",
+      "accountLookup": "The account check could not be completed. Please try again."
+    }
+  }
+}

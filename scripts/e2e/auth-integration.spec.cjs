@@ -73,6 +73,26 @@ async function mockAuth(page, handlers = {}) {
   return requests;
 }
 
+async function mockLoginLookup(page, handler = () => ({ status: 200, body: true })) {
+  const requests = [];
+  await page.route('**/rest/v1/rpc/kampusx_login_email_exists', async (route) => {
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' } });
+      return;
+    }
+    const body = route.request().postDataJSON();
+    requests.push(body);
+    const response = await handler(body);
+    await route.fulfill({
+      status: response.status ?? 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify(response.body),
+    });
+  });
+  return requests;
+}
+
 for (const remember of [false, true]) {
   test(`login uses ${remember ? 'persistent' : 'tab-scoped'} session storage`, async ({ page }) => {
     const response = sessionResponse();
@@ -83,7 +103,8 @@ for (const remember of [false, true]) {
     const rememberControl = page.locator('input[formcontrolname=remember]');
     await rememberControl.setChecked(remember);
     await page.locator('#auth-panel button[type=submit]').click();
-    await expect(page.locator('#auth-panel .success-message')).toBeVisible();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.locator('.dashboard-page')).toBeVisible();
     const submitted = requests.find(({ operation }) => operation === 'token');
     expect(submitted.body.email).toBe(email);
     expect(submitted.body.password).toBe('LocalTestPassword123!');
@@ -93,10 +114,17 @@ for (const remember of [false, true]) {
       return { local: containsToken(localStorage), session: containsToken(sessionStorage) };
     }, response.access_token);
     expect(persisted).toEqual({ local: remember, session: !remember });
+    await page.reload();
+    await expect(page.locator('.dashboard-page')).toBeVisible();
+    await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
+    await expect(page.getByRole('dialog').getByRole('heading', { name: '@student' })).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('Okul bilgisi eklenmemiş')).toBeVisible();
+    expect(requests.some(({ operation }) => operation === 'user')).toBe(true);
   });
 }
 
 test('invalid credentials display a safe localized error and allow retry', async ({ page }) => {
+  const lookups = await mockLoginLookup(page);
   let failed = true;
   const requests = await mockAuth(page, {
     token: () =>
@@ -115,8 +143,88 @@ test('invalid credentials display a safe localized error and allow retry', async
   await expect(submit).toBeEnabled();
   failed = false;
   await submit.click();
-  await expect(page.locator('#auth-panel .success-message')).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/);
   expect(requests.filter(({ operation }) => operation === 'token')).toHaveLength(2);
+  expect(lookups).toEqual([{ email_address: email }]);
+});
+
+test('a confirmed absent account shows the requested message in TR and EN and permits retry', async ({
+  page,
+}) => {
+  let missing = true;
+  await mockAuth(page, {
+    token: () =>
+      missing
+        ? { status: 400, body: { code: 'invalid_credentials', msg: 'PRIVATE_BACKEND_ERROR' } }
+        : { body: sessionResponse() },
+  });
+  const lookups = await mockLoginLookup(page, () => ({ body: false }));
+  await page.goto('/auth/login');
+  await page.locator('#login-identity').fill(email);
+  await page.locator('#login-password').fill('LocalTestPassword123!');
+  const submit = page.locator('#auth-panel button[type=submit]');
+  const alert = page.locator('#auth-panel [role=alert]');
+  await submit.click();
+  await expect(alert).toHaveText('Böyle bir kullanıcı yok.');
+  await expect(submit).toBeEnabled();
+  await page.locator('kx-language-switcher button[lang=en]').first().click();
+  await expect(alert).toHaveText('No such user exists.');
+  expect(lookups).toEqual([{ email_address: email }]);
+  missing = false;
+  await submit.click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  expect(lookups).toHaveLength(1);
+});
+
+test('lookup errors remain distinct from missing users and incorrect credentials', async ({ page }) => {
+  await mockAuth(page, {
+    token: () => ({ status: 400, body: { code: 'invalid_credentials', msg: 'Invalid' } }),
+  });
+  await mockLoginLookup(page, () => ({
+    status: 404,
+    body: { code: 'PGRST202', message: 'PRIVATE_SCHEMA_ERROR' },
+  }));
+  await page.goto('/auth/login');
+  await page.locator('#login-identity').fill(email);
+  await page.locator('#login-password').fill('LocalTestPassword123!');
+  await page.locator('#auth-panel button[type=submit]').click();
+  const alert = page.locator('#auth-panel [role=alert]');
+  await expect(alert).toHaveText('Hesap kontrolü tamamlanamadı. Lütfen tekrar dene.');
+  await expect(alert).not.toContainText('PRIVATE_SCHEMA_ERROR');
+  await expect(page.locator('#auth-panel button[type=submit]')).toBeEnabled();
+});
+
+test('a slow lookup keeps submits disabled and reserves error feedback space on a narrow dark screen', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockAuth(page, {
+    token: () => ({ status: 400, body: { code: 'invalid_credentials', msg: 'Invalid' } }),
+  });
+  let resolveLookup;
+  const response = new Promise((resolve) => {
+    resolveLookup = resolve;
+  });
+  const lookups = await mockLoginLookup(page, () => response);
+  await page.addInitScript(() => localStorage.setItem('kampusx-theme', 'dark'));
+  await page.goto('/auth/login');
+  await page.locator('#login-identity').fill(email);
+  await page.locator('#login-password').fill('LocalTestPassword123!');
+  const submit = page.locator('#auth-panel button[type=submit]');
+  await submit.scrollIntoViewIfNeeded();
+  const before = await submit.boundingBox();
+  await submit.click();
+  await expect(submit).toBeDisabled();
+  await expect(page.locator('#auth-panel form')).toHaveAttribute('aria-busy', 'true');
+  await expect.poll(() => lookups.length).toBe(1);
+  resolveLookup({ body: false });
+  await expect(page.locator('#auth-panel [role=alert]')).toHaveText('Böyle bir kullanıcı yok.');
+  const after = await submit.boundingBox();
+  expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1);
+  await submit.focus();
+  await expect(submit).toBeFocused();
+  await page.screenshot({ path: test.info().outputPath('login-missing-user-tr-dark.png'), fullPage: true });
 });
 
 test('registration sends metadata and displays email-verification guidance', async ({ page }) => {
@@ -147,4 +255,84 @@ test('reset requests do not expose whether an account exists', async ({ page }) 
   await expect(success).toContainText(/hesap|kayıtlı/i);
   await expect(success).toBeFocused();
   expect(requests.find(({ operation }) => operation === 'recover').body.email).toBe(email);
+});
+
+test('registration distinguishes email quota from request limits in Turkish and English', async ({
+  page,
+}) => {
+  let code = 'over_email_send_rate_limit';
+  await mockAuth(page, {
+    signup: () => ({ status: 429, body: { code, msg: 'PRIVATE_PROVIDER_ERROR' } }),
+  });
+  await page.goto('/auth/register');
+  await page.locator('#register-email').fill(email);
+  await page.locator('#register-username').fill('student');
+  await page.locator('#register-password').fill('LocalTestPassword123!');
+  await page.locator('#register-consent').check();
+  const submit = page.locator('#auth-panel button[type=submit]');
+  const alert = page.locator('#auth-panel [role=alert]');
+  await submit.click();
+  await expect(alert).toContainText('E-posta gönderim sınırına ulaşıldı');
+  await expect(alert).not.toContainText('PRIVATE_PROVIDER_ERROR');
+  await expect(submit).toBeEnabled();
+  code = 'over_request_rate_limit';
+  await submit.click();
+  await expect(alert).toContainText('İstek sınırına ulaşıldı');
+  await page.locator('kx-language-switcher button[lang=en]').first().click();
+  await expect(alert).toContainText('The request limit was reached');
+  code = 'over_email_send_rate_limit';
+  await submit.click();
+  await expect(alert).toContainText('The email sending limit was reached');
+});
+
+test('an anonymous visitor cannot open dashboard', async ({ page }) => {
+  await mockAuth(page);
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/auth\/login$/);
+  await expect(page.locator('#login-identity')).toBeVisible();
+  await expect(page.locator('.dashboard-page')).toHaveCount(0);
+});
+
+test('a rejected stored token cannot open dashboard or reveal profile content', async ({ page }) => {
+  const session = sessionResponse();
+  await mockAuth(page, { user: () => ({ status: 401, body: { code: 'bad_jwt', msg: 'Invalid token' } }) });
+  await page.addInitScript((session) => {
+    sessionStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
+  }, session);
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/auth\/login$/);
+  await expect(page.locator('.dashboard-page')).toHaveCount(0);
+  await expect(page.getByText('@student', { exact: true })).toHaveCount(0);
+});
+
+test('sign-out clears the session and denies dashboard until the next login', async ({ page }) => {
+  const requests = await mockAuth(page, { token: () => ({ body: sessionResponse() }) });
+  await page.goto('/auth/login');
+  await page.locator('#login-identity').fill(email);
+  await page.locator('#login-password').fill('LocalTestPassword123!');
+  await page.locator('#auth-panel button[type=submit]').click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto('/auth/login');
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
+  await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
+  await expect(page).toHaveURL(/\/auth\/login$/);
+  expect(requests.filter(({ operation }) => operation === 'logout')).toHaveLength(1);
+  const remains = await page.evaluate(() =>
+    [localStorage, sessionStorage].some((storage) => !!storage.getItem('sb-auth-auth-token')),
+  );
+  expect(remains).toBe(false);
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/auth\/login$/);
+});
+
+test('registration opens dashboard only when Supabase returns a session', async ({ page }) => {
+  await mockAuth(page, { signup: () => ({ body: sessionResponse() }) });
+  await page.goto('/auth/register');
+  await page.locator('#register-email').fill(email);
+  await page.locator('#register-username').fill('student');
+  await page.locator('#register-password').fill('LocalTestPassword123!');
+  await page.locator('#register-consent').check();
+  await page.locator('#auth-panel button[type=submit]').click();
+  await expect(page).toHaveURL(/\/dashboard$/);
 });

@@ -1,0 +1,47 @@
+{
+  "engine": "PGlite PostgreSQL (isolated in-memory fixtures)",
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "migration applies and can be reapplied",
+      "passed": true
+    },
+    {
+      "name": "known active email returns true",
+      "passed": true
+    },
+    {
+      "name": "email comparison trims and ignores case",
+      "passed": true
+    },
+    {
+      "name": "missing email returns false",
+      "passed": true
+    },
+    {
+      "name": "soft-deleted account returns false",
+      "passed": true
+    },
+    {
+      "name": "invalid or oversized input is not classified as missing",
+      "passed": true
+    },
+    {
+      "name": "public-schema decoy cannot alter the auth lookup",
+      "passed": true
+    },
+    {
+      "name": "the unrelated role has no function access",
+      "passed": true
+    },
+    {
+      "name": "anon can receive only the existence boolean",
+      "passed": true
+    },
+    {
+      "name": "authenticated can receive only the existence boolean",
+      "passed": true
+    }
+  ]
+}

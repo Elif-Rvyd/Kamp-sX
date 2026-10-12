@@ -1,0 +1,56 @@
+<div class="dashboard-page" *transloco="let t">
+  <div class="dashboard-shell">
+    <div class="dashboard-sticky">
+      <kx-dashboard-top-bar
+        [initials]="profile().initials"
+        [drawerOpen]="drawerOpen()"
+        [dark]="theme.dark()"
+        [language]="language.language()"
+        (profileOpened)="profileDrawer().open()"
+        (themeChanged)="theme.toggle()"
+        (languageChanged)="language.set($event)"
+      />
+      <kx-dashboard-discover-tabs [active]="active()" (selected)="select($event)" />
+    </div>
+    <div
+      #viewport
+      class="discover-viewport"
+      (pointerdown)="onPointerDown($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="cancelSwipe()"
+    >
+      <div class="discover-track" [style.transform]="'translateX(-' + active() * 100 + '%)'">
+        @for (feed of feeds; track feed.id; let index = $index) {
+        <section
+          class="discover-panel"
+          role="tabpanel"
+          [id]="'dashboard-discover-panel-' + feed.id"
+          [attr.aria-labelledby]="'dashboard-discover-tab-' + feed.id"
+          [attr.aria-hidden]="active() !== index"
+          [inert]="active() !== index"
+          [tabIndex]="active() === index ? 0 : -1"
+        >
+          <div class="feed-heading">
+            <span class="feed-emblem" aria-hidden="true"><kx-icon [name]="feed.icon" /></span>
+            <p class="feed-scope">{{ t(feed.scopeKey) }}</p>
+            <h1>{{ t(feed.headingKey) }}</h1>
+            <p class="feed-description">{{ t(feed.descriptionKey) }}</p>
+          </div>
+          <div class="feed-placeholder-list" aria-hidden="true">
+            @for (card of skeletons; track card) { <kx-feed-skeleton /> }
+          </div>
+        </section>
+        }
+      </div>
+    </div>
+    <kx-dashboard-bottom-nav />
+  </div>
+  <kx-dashboard-profile-drawer
+    #profileDrawerView
+    [profile]="profile()"
+    [logoutBusy]="logoutBusy()"
+    [logoutErrorKey]="logoutErrorKey()"
+    (logoutRequested)="logout()"
+    (changed)="drawerOpen.set($event)"
+  />
+</div>

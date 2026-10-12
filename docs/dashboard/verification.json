@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-12",
+  "unit": {
+    "passed": 53,
+    "failed": 0
+  },
+  "distinctBrowserScenariosCovered": 54,
+  "browserVerificationNote": "The full suite passed 53 of 54 scenarios. The mobile geometry test compared viewport coordinates before an automatic click-scroll; the measurement was corrected by scrolling the button into view first. The affected test then passed. No application code changed for that correction.",
+  "i18n": {
+    "totalMatchingKeys": 274,
+    "newDashboardKeys": 29,
+    "newAuthKeys": 3
+  },
+  "production": {
+    "passed": true,
+    "verifiedJavaScriptFiles": 9,
+    "lazyDashboardKilobytes": 19.57,
+    "initialKilobytes": 658.54
+  },
+  "typecheck": "passed",
+  "format": "passed",
+  "designLint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "premiumAudit": {
+    "findings": 0
+  },
+  "themesTokensAndWelcomeUnchanged": true,
+  "realSupabaseReadOnlyCheck": {
+    "settingsHttpStatus": 200,
+    "emailPasswordEnabled": true,
+    "registrationDisabled": false
+  },
+  "localRealEnvironmentSmoke": {
+    "loginRendered": true,
+    "anonymousDashboardRedirected": true
+  },
+  "personalAccountLoginTested": false,
+  "automaticAuthTestsUseIsolatedMockEnvironment": true,
+  "supabaseRateLimitSettingsChanged": false,
+  "fullBrowserRun": {
+    "passed": 53,
+    "failed": 1
+  },
+  "correctedMobileMeasurementRetest": {
+    "passed": 1,
+    "failed": 0
+  },
+  "loginEmailLookupSql": {
+    "passed": 10,
+    "failed": 0,
+    "engine": "isolated PGlite PostgreSQL"
+  },
+  "loginEmailLookupRemote": {
+    "migrationApplied": false,
+    "status": 404,
+    "code": "PGRST202",
+    "requiredAction": "Apply supabase/migrations/20261012174500_login_email_lookup.sql in Supabase SQL Editor"
+  },
+  "localLoginHttpStatus": 200
+}

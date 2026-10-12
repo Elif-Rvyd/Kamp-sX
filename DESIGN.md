@@ -142,6 +142,11 @@ Buttons have solid, outline, and ghost emphasis. Loading hides the stable label 
 an app-owned spinner, exposes aria-busy, and disables duplicate submits. Disabled controls are honest.
 Fields associate labels, help and error text, use reactive validators, and focus the first invalid field.
 Password form values are never stored by application code. Supabase owns session credentials.
+By the user's explicit product decision, login distinguishes an unknown email from incorrect
+credentials. After `invalid_credentials`, a database RPC returns only an account-existence boolean.
+A confirmed false displays "Böyle bir kullanıcı yok."; true retains the incorrect-credentials
+message. Lookup failures remain a separate retryable error. This deliberately makes account
+existence discoverable and adds no password handling or login bypass to the database function.
 Passwords support password managers, paste and accessible reveal controls. New-password and
 confirmation fields reuse the password molecule with distinct translated labels.
 The `/auth/update-password` page waits for auth initialization and accepts only a session established
@@ -150,6 +155,25 @@ password updates end the current session and offer sign-in with the new password
 keeps a truthful saved-password notice and retry action instead of reporting completion.
 
 The legal dialog uses native modal dialog behavior: focus isolation, Escape dismissal and focus return.
+The authenticated `/dashboard` route uses a centered campus feed shell, with existing logo,
+language and theme controls. It consumes the canonical tokens without changing them or the
+theme services. Shared Avatar, TabStrip, FeedSkeleton and ModalDrawer own its reusable UI.
+The left profile drawer follows the native-dialog modal contract: background isolation,
+scroll lock, focus trap/return, Escape, backdrop click and left-swipe dismissal. Its header
+contains only the signed-in user's handle, university and department. Profile metadata is
+display content only; missing university/department values use honest localized placeholders.
+The drawer's sign-out control closes the real Supabase session. Discovery uses a single selected index
+for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
+remains native; the bottom navigation reserves safe-area space. Motion is transform/opacity
+only and honors reduced motion. Skeletons are static decoration for an empty mock feed,
+not an indefinite loading claim. Profile menu and bottom navigation are explicitly unavailable
+visual items with no navigation or network effects. Email/password sign-in redirects to dashboard
+only after Supabase returns a session; registration with no session keeps email-verification guidance.
+The dashboard guard verifies the session with Supabase getUser; valid signed-in users skip login/register,
+and password recovery keeps its own route. Session loss returns to login. The existing auth forms keep
+their visual design and welcome keeps its public chrome. Plain login URLs are not treated as callback
+links; callback detection requires actual auth parameters. Feed content remains mock; no fake session
+or new social backend is created by dashboard.
 Feed tabs use standard keyboard behavior. Auth mode selectors are native pressed buttons.
 Icon-only controls use translated accessible names. Decorative symbols are hidden from assistive technology.
 Material Symbols Outlined is the icon family. Brand/usernames do not translate; UI text does.

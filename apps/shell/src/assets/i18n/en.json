@@ -145,9 +145,12 @@
     "errors": {
       "config": "Sign-in is not configured yet. Please try again later.",
       "credentials": "The email or password is incorrect. Check your details.",
+      "userNotFound": "No such user exists.",
+      "accountLookup": "The account check could not be completed. Please try again.",
       "unconfirmed": "Confirm your email address before signing in. Check your inbox and spam folder.",
       "network": "We could not connect. Check your internet connection and try again.",
-      "rateLimit": "Too many attempts. Wait a moment and try again.",
+      "rateLimit": "The request limit was reached. Wait a moment and try again.",
+      "emailRateLimit": "The email sending limit was reached. Try again when the sending quota resets.",
       "generic": "We could not complete this request. Please try again.",
       "recoveryInvalid": "This password reset link is missing, invalid, or expired. Request a new link.",
       "weakPassword": "This password was not accepted. Choose a stronger password with at least 8 characters.",
@@ -306,5 +309,54 @@
     "title": "Legal documents are being prepared.",
     "text": "The terms of use and privacy policy have not been published yet. Your email and password are sent to the authentication service when you sign in or sign up. Consider this before submitting the form.",
     "cookies": "Theme and language preferences are saved in this browser. Your sign-in preference determines whether session credentials last for the browser session or remain on this device. Detailed cookie and privacy documents have not been published yet."
+  },
+  "dashboard": {
+    "title": "Home — KampüsX",
+    "openProfile": "Open profile menu",
+    "closeProfile": "Close profile menu",
+    "profileMenu": "Profile menu",
+    "discoverLabel": "Discovery feeds",
+    "navigationLabel": "Main navigation",
+    "visualOnly": "These items are not available yet.",
+    "mock": {
+      "school": "Kırşehir Ahi Evran University",
+      "campus": "Vocational School of Technical Sciences",
+      "department": "Computer Technologies"
+    },
+    "menu": {
+      "settings": "Settings",
+      "account": "Account",
+      "community": "Community"
+    },
+    "tabs": {
+      "university": "University",
+      "campus": "Campus",
+      "department": "Department"
+    },
+    "nav": {
+      "home": "Home",
+      "messages": "Messages",
+      "search": "Search"
+    },
+    "feeds": {
+      "university": {
+        "title": "Around your university",
+        "description": "No posts yet. Conversations, events and updates from your university will come together here."
+      },
+      "campus": {
+        "title": "Life on your campus",
+        "description": "No posts yet. Everyday moments, announcements and meetups from your campus will appear here."
+      },
+      "department": {
+        "title": "Inside your department",
+        "description": "No posts yet. Discover classes, projects and ideas shared within your department."
+      }
+    },
+    "logout": "Sign out",
+    "profile": {
+      "unnamed": "Student",
+      "schoolMissing": "University not added",
+      "departmentMissing": "Department not added"
+    }
   }
 }

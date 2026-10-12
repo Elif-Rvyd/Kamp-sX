@@ -2,6 +2,12 @@
 
 İnceleme tarihi: **10 Ekim 2026**.
 
+**12 Ekim giriş mesajı kararı:** Kullanıcının açık isteğiyle, başarısız girişten sonra `kampusx_login_email_exists` RPC'si hesap varlığını kontrol eder. Kesin `false` sonucunda kullanıcı yok, `true` sonucunda yanlış bilgiler mesajı gösterilir; sorgu hatası ayrı değerlendirilir. Bu tercih hesap varlığını anonim çağırana açıklayabilir. SQL yalnızca boolean döndürür ve tablo okuma izni vermez; Supabase'de uygulanması gereken dosya ve veri sınırları `docs/login-email-lookup.md` içindedir.
+
+**E-posta kota mesajı:** `over_email_send_rate_limit` artık genel HTTP 429/istek sınırından önce değerlendirilir ve ayrı TR/EN mesajı gösterir. Uygulamada ek bir bekleme süresi tanımlanmadı; kalan süre Supabase hata yanıtında verilmediği için bir süre uydurulmaz. Üretim Supabase kota ayarları değiştirilmedi.
+
+**12 Ekim güncellemesi:** Dashboard artık mevcut Supabase Auth'a bağlıdır. Başarılı giriş dashboard'a yönlenir; auth guard bu route'ta kullanılır. Oturumu açık kullanıcı login/register sayfalarından dashboard'a geçer; profil kullanıcı adını oturumdan okur ve gerçek çıkış kontrolü vardır. Düz login URL'sinin callback sanılması hatası, gerçek callback parametreleri kontrol edilerek düzeltildi. Aşağıdaki ilk inceleme bulguları ve test sayıları kendi tarihine aittir; güncel dashboard kodları ve sonuçları `docs/dashboard/DASHBOARD-TESLIM.md` içindedir.
+
 Bu incelemede Angular uygulamasındaki Supabase bağlantısı, auth servisleri, giriş/kayıt/parola yenileme ekranları ve Vercel derleme yapılandırması kontrol edildi. Tespit edilen yerel kod hataları düzeltildi ve regresyon kontrolleri eklendi. Uzak Supabase veya Vercel hesabına erişilmedi; gerçek kullanıcı hesabı oluşturulmadı, gerçek e-posta gönderilmedi ve üretim dağıtımı yapılmadı.
 
 Kurulum adımları ve Dashboard'da tamamlanacak ayarlar [auth-deployment.md](auth-deployment.md), paket güvenlik bulguları [dependency-audit.md](dependency-audit.md) içinde açıklanıyor.
