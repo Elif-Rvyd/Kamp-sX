@@ -1,6 +1,11 @@
 :host {
   display: block;
 }
+.tab-scroll.scrollable {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
 .tab-strip {
   position: relative;
   display: flex;

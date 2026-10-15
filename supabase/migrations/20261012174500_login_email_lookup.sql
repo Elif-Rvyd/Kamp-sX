@@ -1,4 +1,5 @@
--- Apply once in this project's Supabase SQL Editor, as postgres.
+-- HISTORICAL: superseded by 20261015180000_disable_login_email_lookup.sql.
+-- Do not run this migration on its own; the latest migration disables public access.
 -- Product decision: login distinguishes an unknown email from incorrect credentials.
 -- This intentionally reveals whether a supplied email has an active account.
 -- No user rows, IDs, password hashes or roles are returned.

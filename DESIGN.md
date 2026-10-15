@@ -77,7 +77,8 @@ published and describes the authentication data flow without presenting a placeh
 
 Canonical runtime ownership is **Model B**: `libs/shared/design-tokens/tokens.css` owns values.
 This document mirrors the accepted light values and explains intent. The CSS defines both
-themes; Tailwind's preset references the variables, never independent copies of raw values.
+themes; Tailwind v4.3.3 loads the existing variable-based preset with `@config`, never independent copies of raw values.
+`.postcssrc.json` owns the Tailwind v4 PostCSS integration; sources are limited to shell and shared UI.
 
 Light uses warm paper, navy text, saturated cobalt, and a deeper accessible cyan.
 Dark uses `#0B0E14` background, `#151B28` surface, `#EDF2FF` text, `#A6B3CA` muted,
@@ -142,11 +143,11 @@ Buttons have solid, outline, and ghost emphasis. Loading hides the stable label 
 an app-owned spinner, exposes aria-busy, and disables duplicate submits. Disabled controls are honest.
 Fields associate labels, help and error text, use reactive validators, and focus the first invalid field.
 Password form values are never stored by application code. Supabase owns session credentials.
-By the user's explicit product decision, login distinguishes an unknown email from incorrect
-credentials. After `invalid_credentials`, a database RPC returns only an account-existence boolean.
-A confirmed false displays "Böyle bir kullanıcı yok."; true retains the incorrect-credentials
-message. Lookup failures remain a separate retryable error. This deliberately makes account
-existence discoverable and adds no password handling or login bypass to the database function.
+The user's 15 October security decision replaces account discovery with one generic credential error.
+Unknown email and incorrect password use the same TR/EN credentials key. Login sends no account-existence
+RPC; network, quota and email-confirmation failures retain actionable, non-password-revealing feedback.
+The disabling migration revokes the legacy RPC's execute grant from PUBLIC, anon and authenticated;
+it must be applied on the live database independently of deploying the frontend.
 Passwords support password managers, paste and accessible reveal controls. New-password and
 confirmation fields reuse the password molecule with distinct translated labels.
 The `/auth/update-password` page waits for auth initialization and accepts only a session established
@@ -160,20 +161,54 @@ language and theme controls. It consumes the canonical tokens without changing t
 theme services. Shared Avatar, TabStrip, FeedSkeleton and ModalDrawer own its reusable UI.
 The left profile drawer follows the native-dialog modal contract: background isolation,
 scroll lock, focus trap/return, Escape, backdrop click and left-swipe dismissal. Its header
-contains only the signed-in user's handle, university and department. Profile metadata is
+contains the signed-in user's display name, handle, university, department and mock follow counts. Profile metadata is
 display content only; missing university/department values use honest localized placeholders.
 The drawer's sign-out control closes the real Supabase session. Discovery uses a single selected index
 for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
 remains native; the bottom navigation reserves safe-area space. Motion is transform/opacity
-only and honors reduced motion. Skeletons are static decoration for an empty mock feed,
-not an indefinite loading claim. Profile menu and bottom navigation are explicitly unavailable
-visual items with no navigation or network effects. Email/password sign-in redirects to dashboard
+only and honors reduced motion. Skeletons are static decoration only for the three planned academic feeds;
+Explore uses real rows with loading, error/retry and empty states. Profile menu and bottom navigation are explicitly unavailable
+visual items with no navigation or network effects, except the active Profile entry and profile-page Home action. Email/password sign-in redirects to dashboard
 only after Supabase returns a session; registration with no session keeps email-verification guidance.
 The dashboard guard verifies the session with Supabase getUser; valid signed-in users skip login/register,
 and password recovery keeps its own route. Session loss returns to login. The existing auth forms keep
 their visual design and welcome keeps its public chrome. Plain login URLs are not treated as callback
-links; callback detection requires actual auth parameters. Feed content remains mock; no fake session
-or new social backend is created by dashboard.
+links; callback detection requires actual auth parameters. Explore reads authenticated public.posts rows. No fake session is created by dashboard.
+University, campus and department filtering remains a planned visual flow because no scope columns were supplied.
+The lazy `/profile` and `/profile/edit` routes retain the existing session guard. ProfileService
+seeds display identity from the existing session. Names and bios remain in memory;
+follow counts and joined date are illustrative. Avatar/banner URLs persist in public.profiles by user_id;
+posts and post count come from public.posts. No reply/repost data is invented.
+It owns atomic name/bio/photo updates and staged object URLs, releases discarded/replaced assets,
+and resets its local state when the signed-in account changes. Academic details and username stay readonly.
+Registration now requires university and department and sends allowlisted display metadata to Auth; it does not grant roles.
+Upload ownership and a session epoch are checked across asynchronous boundaries. Logout or replacement login
+invalidates pending work, including a re-login to the same user; token refresh alone does not. Dirty profile/post
+editors leave on session loss without trapping the user in a discard dialog or retaining the old draft.
+ProfileRepository snapshots only avatar_url/banner_url and validates their owner and purpose at runtime;
+TypeScript payload types are not treated as a security boundary. Media URLs accept only canonical
+uid/area/safe-filename paths and the supported image/video extensions in the configured bucket. PNG, JPEG
+and WebP dimensions are checked before decoding, with browser decoding and a final pixel-limit check.
+Avatar, scrollable TabStrip and floating FormField extend existing owners through optional variants.
+SocialPostCard owns feed cards; the marketing PostCardPreview remains its separate existing preview.
+ImagePicker owns native file selection and staged previews, ConfirmDialog owns draft-discard confirmation,
+and Toast with NoticeService owns saved feedback across route changes. MediaService owns real uploads to the existing public uploads bucket; ProfileRepository and PostsService own the DB boundary.
+File selection only stages previews; Save/Publish performs network writes. URLs use uid/purpose/random paths and only
+the configured bucket origin is rendered. Confirmed uploads can be reused after a rejected DB write.
+Storage and database writes are separate operations; no speculative deletion of possibly referenced objects occurs.
+Post composer uses existing FormField/Button/ConfirmDialog owners and the same protected navigation/draft contract.
+Ambiguous publication outcomes block blind retries. Only confirmed success triggers the shared toast and feed navigation.
+A post is at most 2000 characters with one optional image/video; images accept JPG/PNG/WEBP,
+up to 5 MiB and 32 megapixels, with decoded-content checks; videos accept MP4/WEBM up to 50 MiB
+with signature and metadata decode checks. Public-file visibility is disclosed before saving. Profile and media geometry stays reserved.
+The profile uses a 3:1 cover, an overlapping 96px avatar, a 64px sticky toolbar and sticky scrolling tabs.
+IntersectionObserver controls only opacity/transform header motion and is disconnected on teardown.
+The editor reserves centered-title space beside its left Cancel/Save controls and blocks duplicate saves.
+Dirty route departures use the native shared confirmation dialog, Escape keeps edits, focus returns,
+and saved changes update the drawer and every own post card through the same signal.
+Production builds use Angular's hashed script CSP. The build adds an exact configured Supabase
+connection and media allowlist; Vercel supplies frame, MIME, referrer and device-permission protections.
+Static style permissions retain Angular component styles and the existing Google font/icon sources.
 Feed tabs use standard keyboard behavior. Auth mode selectors are native pressed buttons.
 Icon-only controls use translated accessible names. Decorative symbols are hidden from assistive technology.
 Material Symbols Outlined is the icon family. Brand/usernames do not translate; UI text does.

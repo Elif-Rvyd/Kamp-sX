@@ -1,0 +1,92 @@
+<ng-container *transloco="let t">
+  <header class="profile-toolbar" [class.collapsed]="collapsed()">
+    <span class="toolbar-surface" aria-hidden="true"></span>
+    <button
+      kxIconButton
+      type="button"
+      [surface]="true"
+      [attr.aria-label]="t('profile.back')"
+      (click)="backRequested.emit()"
+    >
+      <kx-icon name="arrow_back" />
+    </button>
+    <div class="toolbar-identity" [attr.aria-hidden]="!collapsed()">
+      <strong [title]="profile().fullName">{{ profile().fullName }}</strong
+      ><span>{{ t('profile.postCount', { count: profile().postCount }) }}</span>
+    </div>
+    <button
+      kxIconButton
+      type="button"
+      [surface]="true"
+      aria-disabled="true"
+      [attr.aria-label]="t('dashboard.nav.search')"
+      [title]="t('dashboard.visualOnly')"
+    >
+      <kx-icon name="search" />
+    </button>
+  </header>
+  <div class="profile-cover">
+    @if (profile().coverUrl) {
+      <img [src]="profile().coverUrl" [alt]="t('profile.coverAlt')" width="760" height="253" />
+    } @else {
+      <div class="profile-cover-placeholder" aria-hidden="true">
+        <img src="assets/logo.svg" alt="" width="72" height="72" />
+      </div>
+    }
+  </div>
+  <section class="profile-identity">
+    <button
+      type="button"
+      class="large-avatar"
+      [attr.aria-label]="t(profile().avatarUrl ? 'profile.edit.avatar' : 'profile.addPhoto')"
+      (click)="editRequested.emit()"
+    >
+      <kx-avatar [initials]="initials()" [src]="profile().avatarUrl" size="profile" />
+      @if (!profile().avatarUrl) {
+        <span class="camera-badge" aria-hidden="true"><kx-icon name="photo_camera" /></span>
+      }
+    </button>
+    <h1 #name>{{ profile().fullName }}</h1>
+    <p class="profile-username">{{ '@' + profile().username }}</p>
+    @if (profile().bio) {
+      <p class="profile-bio">{{ profile().bio }}</p>
+    }
+    <div class="profile-academic">
+      <p>
+        <kx-icon name="school" /><span>{{
+          profile().university || t('dashboard.profile.schoolMissing')
+        }}</span>
+      </p>
+      <p>
+        <kx-icon name="apartment" /><span>{{ profile().faculty || t('profile.facultyMissing') }}</span>
+      </p>
+      <p>
+        <kx-icon name="code" /><span>{{
+          profile().department || t('dashboard.profile.departmentMissing')
+        }}</span>
+      </p>
+    </div>
+    <p class="profile-joined">
+      <kx-icon name="calendar_month" />{{ t('profile.joined', { date: joined() }) }}
+    </p>
+    <div class="profile-meta-row">
+      <div class="profile-counts">
+        <span
+          ><strong>{{ profile().followingCount | kxNumber }}</strong> {{ t('profile.following') }}</span
+        ><span
+          ><strong>{{ profile().followersCount | kxNumber }}</strong> {{ t('profile.followers') }}</span
+        >
+      </div>
+      <div class="profile-preferences">
+        <kx-language-switcher
+          [touch]="true"
+          [active]="language()"
+          (changed)="languageChanged.emit($event)"
+        /><kx-theme-toggle [touch]="true" [dark]="dark()" (changed)="themeChanged.emit()" />
+      </div>
+    </div>
+    <button kxButton type="button" emphasis="outline" class="edit-profile" (click)="editRequested.emit()">
+      {{ t('profile.edit.button') }}
+    </button>
+  </section>
+</ng-container>

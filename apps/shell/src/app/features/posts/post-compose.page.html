@@ -1,0 +1,76 @@
+<div class="compose-page" *transloco="let t">
+  <header>
+    <button kxButton type="button" emphasis="ghost" [disabled]="busy()" (click)="cancel()">
+      {{t('profile.edit.cancel')}}
+    </button>
+    <h1 id="compose-title" tabindex="-1">{{t('posts.heading')}}</h1>
+  </header>
+  <form novalidate [attr.aria-busy]="busy() || checking()" (submit)="$event.preventDefault(); publish()">
+    <kx-form-field
+      fieldId="post-content"
+      labelKey="posts.content"
+      placeholderKey="posts.placeholder"
+      [control]="content"
+      [multiline]="true"
+      [floating]="true"
+      [maxLength]="2000"
+    />
+    <input
+      #attachment
+      class="sr-only"
+      id="post-file"
+      type="file"
+      tabindex="-1"
+      accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+      [attr.aria-label]="t('posts.attach')"
+      [disabled]="busy() || checking() || uncertain() || published()"
+      (change)="selected($event)"
+    />
+    <div class="attachment-actions">
+      <button
+        kxButton
+        type="button"
+        emphasis="outline"
+        [disabled]="busy() || checking() || uncertain() || published()"
+        (click)="attachment.click()"
+      >
+        <kx-icon name="add_photo_alternate" />{{t('posts.attach')}}
+      </button>
+      @if (file()) {<button
+        kxButton
+        type="button"
+        emphasis="ghost"
+        [disabled]="busy() || uncertain() || published()"
+        (click)="remove()"
+      >
+        {{t('media.remove')}}</button
+      >}
+    </div>
+    <p class="hint">{{t('posts.fileHint')}}</p>
+    <p class="hint">{{t('media.publicHint')}}</p>
+    @if (preview()) {
+    <div class="attachment-preview">
+      @if (type() === 'video') {<video
+        [src]="preview()"
+        controls
+        playsinline
+        preload="metadata"
+        [attr.aria-label]="t('media.video')"
+      ></video
+      >} @else {<img [src]="preview()" [alt]="t('profile.content.mediaAlt')" width="640" height="360" />}
+    </div>
+    }
+    <p class="error-text compose-error" role="alert">{{error() ? t(error()) : ''}}</p>
+    <button kxButton type="submit" class="full-width" [busy]="busy()" [disabled]="!canPublish()">
+      {{t('posts.publish')}}
+    </button>
+  </form>
+  <kx-confirm-dialog
+    #confirmation
+    dialogId="post-discard"
+    titleKey="posts.discardTitle"
+    bodyKey="posts.discardText"
+    cancelKey="profile.edit.keepEditing"
+    confirmKey="profile.edit.discard"
+  />
+</div>

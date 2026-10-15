@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-15",
+  "command": "npm audit --json",
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependencies": {
+    "prod": 40,
+    "dev": 786,
+    "optional": 174,
+    "peer": 72,
+    "peerOptional": 0,
+    "total": 825
+  },
+  "caveat": "Registry advisory matches for installed dependency versions; not a proof that application logic or server policies are secure."
+}

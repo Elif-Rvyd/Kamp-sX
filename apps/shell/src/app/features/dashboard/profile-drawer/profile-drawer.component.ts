@@ -3,22 +3,37 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { AvatarComponent, ButtonComponent, IconComponent, ModalDrawerComponent } from '@kampusx/shared/ui';
 import { PROFILE_MENU } from '../mock-data';
 import type { DashboardProfile } from '../dashboard-profile';
+import { LocalizedNumberPipe } from '@kampusx/shared/util';
 
 @Component({
   selector: 'kx-dashboard-profile-drawer',
   standalone: true,
-  imports: [TranslocoDirective, AvatarComponent, ButtonComponent, IconComponent, ModalDrawerComponent],
+  imports: [
+    TranslocoDirective,
+    AvatarComponent,
+    ButtonComponent,
+    IconComponent,
+    ModalDrawerComponent,
+    LocalizedNumberPipe,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<kx-modal-drawer
     #drawer
     drawerId="dashboard-profile-drawer"
     labelledBy="dashboard-profile-name"
     describedBy="dashboard-profile-school dashboard-profile-department"
-    (changed)="changed.emit($event)"
+    (changed)="onChanged($event)"
   >
     <div class="profile-content" *transloco="let t">
       <div class="drawer-top">
-        <kx-avatar [initials]="profile().initials" size="large" />
+        <button
+          type="button"
+          class="profile-avatar-link"
+          [attr.aria-label]="t('profile.drawer.open', { name: profile().fullName })"
+          (click)="goToProfile()"
+        >
+          <kx-avatar [initials]="profile().initials" [src]="profile().avatarUrl" size="large" />
+        </button>
         <button
           type="button"
           data-drawer-close
@@ -30,19 +45,33 @@ import type { DashboardProfile } from '../dashboard-profile';
         </button>
       </div>
       <div class="profile-details">
-        <h2 id="dashboard-profile-name">{{ profile().handle || t('dashboard.profile.unnamed') }}</h2>
+        <button type="button" class="profile-name-link" (click)="goToProfile()">
+          <h2 id="dashboard-profile-name">{{ profile().fullName }}</h2>
+          <span class="profile-handle">{{ profile().handle }}</span>
+        </button>
         <p id="dashboard-profile-school">{{ profile().school || t('dashboard.profile.schoolMissing') }}</p>
         <p id="dashboard-profile-department">
           {{ profile().department || t('dashboard.profile.departmentMissing') }}
         </p>
+        <div class="drawer-counts">
+          <span
+            ><strong>{{ profile().followingCount | kxNumber }}</strong> {{ t('profile.following') }}</span
+          ><span
+            ><strong>{{ profile().followersCount | kxNumber }}</strong> {{ t('profile.followers') }}</span
+          >
+        </div>
       </div>
       <nav class="profile-menu" [attr.aria-label]="t('dashboard.profileMenu')">
         @for (item of menu; track item.id) {
+          @if (item.id === 'settings') {
+            <div class="menu-divider" aria-hidden="true"></div>
+          }
           <button
             type="button"
             class="profile-menu-item"
-            aria-disabled="true"
-            aria-describedby="dashboard-menu-note"
+            [attr.aria-disabled]="item.id === 'profile' ? null : true"
+            [attr.aria-describedby]="item.id === 'profile' ? null : 'dashboard-menu-note'"
+            (click)="item.id === 'profile' && goToProfile()"
           >
             <kx-icon [name]="item.icon" /><span>{{ t(item.key) }}</span
             ><kx-icon name="chevron_right" />
@@ -74,9 +103,22 @@ export class DashboardProfileDrawerComponent {
   readonly logoutBusy = input(false);
   readonly logoutErrorKey = input('');
   readonly logoutRequested = output<void>();
+  readonly profileRequested = output<void>();
   readonly menu = PROFILE_MENU;
   readonly changed = output<boolean>();
   private readonly drawer = viewChild.required<ModalDrawerComponent>('drawer');
+  private pendingProfile = false;
+  goToProfile(): void {
+    this.pendingProfile = true;
+    this.drawer().close();
+  }
+  onChanged(open: boolean): void {
+    this.changed.emit(open);
+    if (!open && this.pendingProfile) {
+      this.pendingProfile = false;
+      this.profileRequested.emit();
+    }
+  }
   open(): void {
     this.drawer().open();
   }

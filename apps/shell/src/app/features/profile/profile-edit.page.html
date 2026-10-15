@@ -1,0 +1,129 @@
+<div class="edit-page" *transloco="let t">
+  <div class="edit-shell">
+    <header class="edit-toolbar">
+      <div class="edit-actions">
+        <button kxButton type="button" emphasis="ghost" [disabled]="saving()" (click)="cancel()">
+          {{ t('profile.edit.cancel') }}</button
+        ><button
+          kxButton
+          type="submit"
+          form="profile-edit-form"
+          [disabled]="!hasChanges() || uploading() || profiles.loading() || !!profiles.readError()"
+          [busy]="saving()"
+        >
+          {{ t('profile.edit.save') }}
+        </button>
+      </div>
+      <h1 #title tabindex="-1">{{ t('profile.edit.heading') }}</h1>
+    </header>
+    <form
+      id="profile-edit-form"
+      [formGroup]="form"
+      novalidate
+      (ngSubmit)="save()"
+      [attr.aria-busy]="saving() || uploading()"
+    >
+      <kx-image-picker
+        mode="cover"
+        pickerId="profile-cover-file"
+        labelKey="profile.edit.cover"
+        [imageUrl]="cover()"
+        [busy]="coverBusy() || saving()"
+        [errorKey]="coverError()"
+        (selected)="selectImage('cover',$event)"
+        (removed)="removeImage('cover')"
+      />
+      <div class="avatar-zone">
+        <kx-image-picker
+          mode="avatar"
+          pickerId="profile-avatar-file"
+          labelKey="profile.edit.avatar"
+          [imageUrl]="avatar()"
+          [initials]="initials()"
+          [busy]="avatarBusy() || saving()"
+          [errorKey]="avatarError()"
+          (selected)="selectImage('avatar',$event)"
+          (removed)="removeImage('avatar')"
+        />
+        <p class="image-hint"><kx-icon name="info" />{{ t('profile.edit.imageHint') }}</p>
+      </div>
+      <div class="edit-fields">
+        <kx-form-field
+          fieldId="profile-name"
+          labelKey="profile.edit.name"
+          placeholderKey="profile.edit.name"
+          autocomplete="name"
+          [control]="form.controls.fullName"
+          [floating]="true"
+          [maxLength]="50"
+        /><kx-form-field
+          fieldId="profile-bio"
+          labelKey="profile.edit.bio"
+          placeholderKey="profile.edit.bio"
+          [control]="form.controls.bio"
+          [floating]="true"
+          [multiline]="true"
+          [maxLength]="160"
+        />
+        <p class="image-hint">{{t('media.publicHint')}}</p>
+        <p class="save-error error-text" role="alert">
+          {{ (error() || profiles.readError()) ? t(error() || profiles.readError()) : '' }}
+        </p>
+        @if (profiles.readError()) {<button
+          kxButton
+          type="button"
+          emphasis="outline"
+          [disabled]="profiles.loading()"
+          (click)="retryRead()"
+        >
+          {{t('media.retry')}}</button
+        >}
+        <section class="readonly-section" [attr.aria-label]="t('profile.edit.readonly')">
+          <h2>{{ t('profile.edit.readonly') }}</h2>
+          <label for="profile-username">{{ t('profile.edit.username') }}</label
+          ><input kxInput id="profile-username" readonly [value]="'@'+baseline().username" />
+          <label for="profile-university">{{ t('profile.edit.university') }}</label
+          ><textarea
+            id="profile-university"
+            class="kx-input resize-none"
+            rows="2"
+            readonly
+            [value]="baseline().university || t('dashboard.profile.schoolMissing')"
+          ></textarea>
+          <label for="profile-faculty">{{ t('profile.edit.faculty') }}</label
+          ><textarea
+            id="profile-faculty"
+            class="kx-input resize-none"
+            rows="2"
+            readonly
+            [value]="baseline().faculty || t('profile.facultyMissing')"
+          ></textarea>
+          <label for="profile-department">{{ t('profile.edit.department') }}</label
+          ><textarea
+            id="profile-department"
+            class="kx-input resize-none"
+            rows="2"
+            readonly
+            [value]="baseline().department || t('dashboard.profile.departmentMissing')"
+          ></textarea>
+          <p>{{ t('profile.edit.readonlyHint') }}</p>
+        </section>
+        <div class="edit-preferences">
+          <kx-language-switcher
+            [touch]="true"
+            [active]="language.language()"
+            (changed)="language.set($event)"
+          /><kx-theme-toggle [touch]="true" [dark]="theme.dark()" (changed)="theme.toggle()" />
+        </div>
+      </div>
+    </form>
+    <kx-confirm-dialog
+      #confirmation
+      dialogId="profile-discard"
+      titleKey="profile.edit.discardTitle"
+      bodyKey="profile.edit.discardText"
+      cancelKey="profile.edit.keepEditing"
+      confirmKey="profile.edit.discard"
+    />
+  </div>
+</div>

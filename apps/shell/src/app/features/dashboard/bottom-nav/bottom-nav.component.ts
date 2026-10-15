@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { IconComponent } from '@kampusx/shared/ui';
 import { BOTTOM_NAV } from '../mock-data';
@@ -13,9 +14,10 @@ import { BOTTOM_NAV } from '../mock-data';
       <button
         type="button"
         class="nav-item"
-        [class.active]="item.id === 'home'"
-        [attr.aria-current]="item.id === 'home' ? 'page' : null"
-        aria-disabled="true"
+        [class.active]="item.id === 'home' && currentHome()"
+        [attr.aria-current]="item.id === 'home' && currentHome() ? 'page' : null"
+        [attr.aria-disabled]="item.id === 'home' && homeEnabled() ? null : true"
+        (click)="item.id === 'home' && goHome()"
         [attr.aria-label]="t(item.key)"
         aria-describedby="dashboard-nav-note"
       >
@@ -34,5 +36,11 @@ import { BOTTOM_NAV } from '../mock-data';
   styleUrl: './bottom-nav.component.css',
 })
 export class DashboardBottomNavComponent {
+  readonly homeEnabled = input(false);
+  readonly currentHome = input(true);
+  private readonly router = inject(Router);
+  goHome(): void {
+    if (this.homeEnabled()) void this.router.navigateByUrl('/dashboard');
+  }
   readonly items = BOTTOM_NAV;
 }

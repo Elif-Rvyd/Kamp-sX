@@ -71,6 +71,17 @@
   display: grid;
   gap: 16px;
 }
+.compose-fab {
+  position: fixed;
+  z-index: 35;
+  bottom: calc(100px + env(safe-area-inset-bottom));
+  right: max(20px, calc((100vw - 760px) / 2 + 20px));
+  width: 56px;
+  height: 56px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-panel);
+}
 @media (max-width: 640px) {
   .discover-panel {
     padding: 28px 16px 20px;

@@ -4,3 +4,5 @@ export * from './localized-number.pipe';
 export * from './reveal.directive';
 export * from './mock-data';
 export * from './horizontal-swipe';
+export * from './social-post';
+export * from './image-header';

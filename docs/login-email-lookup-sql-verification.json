@@ -1,7 +1,9 @@
 {
   "engine": "PGlite PostgreSQL (isolated in-memory fixtures)",
-  "passed": 10,
+  "passed": 16,
   "failed": 0,
+  "finalState": "Legacy RPC execute denied for anon/authenticated; migration also safe when RPC is absent.",
+  "liveSupabaseChanged": false,
   "checks": [
     {
       "name": "migration applies and can be reapplied",
@@ -41,6 +43,30 @@
     },
     {
       "name": "authenticated can receive only the existence boolean",
+      "passed": true
+    },
+    {
+      "name": "disabling account discovery is idempotent",
+      "passed": true
+    },
+    {
+      "name": "anon has no execute permission after disable",
+      "passed": true
+    },
+    {
+      "name": "authenticated has no execute permission after disable",
+      "passed": true
+    },
+    {
+      "name": "unrelated has no execute permission after disable",
+      "passed": true
+    },
+    {
+      "name": "the disabling migration leaves all user rows untouched",
+      "passed": true
+    },
+    {
+      "name": "a project without the old RPC accepts the disabling migration",
       "passed": true
     }
   ]

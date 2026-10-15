@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+.compose-page {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  min-height: 100dvh;
+  background: var(--color-surface);
+  border-inline: 1px solid var(--color-border);
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+h1 {
+  font-size: 18px;
+  font-weight: 800;
+}
+form {
+  padding: 24px 16px;
+}
+.attachment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.hint {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--color-muted);
+  margin-top: 10px;
+}
+.attachment-preview {
+  margin-top: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+}
+.attachment-preview img,
+.attachment-preview video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  background: var(--color-surface-alt);
+}
+.compose-error {
+  min-height: 52px;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 16px;
+}

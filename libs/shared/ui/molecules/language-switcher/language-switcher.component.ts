@@ -7,6 +7,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div
     class="language-switcher"
+    [class.touch-controls]="touch()"
     *transloco="let t"
     role="group"
     [attr.aria-label]="t('common.language.label')"
@@ -24,8 +25,15 @@ import { TranslocoDirective } from '@jsverse/transloco';
       </button>
     }
   </div>`,
+  styles: `
+    .touch-controls button {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  `,
 })
 export class LanguageSwitcherComponent {
+  readonly touch = input(false);
   readonly active = input('tr');
   readonly changed = output<string>();
 }

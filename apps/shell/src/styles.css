@@ -1,10 +1,15 @@
+@import 'tailwindcss' source(none);
 @import '../../../libs/shared/ui/styles.css';
 @import '../../../libs/shared/design-tokens/tokens.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config '../../../tailwind.config.cjs';
+@source './app';
+@source '../../../libs/shared/ui';
 
 @layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
   * {
     box-sizing: border-box;
   }

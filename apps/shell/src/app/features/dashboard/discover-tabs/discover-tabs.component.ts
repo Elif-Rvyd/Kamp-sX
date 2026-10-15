@@ -10,6 +10,7 @@ import { DISCOVER_FEEDS } from '../mock-data';
   template: `<kx-tab-strip
     [items]="feeds"
     [active]="active()"
+    [scrollable]="true"
     baseId="dashboard-discover"
     labelKey="dashboard.discoverLabel"
     (selected)="selected.emit($event)"

@@ -78,10 +78,44 @@ async function verify() {
         }
       });
     }
+    const disable = fs.readFileSync(
+      path.join(root, 'supabase/migrations/20261015180000_disable_login_email_lookup.sql'),
+      'utf8',
+    );
+    await check('disabling account discovery is idempotent', async () => {
+      await db.exec(disable);
+      await db.exec(disable);
+    });
+    for (const role of ['anon', 'authenticated', 'unrelated']) {
+      await check(`${role} has no execute permission after disable`, async () => {
+        const { rows } = await db.query(
+          "select has_function_privilege($1, 'public.kampusx_login_email_exists(text)', 'execute') as allowed",
+          [role],
+        );
+        assert.equal(rows[0].allowed, false);
+        await db.exec(`set role ${role}`);
+        try {
+          await assert.rejects(lookup('student@itu.edu.tr'), (error) => error.code === '42501');
+        } finally {
+          await db.exec('reset role');
+        }
+      });
+    }
+    await check('the disabling migration leaves all user rows untouched', async () => {
+      const { rows } = await db.query('select count(*)::int as count from auth.users');
+      assert.equal(rows[0].count, 2);
+    });
+    await check('a project without the old RPC accepts the disabling migration', async () => {
+      await db.exec('drop function public.kampusx_login_email_exists(text)');
+      await db.exec(disable);
+      await db.exec(disable);
+    });
     const report = {
       engine: 'PGlite PostgreSQL (isolated in-memory fixtures)',
       passed: checks.length,
       failed: 0,
+      finalState: 'Legacy RPC execute denied for anon/authenticated; migration also safe when RPC is absent.',
+      liveSupabaseChanged: false,
       checks,
     };
     fs.writeFileSync(

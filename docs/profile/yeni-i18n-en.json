@@ -1,0 +1,164 @@
+{
+  "common": {
+    "characterCount": "{{count}} of {{max}} characters"
+  },
+  "auth": {
+    "register": {
+      "university": "University",
+      "universityPlaceholder": "Your university’s full name",
+      "department": "Department",
+      "departmentPlaceholder": "Your department’s name"
+    }
+  },
+  "validation": {
+    "maxlength": "Enter no more than {{max}} characters."
+  },
+  "posts": {
+    "title": "Create post — KampüsX",
+    "heading": "Create post",
+    "content": "Your post",
+    "placeholder": "What’s happening on campus?",
+    "attach": "Add photo or video",
+    "fileHint": "JPG, PNG, WEBP: 5 MB · MP4, WEBM: 50 MB",
+    "publish": "Publish",
+    "saved": "Your post was published.",
+    "loading": "Loading posts…",
+    "empty": "No posts yet. You can create your first post.",
+    "author": "KampüsX student",
+    "discardTitle": "Discard this post?",
+    "discardText": "Your unsaved text and file selection will be discarded.",
+    "navigation": "Your post was published. Use Cancel to return to your feed."
+  },
+  "dashboard": {
+    "mock": {
+      "explore": "Across campuses"
+    },
+    "tabs": {
+      "explore": "Explore"
+    },
+    "feeds": {
+      "university": {
+        "description": "A dedicated feed and filters for this area will appear here."
+      },
+      "campus": {
+        "description": "A dedicated feed and filters for this area will appear here."
+      },
+      "department": {
+        "description": "A dedicated feed and filters for this area will appear here."
+      },
+      "explore": {
+        "title": "Explore campus life",
+        "description": "Text, photos and videos shared on KampüsX."
+      }
+    }
+  },
+  "profile": {
+    "title": "Profile — KampüsX",
+    "back": "Back to home",
+    "coverAlt": "Profile cover photo",
+    "addPhoto": "Add a profile photo",
+    "following": "Following",
+    "followers": "Followers",
+    "facultyMissing": "Faculty not added",
+    "joined": "Joined {{date}}",
+    "postCount": "{{count}} posts",
+    "compose": "Create a post",
+    "saved": "Your profile was updated.",
+    "drawer": {
+      "profile": "Profile",
+      "history": "History",
+      "community": "Communities",
+      "settings": "Settings and privacy",
+      "help": "Help Center",
+      "open": "Open {{name}}’s profile"
+    },
+    "tabs": {
+      "label": "Profile feeds",
+      "posts": "Posts",
+      "replies": "Replies",
+      "retweets": "Reposts"
+    },
+    "content": {
+      "reply": "Replied to a post",
+      "retweet": "Reposted",
+      "mediaAlt": "Image attached to the post",
+      "visualOnly": "Post interactions are not available yet."
+    },
+    "actions": {
+      "reply": "Reply",
+      "retweet": "Repost",
+      "like": "Like",
+      "views": "Views",
+      "bookmark": "Bookmark",
+      "share": "Share"
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "text": "Posts in this feed will appear here."
+    },
+    "edit": {
+      "title": "Edit Profile — KampüsX",
+      "heading": "Edit Profile",
+      "button": "Edit Profile",
+      "cancel": "Cancel",
+      "save": "Save",
+      "name": "Name",
+      "bio": "Bio",
+      "avatar": "Choose a profile photo",
+      "cover": "Choose a cover photo",
+      "removeImage": "Remove photo",
+      "imageHint": "JPG, PNG or WEBP · Up to 5 MB",
+      "readonly": "Account and university details",
+      "username": "Username",
+      "university": "University",
+      "faculty": "Faculty / School",
+      "department": "Department",
+      "readonlyHint": "Your username and university details are set during registration.",
+      "discardTitle": "Discard your changes?",
+      "discardText": "Your unsaved name, bio and photo changes will be discarded.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard changes"
+    },
+    "errors": {
+      "name": "Enter a name with up to 50 characters.",
+      "bio": "Your bio can contain up to 160 characters.",
+      "image": "This image could not be read. Choose a valid JPG, PNG or WEBP.",
+      "type": "Choose an image in JPG, PNG or WEBP format.",
+      "size": "The image must be 5 MB or smaller.",
+      "resolution": "The image resolution is too high. Choose a smaller image.",
+      "upload": "The photo could not be prepared. Please try again.",
+      "save": "Your profile could not be updated. Please try again.",
+      "navigation": "Your profile was saved. Try opening the profile page again."
+    },
+    "mock": {
+      "posts": {
+        "library": "A small plan for finals week: the library, coffee and working through questions together. Anyone from my department want to join?",
+        "reply": "Count me in! Keeping our class notes in one place would make things easier for everyone.",
+        "club": "A new term, new ideas. Let’s build something together at this week’s campus community meetup.",
+        "project": "I shared my first Angular project with my friends. The best part was everything we learned from each other.",
+        "replyTwo": "Thursday afternoon works for me. We can meet at the library after class.",
+        "week": "My favorite thing about campus is how even an ordinary day can turn into a great conversation."
+      }
+    }
+  },
+  "media": {
+    "video": "Video attached to the post",
+    "retry": "Try again",
+    "publicHint": "Uploaded files can be viewed publicly.",
+    "errors": {
+      "type": "Choose JPG, PNG, WEBP, MP4 or WEBM. Profile photos accept images only.",
+      "imageSize": "Images must be 5 MB or smaller.",
+      "videoSize": "Videos must be 50 MB or smaller.",
+      "invalidVideo": "Choose a valid MP4 or WEBM file.",
+      "session": "Your session could not be verified. Sign in again.",
+      "upload": "The file could not be uploaded. Check your connection and upload permissions, then try again.",
+      "profileRead": "Your profile photos could not be loaded. You can try again.",
+      "profileSave": "The photos could not be saved to your profile. Check your permissions and profile details, then try again.",
+      "postsRead": "Posts could not be loaded. You can try again.",
+      "content": "Add text or a file. Text can contain up to 2000 characters.",
+      "postSave": "The post could not be saved. Check your details and posting permissions.",
+      "uncertain": "We could not confirm whether your post was published. Check your feed before posting again."
+    },
+    "remove": "Remove file"
+  }
+}

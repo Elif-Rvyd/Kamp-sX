@@ -28,7 +28,7 @@ import {
         [attr.aria-expanded]="drawerOpen()"
         (click)="profileOpened.emit()"
       >
-        <kx-avatar [initials]="initials()" />
+        <kx-avatar [initials]="initials()" [src]="avatarUrl()" />
       </button>
     </div>
     <div class="top-bar-brand" role="img" [attr.aria-label]="t('common.brand')">
@@ -44,6 +44,7 @@ import {
 })
 export class DashboardTopBarComponent {
   readonly initials = input.required<string>();
+  readonly avatarUrl = input<string>();
   readonly drawerOpen = input(false);
   readonly language = input('tr');
   readonly dark = input(false);

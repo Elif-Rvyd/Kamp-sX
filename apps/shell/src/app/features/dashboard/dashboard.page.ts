@@ -13,11 +13,20 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Router } from '@angular/router';
-import { FeedSkeletonComponent, IconComponent } from '@kampusx/shared/ui';
+import {
+  FeedSkeletonComponent,
+  IconComponent,
+  IconButtonComponent,
+  ButtonComponent,
+  SocialPostCardComponent,
+} from '@kampusx/shared/ui';
+import { PostsService, type StoredPost } from '../../core/posts.service';
+import type { PostAuthor } from '@kampusx/shared/util';
 import { horizontalSwipe, swipePoint, type SwipePoint } from '@kampusx/shared/util';
 import { ThemeService } from '../../core/theme.service';
 import { LanguageService } from '../../core/language.service';
 import { AuthService } from '../../core/auth.service';
+import { ProfileService } from '../../core/profile.service';
 import { dashboardProfile } from './dashboard-profile';
 import { DashboardTopBarComponent } from './top-bar/top-bar.component';
 import { DashboardProfileDrawerComponent } from './profile-drawer/profile-drawer.component';
@@ -30,6 +39,9 @@ import { DISCOVER_FEEDS, SKELETON_CARDS } from './mock-data';
   imports: [
     TranslocoDirective,
     FeedSkeletonComponent,
+    IconButtonComponent,
+    ButtonComponent,
+    SocialPostCardComponent,
     IconComponent,
     DashboardTopBarComponent,
     DashboardProfileDrawerComponent,
@@ -41,12 +53,26 @@ import { DISCOVER_FEEDS, SKELETON_CARDS } from './mock-data';
   styleUrl: './dashboard.page.css',
 })
 export class DashboardPage {
+  readonly posts = inject(PostsService);
+  private readonly i18n = inject(TranslocoService);
+  compose(): void {
+    void this.router.navigateByUrl('/compose');
+  }
+  authorFor(post: StoredPost): PostAuthor {
+    return post.userId === this.auth.session()?.user.id
+      ? this.profiles.profile()
+      : { fullName: this.i18n.translate('posts.author') };
+  }
   readonly theme = inject(ThemeService);
   readonly language = inject(LanguageService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  readonly profile = computed(() => dashboardProfile(this.auth.session()?.user, this.language.language()));
+  private readonly profiles = inject(ProfileService);
+  readonly profile = computed(() => dashboardProfile(this.profiles.profile()));
+  openProfile(): void {
+    void this.router.navigateByUrl('/profile');
+  }
   readonly logoutBusy = signal(false);
   readonly logoutErrorKey = signal('');
   readonly feeds = DISCOVER_FEEDS;

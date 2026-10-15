@@ -1,0 +1,81 @@
+<div class="profile-page" *transloco="let t">
+  <div class="profile-shell">
+    <kx-profile-header
+      [profile]="profiles.profile()"
+      [language]="language.language()"
+      [dark]="theme.dark()"
+      (backRequested)="back()"
+      (editRequested)="edit()"
+      (languageChanged)="language.set($event)"
+      (themeChanged)="theme.toggle()"
+    />
+    <div class="profile-tabs">
+      <kx-tab-strip
+        baseId="profile-feed"
+        labelKey="profile.tabs.label"
+        [items]="tabs"
+        [active]="active()"
+        [scrollable]="true"
+        (selected)="active.set($event)"
+      />
+    </div>
+    @if (profiles.readError()) {
+    <p class="info-message" role="alert">
+      {{t(profiles.readError())}}<button
+        kxButton
+        emphasis="ghost"
+        type="button"
+        (click)="profiles.reload()"
+        [disabled]="profiles.loading()"
+      >
+        {{t('media.retry')}}
+      </button>
+    </p>
+    }
+    <div
+      #viewport
+      class="profile-feed"
+      role="tabpanel"
+      [id]="'profile-feed-panel-'+tabs[active()].id"
+      [attr.aria-labelledby]="'profile-feed-tab-'+tabs[active()].id"
+      tabindex="0"
+      (pointerdown)="pointerDown($event)"
+      (pointerup)="pointerUp($event)"
+      (pointercancel)="cancelSwipe()"
+    >
+      @if (postsApi.error()) {
+      <p class="info-message" role="alert">
+        {{t(postsApi.error())}}
+        <button
+          kxButton
+          emphasis="ghost"
+          type="button"
+          (click)="postsApi.load()"
+          [disabled]="postsApi.loading()"
+        >
+          {{t('media.retry')}}
+        </button>
+      </p>
+      } @else if (postsApi.loading() && !posts().length) {
+      <p class="info-message" role="status">{{t('posts.loading')}}</p>
+      } @else {
+      <kx-profile-post-list
+        [posts]="posts()"
+        [profile]="profiles.profile()"
+        [language]="language.language()"
+      />
+      }
+    </div>
+    <button
+      kxIconButton
+      type="button"
+      class="compose-fab"
+      (click)="compose()"
+      [attr.aria-label]="t('profile.compose')"
+      [title]="t('profile.compose')"
+    >
+      <kx-icon name="add" />
+    </button>
+    <kx-dashboard-bottom-nav [homeEnabled]="true" [currentHome]="false" />
+  </div>
+</div>

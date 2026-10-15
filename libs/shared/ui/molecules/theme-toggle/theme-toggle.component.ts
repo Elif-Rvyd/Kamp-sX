@@ -9,6 +9,7 @@ import { ToggleComponent } from '../../atoms/toggle/toggle.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<button
     kxToggle
+    [class.touch-control]="touch()"
     type="button"
     *transloco="let t"
     [pressed]="dark()"
@@ -18,8 +19,15 @@ import { ToggleComponent } from '../../atoms/toggle/toggle.component';
   >
     <kx-icon [name]="dark() ? 'light_mode' : 'dark_mode'" />
   </button>`,
+  styles: `
+    .touch-control {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  `,
 })
 export class ThemeToggleComponent {
+  readonly touch = input(false);
   readonly dark = input(false);
   readonly changed = output<void>();
 }

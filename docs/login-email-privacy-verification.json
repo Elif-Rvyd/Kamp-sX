@@ -1,0 +1,48 @@
+{
+  "checkedAt": "2026-10-15",
+  "decision": "One generic credential error; no account-existence RPC request.",
+  "unit": {
+    "command": "npm test",
+    "passed": 94,
+    "failed": 0
+  },
+  "browser": {
+    "command": "npx playwright test scripts/e2e/auth-integration.spec.cjs scripts/e2e/auth-accessibility.spec.cjs",
+    "passed": 14,
+    "failed": 0
+  },
+  "productionSecurity": {
+    "command": "npm run test:security",
+    "passed": 9,
+    "failed": 0
+  },
+  "sql": {
+    "command": "node scripts/verify-login-email-lookup.cjs",
+    "passed": 16,
+    "failed": 0,
+    "engine": "Isolated local PGlite PostgreSQL",
+    "liveDatabaseChanged": false
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "retiredRpcAbsentFromProductionJavaScript": true,
+    "verifiedJavaScriptFiles": 18
+  },
+  "types": {
+    "exitCode": 0
+  },
+  "format": {
+    "exitCode": 0
+  },
+  "i18n": {
+    "matchingNonEmptyKeys": 381,
+    "exitCode": 0
+  },
+  "liveFollowup": {
+    "sqlApplied": false,
+    "migration": "supabase/migrations/20261015180000_disable_login_email_lookup.sql",
+    "tableChanges": false,
+    "deploymentPerformed": false
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "checkedAt": "2026-10-15",
+  "scope": "Auth, profile, Storage, posts, SPA/CSP, dependency and secret scan",
+  "mutations": {
+    "liveDatabase": false,
+    "liveStorage": false,
+    "liveAuth": false,
+    "schemaChanges": false,
+    "deployment": false,
+    "gitPush": false
+  },
+  "unit": {
+    "command": "npm test",
+    "passed": 94,
+    "failed": 0
+  },
+  "browser": {
+    "command": "CI=true NODE_ENV=production npm run test:ui",
+    "passed": 76,
+    "failed": 0,
+    "isolatedSdkTransport": true,
+    "includesCrossTabSignoutAndLateUpload": true
+  },
+  "productionSecurity": {
+    "command": "npm run test:security",
+    "passed": 9,
+    "failed": 0,
+    "includesStoredPostHtmlAndMediaAllowlist": true
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "verifiedJavaScriptFiles": 18
+  },
+  "types": {
+    "command": "npm run typecheck",
+    "exitCode": 0
+  },
+  "format": {
+    "command": "npm run format:check",
+    "exitCode": 0
+  },
+  "i18n": {
+    "command": "npm run check:i18n",
+    "matchingNonEmptyKeys": 381,
+    "exitCode": 0
+  },
+  "designLint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "staticAudit": {
+    "rawErrors": 14,
+    "reason": "Upstream parser does not recognize Angular click/aria-disabled syntax",
+    "angularRecognitionErrors": 0,
+    "angularRecognitionWarnings": 0
+  },
+  "dependencyAudit": {
+    "knownVulnerabilities": 0,
+    "evidence": "security-dependencies-2026-10-15.json"
+  },
+  "secretScan": {
+    "realPatternFindings": 0,
+    "trackedLocalConfig": 0,
+    "evidence": "security-secret-scan-2026-10-15.json",
+    "scope": "Current non-ignored text and locally available Git history; documented invalid fixture excluded"
+  },
+  "server": {
+    "anonymousLimitZeroStatus": {
+      "profiles": 200,
+      "posts": 200
+    },
+    "userRowsRead": 0,
+    "liveRlsVerified": false,
+    "liveAuthHooksVerified": false,
+    "sqlExecuted": false,
+    "evidence": "security-anonymous-probes-2026-10-15.json"
+  },
+  "remaining": [
+    {
+      "item": "Legacy public account-existence RPC",
+      "status": "Frontend no longer calls it. Apply the tested disabling migration on live Supabase; not executed remotely."
+    },
+    {
+      "item": "Live RLS / grants / Storage limits / university email hook",
+      "status": "Not verified with an authenticated admin; no server policy changed."
+    }
+  ],
+  "report": "GUVENLIK-INCELEMESI-2026-10-15.md",
+  "genericLoginMessageUpdate": {
+    "checkedAt": "2026-10-15",
+    "decision": "One generic credential error; no account-existence RPC request.",
+    "unit": {
+      "command": "npm test",
+      "passed": 94,
+      "failed": 0
+    },
+    "browser": {
+      "command": "npx playwright test scripts/e2e/auth-integration.spec.cjs scripts/e2e/auth-accessibility.spec.cjs",
+      "passed": 14,
+      "failed": 0
+    },
+    "productionSecurity": {
+      "command": "npm run test:security",
+      "passed": 9,
+      "failed": 0
+    },
+    "sql": {
+      "command": "node scripts/verify-login-email-lookup.cjs",
+      "passed": 16,
+      "failed": 0,
+      "engine": "Isolated local PGlite PostgreSQL",
+      "liveDatabaseChanged": false
+    },
+    "build": {
+      "command": "npm run build",
+      "exitCode": 0,
+      "retiredRpcAbsentFromProductionJavaScript": true,
+      "verifiedJavaScriptFiles": 18
+    },
+    "types": {
+      "exitCode": 0
+    },
+    "format": {
+      "exitCode": 0
+    },
+    "i18n": {
+      "matchingNonEmptyKeys": 381,
+      "exitCode": 0
+    },
+    "liveFollowup": {
+      "sqlApplied": false,
+      "migration": "supabase/migrations/20261015180000_disable_login_email_lookup.sql",
+      "tableChanges": false,
+      "deploymentPerformed": false
+    }
+  }
+}

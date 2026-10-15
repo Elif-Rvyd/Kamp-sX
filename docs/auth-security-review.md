@@ -2,6 +2,8 @@
 
 İnceleme tarihi: **10 Ekim 2026**.
 
+**15 Ekim güncel karar:** Kullanıcı ortak güvenli giriş hata mesajını seçti. Uygulama hesap varlığı RPC'sini artık çağırmıyor. Eski fonksiyonun sunucu erişimini kapatan migration ve yönerge `docs/login-email-lookup.md` içindedir. Aşağıdaki eski karar tarihsel bilgidir.
+
 **12 Ekim giriş mesajı kararı:** Kullanıcının açık isteğiyle, başarısız girişten sonra `kampusx_login_email_exists` RPC'si hesap varlığını kontrol eder. Kesin `false` sonucunda kullanıcı yok, `true` sonucunda yanlış bilgiler mesajı gösterilir; sorgu hatası ayrı değerlendirilir. Bu tercih hesap varlığını anonim çağırana açıklayabilir. SQL yalnızca boolean döndürür ve tablo okuma izni vermez; Supabase'de uygulanması gereken dosya ve veri sınırları `docs/login-email-lookup.md` içindedir.
 
 **E-posta kota mesajı:** `over_email_send_rate_limit` artık genel HTTP 429/istek sınırından önce değerlendirilir ve ayrı TR/EN mesajı gösterir. Uygulamada ek bir bekleme süresi tanımlanmadı; kalan süre Supabase hata yanıtında verilmediği için bir süre uydurulmaz. Üretim Supabase kota ayarları değiştirilmedi.

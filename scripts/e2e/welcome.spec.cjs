@@ -1,6 +1,8 @@
+const { mockSocial } = require('./mock-social.cjs');
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 test.beforeEach(async ({ page }) => {
+  await mockSocial(page);
   // All auth traffic is fulfilled locally; UI tests never contact a real project.
   await page.route('**/auth/v1/**', async (route) => {
     const request = route.request();
@@ -75,6 +77,8 @@ test('register validates university address and consent; Google stays local', as
   await expect(panel.locator('.info-message')).toContainText(/Google/);
   await page.locator('#register-email').fill('student@gmail.com');
   await page.locator('#register-username').fill('@deniz');
+  await page.locator('#register-university').fill('İstanbul Teknik Üniversitesi');
+  await page.locator('#register-department').fill('Bilgisayar Mühendisliği');
   await page.locator('#register-password').fill('LongPassword123!');
   await panel.getByRole('button', { name: 'KampüsX’e katıl', exact: true }).click();
   await expect(page.locator('#register-email')).toBeFocused();

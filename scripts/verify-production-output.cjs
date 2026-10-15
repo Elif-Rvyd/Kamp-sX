@@ -7,6 +7,7 @@ const FORBIDDEN_MARKERS = [
   'console-ninja',
   'auth.kampusx.test',
   'sb_publishable_test_key',
+  'kampusx_login_email_exists',
 ];
 
 class ProductionOutputError extends Error {}

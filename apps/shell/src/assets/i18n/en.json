@@ -22,7 +22,8 @@
     "brand": "KampüsX",
     "title": "KampüsX — Your campus is talking",
     "notFound": "We couldn't find this page on campus.",
-    "home": "Back to home"
+    "home": "Back to home",
+    "characterCount": "{{count}} of {{max}} characters"
   },
   "nav": {
     "explore": "Explore",
@@ -118,7 +119,11 @@
       "usernamePlaceholder": "@campuslife",
       "usernameHint": "3–20 letters, numbers, or underscores.",
       "submit": "Join KampüsX",
-      "success": "Check your email to continue. If this address is eligible for sign-up, a confirmation link will be sent."
+      "success": "Check your email to continue. If this address is eligible for sign-up, a confirmation link will be sent.",
+      "university": "University",
+      "universityPlaceholder": "Your university’s full name",
+      "department": "Department",
+      "departmentPlaceholder": "Your department’s name"
     },
     "reset": {
       "title": "Let’s reconnect.",
@@ -145,8 +150,6 @@
     "errors": {
       "config": "Sign-in is not configured yet. Please try again later.",
       "credentials": "The email or password is incorrect. Check your details.",
-      "userNotFound": "No such user exists.",
-      "accountLookup": "The account check could not be completed. Please try again.",
       "unconfirmed": "Confirm your email address before signing in. Check your inbox and spam folder.",
       "network": "We could not connect. Check your internet connection and try again.",
       "rateLimit": "The request limit was reached. Wait a moment and try again.",
@@ -164,7 +167,8 @@
     "universityEmail": "Use your university email ending in .edu.tr.",
     "username": "Use 3–20 letters, numbers, or underscores.",
     "passwordLength": "Your password needs at least 8 characters.",
-    "passwordMismatch": "The passwords must match."
+    "passwordMismatch": "The passwords must match.",
+    "maxlength": "Enter no more than {{max}} characters."
   },
   "posts": {
     "photo": {
@@ -200,7 +204,21 @@
     "comments": "comments",
     "share": "reposts",
     "anonymousTag": "Anonymous",
-    "sample": "Sample post"
+    "sample": "Sample post",
+    "title": "Create post — KampüsX",
+    "heading": "Create post",
+    "content": "Your post",
+    "placeholder": "What’s happening on campus?",
+    "attach": "Add photo or video",
+    "fileHint": "JPG, PNG, WEBP: 5 MB · MP4, WEBM: 50 MB",
+    "publish": "Publish",
+    "saved": "Your post was published.",
+    "loading": "Loading posts…",
+    "empty": "No posts yet. You can create your first post.",
+    "author": "KampüsX student",
+    "discardTitle": "Discard this post?",
+    "discardText": "Your unsaved text and file selection will be discarded.",
+    "navigation": "Your post was published. Use Cancel to return to your feed."
   },
   "universities": {
     "itu": "Istanbul Technical University",
@@ -321,7 +339,8 @@
     "mock": {
       "school": "Kırşehir Ahi Evran University",
       "campus": "Vocational School of Technical Sciences",
-      "department": "Computer Technologies"
+      "department": "Computer Technologies",
+      "explore": "Across campuses"
     },
     "menu": {
       "settings": "Settings",
@@ -331,7 +350,8 @@
     "tabs": {
       "university": "University",
       "campus": "Campus",
-      "department": "Department"
+      "department": "Department",
+      "explore": "Explore"
     },
     "nav": {
       "home": "Home",
@@ -341,15 +361,19 @@
     "feeds": {
       "university": {
         "title": "Around your university",
-        "description": "No posts yet. Conversations, events and updates from your university will come together here."
+        "description": "A dedicated feed and filters for this area will appear here."
       },
       "campus": {
         "title": "Life on your campus",
-        "description": "No posts yet. Everyday moments, announcements and meetups from your campus will appear here."
+        "description": "A dedicated feed and filters for this area will appear here."
       },
       "department": {
         "title": "Inside your department",
-        "description": "No posts yet. Discover classes, projects and ideas shared within your department."
+        "description": "A dedicated feed and filters for this area will appear here."
+      },
+      "explore": {
+        "title": "Explore campus life",
+        "description": "Text, photos and videos shared on KampüsX."
       }
     },
     "logout": "Sign out",
@@ -358,5 +382,114 @@
       "schoolMissing": "University not added",
       "departmentMissing": "Department not added"
     }
+  },
+  "profile": {
+    "title": "Profile — KampüsX",
+    "back": "Back to home",
+    "coverAlt": "Profile cover photo",
+    "addPhoto": "Add a profile photo",
+    "following": "Following",
+    "followers": "Followers",
+    "facultyMissing": "Faculty not added",
+    "joined": "Joined {{date}}",
+    "postCount": "{{count}} posts",
+    "compose": "Create a post",
+    "saved": "Your profile was updated.",
+    "drawer": {
+      "profile": "Profile",
+      "history": "History",
+      "community": "Communities",
+      "settings": "Settings and privacy",
+      "help": "Help Center",
+      "open": "Open {{name}}’s profile"
+    },
+    "tabs": {
+      "label": "Profile feeds",
+      "posts": "Posts",
+      "replies": "Replies",
+      "retweets": "Reposts"
+    },
+    "content": {
+      "reply": "Replied to a post",
+      "retweet": "Reposted",
+      "mediaAlt": "Image attached to the post",
+      "visualOnly": "Post interactions are not available yet."
+    },
+    "actions": {
+      "reply": "Reply",
+      "retweet": "Repost",
+      "like": "Like",
+      "views": "Views",
+      "bookmark": "Bookmark",
+      "share": "Share"
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "text": "Posts in this feed will appear here."
+    },
+    "edit": {
+      "title": "Edit Profile — KampüsX",
+      "heading": "Edit Profile",
+      "button": "Edit Profile",
+      "cancel": "Cancel",
+      "save": "Save",
+      "name": "Name",
+      "bio": "Bio",
+      "avatar": "Choose a profile photo",
+      "cover": "Choose a cover photo",
+      "removeImage": "Remove photo",
+      "imageHint": "JPG, PNG or WEBP · Up to 5 MB",
+      "readonly": "Account and university details",
+      "username": "Username",
+      "university": "University",
+      "faculty": "Faculty / School",
+      "department": "Department",
+      "readonlyHint": "Your username and university details are set during registration.",
+      "discardTitle": "Discard your changes?",
+      "discardText": "Your unsaved name, bio and photo changes will be discarded.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard changes"
+    },
+    "errors": {
+      "name": "Enter a name with up to 50 characters.",
+      "bio": "Your bio can contain up to 160 characters.",
+      "image": "This image could not be read. Choose a valid JPG, PNG or WEBP.",
+      "type": "Choose an image in JPG, PNG or WEBP format.",
+      "size": "The image must be 5 MB or smaller.",
+      "resolution": "The image resolution is too high. Choose a smaller image.",
+      "upload": "The photo could not be prepared. Please try again.",
+      "save": "Your profile could not be updated. Please try again.",
+      "navigation": "Your profile was saved. Try opening the profile page again."
+    },
+    "mock": {
+      "posts": {
+        "library": "A small plan for finals week: the library, coffee and working through questions together. Anyone from my department want to join?",
+        "reply": "Count me in! Keeping our class notes in one place would make things easier for everyone.",
+        "club": "A new term, new ideas. Let’s build something together at this week’s campus community meetup.",
+        "project": "I shared my first Angular project with my friends. The best part was everything we learned from each other.",
+        "replyTwo": "Thursday afternoon works for me. We can meet at the library after class.",
+        "week": "My favorite thing about campus is how even an ordinary day can turn into a great conversation."
+      }
+    }
+  },
+  "media": {
+    "video": "Video attached to the post",
+    "retry": "Try again",
+    "publicHint": "Uploaded files can be viewed publicly.",
+    "errors": {
+      "type": "Choose JPG, PNG, WEBP, MP4 or WEBM. Profile photos accept images only.",
+      "imageSize": "Images must be 5 MB or smaller.",
+      "videoSize": "Videos must be 50 MB or smaller.",
+      "invalidVideo": "Choose a valid MP4 or WEBM file.",
+      "session": "Your session could not be verified. Sign in again.",
+      "upload": "The file could not be uploaded. Check your connection and upload permissions, then try again.",
+      "profileRead": "Your profile photos could not be loaded. You can try again.",
+      "profileSave": "The photos could not be saved to your profile. Check your permissions and profile details, then try again.",
+      "postsRead": "Posts could not be loaded. You can try again.",
+      "content": "Add text or a file. Text can contain up to 2000 characters.",
+      "postSave": "The post could not be saved. Check your details and posting permissions.",
+      "uncertain": "We could not confirm whether your post was published. Check your feed before posting again."
+    },
+    "remove": "Remove file"
   }
 }

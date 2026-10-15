@@ -26,6 +26,7 @@
       },
       "configurations": {
         "production": {
+          "security": { "autoCsp": true },
           "outputHashing": "all",
           "budgets": [{ "type": "initial", "maximumWarning": "700kb", "maximumError": "1mb" }],
           "optimization": { "scripts": true, "styles": true, "fonts": false }

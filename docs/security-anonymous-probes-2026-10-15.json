@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-15",
+  "probes": [
+    {
+      "table": "profiles",
+      "method": "GET",
+      "limit": 0,
+      "status": 200,
+      "rowsRetrieved": 0
+    },
+    {
+      "table": "posts",
+      "method": "GET",
+      "limit": 0,
+      "status": 200,
+      "rowsRetrieved": 0
+    }
+  ],
+  "mutationsPerformed": false,
+  "livePoliciesVerified": false,
+  "caveat": "An anonymous limit=0 probe never retrieves user records. HTTP status alone does not prove row-level or column-level authorization."
+}

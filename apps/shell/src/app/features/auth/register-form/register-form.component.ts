@@ -57,6 +57,21 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         placeholderKey="auth.register.usernamePlaceholder"
         hintKey="auth.register.usernameHint"
         [control]="form.controls.username"
+      /><kx-form-field
+        fieldId="register-university"
+        icon="school"
+        autocomplete="organization"
+        labelKey="auth.register.university"
+        placeholderKey="auth.register.universityPlaceholder"
+        [control]="form.controls.university"
+        [maxLength]="150"
+      /><kx-form-field
+        fieldId="register-department"
+        icon="code"
+        labelKey="auth.register.department"
+        placeholderKey="auth.register.departmentPlaceholder"
+        [control]="form.controls.department"
+        [maxLength]="150"
       /><kx-password-field
         fieldId="register-password"
         [control]="form.controls.password"
@@ -111,6 +126,22 @@ export class RegisterFormComponent {
       validators: [Validators.required, Validators.email, universityEmail],
     }),
     username: new FormControl('', { nonNullable: true, validators: [Validators.required, username] }),
+    university: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(150),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
+    department: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(150),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
     password: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(8)],
@@ -125,7 +156,10 @@ export class RegisterFormComponent {
     this.busy.set(true);
     const v = this.form.getRawValue();
     try {
-      const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim());
+      const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim(), {
+        university: v.university.trim(),
+        department: v.department.trim(),
+      });
       if (this.destroyRef.destroyed) return;
       if (error) this.errorKey.set(this.api.errorKey(error));
       else {

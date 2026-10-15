@@ -1,35 +1,24 @@
-# Girişte kullanıcı yok / yanlış bilgiler ayrımı
+# Hesap varlığı sorgusu kaldırıldı — 15 Ekim 2026
 
-12 Ekim 2026. Kullanıcının açık isteğiyle giriş ekranı kayıtlı olmayan e-posta ile yanlış bilgileri ayırır.
+Kullanıcının güvenlik kararıyla kayıtlı olmayan e-posta ve yanlış şifre aynı mesajı gösterir:
 
-## Davranış
+- TR: **E-posta veya şifre yanlış. Bilgilerini kontrol et.**
+- EN: **The email or password is incorrect. Check your details.**
 
-- Supabase giriş başarılıysa mevcut gerçek oturum/dashboard akışı devam eder; ek sorgu yapılmaz.
-- Yalnızca `invalid_credentials` hatasında `public.kampusx_login_email_exists` çağrılır.
-- Veritabanı `false` döndürürse **Böyle bir kullanıcı yok.** gösterilir.
-- Veritabanı `true` döndürürse **E-posta veya şifre yanlış. Bilgilerini kontrol et.** gösterilir.
-- Fonksiyon eksikse, istek başarısızsa veya yanıt boolean değilse **Hesap kontrolü tamamlanamadı. Lütfen tekrar dene.** gösterilir. Bağlantı hatası, kullanıcı yok olarak değerlendirilmez.
-- E-posta doğrulama ve hız sınırı hataları kendi mesajlarını korur. Sorgu 5 saniyede zaman aşımına uğrar; uygulamaya yeni deneme bekleme süresi eklenmez.
-- Mesajların Türkçe ve İngilizce karşılıkları sözlüklere eklenmiştir; form görünümü ve temalar korunur.
+AuthService artık hesap varlığı RPC'sini çağırmaz. Eski RPC'nin eksik, hatalı veya kapalı olması giriş akışını etkilemez. Ağ, kota ve e-posta doğrulama hataları uygun mesajlarını korur. Başarılı gerçek giriş dashboard'u açmaya devam eder.
 
-## Supabase'de uygulanması gereken SQL
+## Supabase'de kalan adım
 
-Projede şu dosya hazırlanmıştır:
+Uygulamadan sorguyu kaldırmak, önceden açılmış bir RPC'nin doğrudan çağrılmasını engellemez. Supabase projesinde **SQL Editor → New query** aç; `supabase/migrations/20261015180000_disable_login_email_lookup.sql` dosyasının TAM içeriğini yapıştır ve **Run** ile çalıştır.
 
-`supabase/migrations/20261012174500_login_email_lookup.sql`
+Dosya yalnız `public.kampusx_login_email_exists(text)` fonksiyonunun EXECUTE yetkisini PUBLIC, anon ve authenticated rollerinden kaldırır; PostgREST şema önbelleğini yeniler. Tablo, kullanıcı, dosya veya satır oluşturmaz/değiştirmez/silmez. Fonksiyon hiç kurulmadıysa işlem güvenle atlanır. Tekrar çalıştırılabilir. Bu dosya canlı Supabase'de otomatik uygulanmadı.
 
-KampüsX Supabase projesinde **SQL Editor → New query** açıp dosyanın tamamını yapıştırarak **Run** ile çalıştır. Dosya yeni bir fonksiyon ekler; tablo veya kullanıcı silmez. Ardından local giriş ekranında ayrım gerçek veritabanı sonucuna göre çalışır. Vercel için uygulama kodunun da yeni sürümü dağıtılmalıdır.
+`20261012174500_login_email_lookup.sql` tarihsel migration'dır. **Tek başına tekrar çalıştırma:** eski erişimi yeniden açar. Sıfırdan migration çalıştırıldığında en son kapatma migration'ı da uygulanmalıdır. 12/14 Ekim raporları ve eski dashboard kaynak dökümleri tarihsel sürümü anlatır; güncel davranış bu belgededir.
 
-SQL'in uzak projeye uygulanmış olduğu otomatik olarak varsayılmaz. Normal uygulama gerçek Supabase bağlantısını kullanır; otomatik tarayıcı testleri izole E2E bağlantısında mock yanıtlarla çalışır.
+## Doğrulama
 
-## Yetki ve veri sınırı
+- Servis ve tarayıcı testleri hatalı girişte RPC isteği gönderilmediğini, TR/EN ortak mesajı, tekrar denemeyi ve başarılı giriş yönlendirmesini doğrular.
+- Production çıktı kontrolü eski RPC ismi bulunan JavaScript'i reddeder; eski sorgu yanlışlıkla geri gelemez.
+- `node scripts/verify-login-email-lookup.cjs`, önceden kurulu yerel PGlite motorunda eski davranışı kurup kapatma migration'ını test eder: anon/authenticated çağrıları 42501 ile reddedilir; kullanıcı kayıtları korunur; migration fonksiyon yokken de tekrar uygulanır. Kanıt `login-email-lookup-sql-verification.json` içindedir. Gerçek Supabase'e bağlanmaz.
 
-Fonksiyon yalnızca tek bir e-postanın aktif hesapla eşleşip eşleşmediğini boolean olarak döndürür. User ID, profil, hash, şifre veya rol döndürmez; `auth.users` için tablo okuma izni verilmez. Sabit ve boş `search_path` ile `auth.users` tam şema adıyla kullanılır. Fonksiyon yürütme izni yalnızca `anon` ve `authenticated` rollerine verilir; diğer fonksiyonların izinleri değiştirilmez. Silinmiş hesaplar eşleşmez.
-
-Bu ürün tercihi, dışarıdan verilen bir e-postanın kayıtlı olup olmadığının anlaşılmasına izin verir. Anonim RPC doğrudan da çağrılabilir; normal girişin hız sınırı bu RPC için bağımsız bir kötüye kullanım sınırı oluşturmaz. Daha önceki genel hata mesajının gizlilik özelliği bu ayrımda korunmaz. Bu değişiklik, kullanıcının özellikle istediği davranışı uygular.
-
-Tarayıcıya yeni gizli anahtar eklenmez. Parola yalnızca mevcut Supabase Auth giriş isteğine gönderilir; hesap varlığı sorgusuna gönderilmez.
-
-## Yerel SQL doğrulaması
-
-İzole PostgreSQL motoru için `npm install --prefix .nx/login-sql-verification --no-save --package-lock=false @electric-sql/pglite` ardından `node scripts/verify-login-email-lookup.cjs` çalıştırılır. Paket yalnızca Git'in yok saydığı test dizinine kurulur; proje bağımlılıkları değişmez. Sonuç `docs/login-email-lookup-sql-verification.json` dosyasına yazılır.
+İstemci değişikliği için uygulamanın yeni sürümü dağıtılmalıdır; SQL işlemi bunun ayrı sunucu adımıdır.

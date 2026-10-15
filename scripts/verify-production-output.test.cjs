@@ -72,3 +72,9 @@ test('missing or empty JavaScript output cannot pass as a clean production build
   fs.writeFileSync(path.join(root, 'index.html'), '<html></html>');
   assert.throws(() => verifyProductionOutput(root), /No production JavaScript/);
 });
+
+test('the retired account discovery RPC cannot ship in production JavaScript', (t) => {
+  const root = temporaryOutput(t);
+  fs.writeFileSync(path.join(root, 'auth.js'), 'client.rpc("kampusx_login_email_exists", {});');
+  assert.throws(() => verifyProductionOutput(root), /auth\.js/);
+});

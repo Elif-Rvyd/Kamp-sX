@@ -16,7 +16,10 @@ Başarılı girişten sonra oturum korumalı ana ekran açılır. Profil çekmec
 
 - Kampüs gündemi, paylaşım örnekleri ve üniversite topluluklarını tanıtan karşılama ekranı.
 - Ayrı giriş, kayıt ve şifre yenileme ekranları.
-- Giriş sonrası dashboard, profil çekmecesi ve üniversite/kampüs/bölüm keşfet sekmeleri.
+- Giriş sonrası dashboard, profil çekmecesi ve Keşfet / Üniversite / Kampüs / Bölüm sekmeleri. Keşfet gerçek gönderileri gösterir; akademik kapsam filtreleri geliştirme aşamasındadır.
+- Profil, gönderi/yanıt/retweet sekmeleri ve fotoğraf, isim, bio düzenleme ekranı. Profil/kapak fotoğrafları Supabase Storage ve veritabanında saklanır; isim ve bio düzenlemeleri henüz oturum içi görseldir.
+- Gerçek metin, fotoğraf ve video paylaşımı; Keşfet ve profil akışında kalıcı gönderiler.
+- Kayıt sırasında üniversite ve bölüm bilgileri.
 - Anlık Türkçe ve İngilizce dil değişimi.
 - Açık ve koyu tema.
 - Masaüstü, tablet ve mobil ekranlara uyumlu tasarım.
@@ -26,11 +29,11 @@ Tasarım dili, üniversite hayatının enerjisini editoryal tipografi, güçlü 
 
 ### Ürün vizyonu
 
-Platformun geliştirme hedefleri; bölüm, üniversite ve genel keşfet akışları, yazı/fotoğraf/video paylaşımı, beğeni, yorum, yeniden paylaşım ve alıntılama özellikleridir. Birebir mesajlaşma ve yöneticilerin üyelik isteklerini onayladığı uygulama içi topluluklar da bu kapsamda yer alır.
+Platformun geliştirme hedefleri; bölüm, üniversite ve genel keşfet akışları, beğeni, yorum, yeniden paylaşım ve alıntılama özellikleridir. Birebir mesajlaşma ve yöneticilerin üyelik isteklerini onayladığı uygulama içi topluluklar da bu kapsamda yer alır.
 
 ### Teknoloji
 
-Frontend Angular ve Nx üzerine kuruludur. Ortak arayüz bileşenleri atomic design yaklaşımıyla düzenlenir; renk ve tipografi tasarım token'larıyla yönetilir. Tailwind CSS arayüz stillerini, Transloco dil desteğini, Supabase Auth ise kimlik doğrulamayı sağlar.
+Frontend Angular ve Nx üzerine kuruludur. Ortak arayüz bileşenleri atomic design yaklaşımıyla düzenlenir; renk ve tipografi tasarım token'larıyla yönetilir. Tailwind CSS arayüz stillerini, Transloco dil desteğini, Supabase Auth kimlik doğrulamayı, Supabase Storage ve veritabanı profil medyası ile gönderi kalıcılığını sağlar.
 
 ## English
 
@@ -46,7 +49,10 @@ Successful sign-in opens the session-protected home screen. The profile drawer d
 
 - A welcome screen introducing campus news, example posts and university communities.
 - Dedicated sign-in, registration and password recovery screens.
-- A dashboard after sign-in, a profile drawer and university/campus/department discovery tabs.
+- A dashboard after sign-in, a profile drawer and Explore / University / Campus / Department tabs. Explore shows persisted posts; academic scope filters are under development.
+- A profile with post/reply/repost tabs and photo, name and bio editing. Profile/cover photos persist in Supabase Storage and the database; name and bio edits remain local display changes.
+- Real text, photo and video publishing with persisted Explore and profile feeds.
+- University and department details during registration.
 - Instant Turkish and English language switching.
 - Light and dark themes.
 - Responsive layouts for desktop, tablet and mobile.
@@ -56,8 +62,8 @@ The visual language combines the energy of campus life with editorial typography
 
 ### Product vision
 
-Development goals include department, university and general discovery feeds; text, photo and video posts; likes, comments, reposts and quote posts. Direct messaging and in-app communities with administrator-approved membership requests are also part of the product vision.
+Development goals include department, university and general discovery feeds; likes, comments, reposts and quote posts. Direct messaging and in-app communities with administrator-approved membership requests are also part of the product vision.
 
 ### Technology
 
-The frontend is built with Angular and Nx. Shared UI components follow atomic design, with colors and typography managed through design tokens. Tailwind CSS provides interface styling, Transloco provides localization, and Supabase Auth handles authentication.
+The frontend is built with Angular and Nx. Shared UI components follow atomic design, with colors and typography managed through design tokens. Tailwind CSS provides interface styling, Transloco provides localization, Supabase Auth handles authentication, and Supabase Storage and database tables persist profile media and posts.

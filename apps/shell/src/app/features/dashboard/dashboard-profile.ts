@@ -1,22 +1,27 @@
-import type { User } from '@supabase/supabase-js';
+import { profileInitials } from '@kampusx/shared/util';
+import type { Profile } from '../../core/profile.model';
 
 export interface DashboardProfile {
   handle: string;
   initials: string;
   school: string | null;
   department: string | null;
+  fullName: string;
+  avatarUrl?: string;
+  followingCount: number;
+  followersCount: number;
 }
 
 /** Metadata is display content only; it never grants permissions. */
-export function dashboardProfile(user: User | undefined, locale: string): DashboardProfile {
-  const metadata = user?.user_metadata ?? {};
-  const text = (value: unknown): string | null =>
-    typeof value === 'string' && value.trim() ? value.trim() : null;
-  const username = (text(metadata['username']) ?? user?.email?.split('@')[0] ?? '').replace(/^@+/, '');
+export function dashboardProfile(profile: Profile): DashboardProfile {
   return {
-    handle: username ? `@${username}` : '',
-    initials: Array.from(username)[0]?.toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US') ?? '',
-    school: text(metadata['university_name']) ?? text(metadata['school']),
-    department: text(metadata['department_name']) ?? text(metadata['department']),
+    handle: `@${profile.username}`,
+    initials: profileInitials(profile.fullName),
+    school: profile.university || null,
+    department: profile.department || null,
+    fullName: profile.fullName,
+    avatarUrl: profile.avatarUrl,
+    followingCount: profile.followingCount,
+    followersCount: profile.followersCount,
   };
 }

@@ -241,71 +241,31 @@ test('sign-out targets the current session', async () => {
   assert.deepEqual(calls.signOut, [{ scope: 'local' }]);
 });
 
-test('only a confirmed missing account produces the user-not-found error after failed login', async () => {
-  const { service, calls } = harness({
-    signInWithPassword: async () => ({
-      ...anonymousResult(),
-      error: new AuthError('Invalid', 400, 'invalid_credentials'),
-    }),
-    lookup: async () => ({ data: false, error: null }),
-  });
-  const result = await service.signIn(' Student@itu.edu.tr ', 'PrivatePassword');
-  assert.equal(service.errorKey(result.error), 'auth.errors.userNotFound');
-  assert.deepEqual(calls.lookup, [
-    { name: 'kampusx_login_email_exists', params: { email_address: 'Student@itu.edu.tr' } },
-  ]);
-  assert.equal(result.data.session, null);
-});
-
-test('an existing account preserves the original incorrect-credentials error', async () => {
-  const error = new AuthError('Invalid', 400, 'invalid_credentials');
-  const { service } = harness({
-    signInWithPassword: async () => ({ ...anonymousResult(), error }),
-    lookup: async () => ({ data: true, error: null }),
-  });
-  const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
-  assert.equal(result.error, error);
-  assert.equal(service.errorKey(result.error), 'auth.errors.credentials');
-});
-
-test('missing RPC, malformed data and database errors never claim the account is absent', async () => {
-  for (const response of [
-    { data: null, error: null },
-    { data: 'false', error: null },
-    { data: [], error: null },
-    { data: false, error: { code: 'PGRST202' } },
-    { data: true, error: { code: '42501' } },
+test('all credential failures use one message and never query account existence', async () => {
+  for (const lookup of [
+    async () => ({ data: false, error: null }),
+    async () => ({ data: true, error: null }),
+    async () => {
+      throw new Error('RPC must never be called');
+    },
   ]) {
-    const { service } = harness({
-      signInWithPassword: async () => ({
-        ...anonymousResult(),
-        error: new AuthError('Invalid', 400, 'invalid_credentials'),
-      }),
-      lookup: async () => response,
+    const error = new AuthError('PRIVATE_BACKEND_ERROR', 400, 'invalid_credentials');
+    const { service, calls } = harness({
+      signInWithPassword: async () => ({ ...anonymousResult(), error }),
+      lookup,
     });
-    const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
-    assert.equal(service.errorKey(result.error), 'auth.errors.accountLookup');
+    const result = await service.signIn('Student@itu.edu.tr', 'PrivatePassword');
+    assert.equal(result.error, error);
+    assert.equal(service.errorKey(result.error), 'auth.errors.credentials');
+    assert.equal(result.data.session, null);
+    assert.deepEqual(calls.lookup, []);
   }
 });
 
-test('a thrown or aborted lookup becomes a retryable account-check failure', async () => {
-  for (const reason of [
-    new TypeError('PRIVATE_NETWORK_FAILURE'),
-    new DOMException('Timeout', 'TimeoutError'),
-  ]) {
-    const { service } = harness({
-      signInWithPassword: async () => ({
-        ...anonymousResult(),
-        error: new AuthError('Invalid', 400, 'invalid_credentials'),
-      }),
-      lookup: async () => {
-        throw reason;
-      },
-    });
-    const result = await service.signIn('student@itu.edu.tr', 'WrongPassword');
-    assert.equal(service.errorKey(result.error), 'auth.errors.accountLookup');
-    assert.notEqual(result.error.message, reason.message);
-  }
+test('legacy missing-user error codes also map to the generic credentials message', () => {
+  const { service } = harness();
+  for (const code of ['user_not_found', 'login_user_not_found', 'invalid_credentials'])
+    assert.equal(service.errorKey({ code }), 'auth.errors.credentials');
 });
 
 test('successful login, unconfirmed email, rate limits and network failures skip account lookup', async () => {
@@ -368,6 +328,57 @@ test('logout failure after a password update does not claim the password change 
   assert.equal(service.errorKey(result.error), 'auth.errors.signOut');
 });
 
+test('token refresh keeps the session epoch but replacement and logout invalidate pending work', async () => {
+  const h = harness();
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const first = h.service.sessionEpoch();
+  const refreshed = { ...session, access_token: 'refreshed-test-token' };
+  h.emit('TOKEN_REFRESHED', refreshed);
+  assert.equal(h.service.sessionEpoch(), first);
+  h.emit('SIGNED_IN', refreshed);
+  assert.equal(h.service.sessionEpoch(), first);
+  h.emit('SIGNED_OUT', null);
+  h.emit('SIGNED_IN', session);
+  assert.ok(h.service.sessionEpoch() > first);
+});
+
+test('late sign-out success cannot clear a replacement account', async () => {
+  const gate = deferred(),
+    h = harness({ signOut: () => gate.promise });
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const request = h.service.signOut();
+  const next = { ...session, access_token: 'new-test-token', user: { ...user, id: 'other-student' } };
+  h.emit('SIGNED_IN', next);
+  gate.resolve({ error: null });
+  await request;
+  assert.equal(h.service.session(), next);
+});
+
+test('a late password-update response cannot sign out a replacement account', async () => {
+  const gate = deferred(),
+    started = deferred(),
+    h = harness({
+      updateUser: () => {
+        started.resolve();
+        return gate.promise;
+      },
+    });
+  await h.service.ready;
+  h.emit('PASSWORD_RECOVERY', session);
+  const request = h.service.updatePassword('NewStrongPassword123!');
+  await started.promise;
+  const next = { ...session, access_token: 'new-test-token', user: { ...user, id: 'other-student' } };
+  h.emit('SIGNED_IN', next);
+  gate.resolve({ data: { user }, error: null });
+  const result = await request;
+  assert.equal(result.passwordUpdated, true);
+  assert.equal(result.error?.code, 'password_updated_signout_failed');
+  assert.equal(h.service.session(), next);
+  assert.equal(h.calls.signOut.length, 0);
+});
+
 test('destroyed services ignore a pending initialization snapshot', async () => {
   const snapshot = deferred();
   const started = deferred();
@@ -409,6 +420,20 @@ test('network exceptions become safe translated auth errors', async () => {
   const result = await service.signIn('student@itu.edu.tr', 'password');
   assert.equal(service.errorKey(result.error), 'auth.errors.network');
   assert.notEqual(result.error.message, 'PRIVATE_BACKEND_ERROR');
+});
+
+test('registration sends only the declared academic display metadata', async () => {
+  const { service, calls } = harness();
+  await service.signUp('student@itu.edu.tr', 'password', 'student', {
+    university: ' Example University ',
+    department: ' Computer Science ',
+    role: 'admin',
+  });
+  assert.deepEqual(calls.signUp[0].options.data, {
+    username: 'student',
+    university_name: 'Example University',
+    department_name: 'Computer Science',
+  });
 });
 
 test('safe auth mappings distinguish useful failures without exposing arbitrary messages', async () => {
@@ -535,6 +560,27 @@ test('sign-out during server verification prevents a stale guard approval', asyn
   context.emit('SIGNED_OUT', null);
   verified.resolve({ data: { user }, error: null });
   assert.deepEqual(await guarded, { redirect: ['/auth/login'] });
+});
+
+test('verification cannot approve a destroyed service or a logout without an SDK event', async () => {
+  for (const action of ['destroy', 'signOut']) {
+    const verified = deferred();
+    const started = deferred();
+    const context = harness({
+      getSession: async () => ({ data: { session }, error: null }),
+      getUser: () => {
+        started.resolve();
+        return verified.promise;
+      },
+    });
+    await context.service.ready;
+    const pending = context.service.hasVerifiedSession();
+    await started.promise;
+    if (action === 'destroy') context.destroy();
+    else await context.service.signOut();
+    verified.resolve({ data: { user }, error: null });
+    assert.equal(await pending, false);
+  }
 });
 
 test('recovery sessions keep the password reset flow instead of opening dashboard', async () => {

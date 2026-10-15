@@ -1,3 +1,4 @@
+const { mockSocial } = require('./mock-social.cjs');
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
@@ -46,9 +47,10 @@ async function openDashboard(page, language = 'tr', theme = 'light', width = 390
       body: JSON.stringify(user),
     }),
   );
+  await mockSocial(page);
   await page.goto('/dashboard');
   await expect(
-    page.getByRole('tab', { name: language === 'tr' ? 'Üniversite' : 'University', exact: true }),
+    page.getByRole('tab', { name: language === 'tr' ? 'Keşfet' : 'Explore', exact: true }),
   ).toHaveAttribute('aria-selected', 'true');
   await page.evaluate(() => document.fonts.ready);
 }
@@ -80,7 +82,7 @@ for (const language of ['tr', 'en']) {
     test(`dashboard geometry and accessibility — ${language}/${theme}`, async ({ page }, info) => {
       await openDashboard(page, language, theme, language === 'en' ? 320 : 1440);
       await expect(page.locator('kx-header, kx-footer')).toHaveCount(0);
-      await expect(page.getByRole('tab')).toHaveCount(3);
+      await expect(page.getByRole('tab')).toHaveCount(4);
       await expect(page.getByRole('tabpanel')).toHaveCount(1);
       await expect(page.locator('.bottom-nav button')).toHaveCount(3);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -99,7 +101,7 @@ for (const language of ['tr', 'en']) {
       await opener.click();
       const dialog = page.getByRole('dialog');
       await settledDrawer(page);
-      await expect(dialog.getByRole('heading', { name: '@elif' })).toBeVisible();
+      await expect(dialog.getByText('@elif', { exact: true })).toBeVisible();
       await expect(dialog.locator('.profile-details p')).toHaveCount(2);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.screenshot({ path: info.outputPath(`drawer-${language}-${theme}.png`) });
@@ -113,16 +115,16 @@ for (const language of ['tr', 'en']) {
 test('tabs, keyboard and content use one selection state', async ({ page }) => {
   await openDashboard(page);
   const tabs = page.getByRole('tab');
-  await tabs.nth(1).click();
+  await tabs.nth(2).click();
   await expect(page.getByRole('heading', { name: 'Kampüsünün gündemi' })).toBeVisible();
-  await tabs.nth(1).press('ArrowRight');
-  await expect(tabs.nth(2)).toBeFocused();
-  await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true');
-  await tabs.nth(2).press('Home');
+  await tabs.nth(2).press('ArrowRight');
+  await expect(tabs.nth(3)).toBeFocused();
+  await expect(tabs.nth(3)).toHaveAttribute('aria-selected', 'true');
+  await tabs.nth(3).press('Home');
   await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
   await tabs.nth(0).press('End');
   await expect(page.getByRole('heading', { name: 'Bölümündeki konuşmalar' })).toBeVisible();
-  await tabs.nth(2).press('ArrowRight');
+  await tabs.nth(3).press('ArrowRight');
   await expect(tabs.nth(0)).toBeFocused();
   await expect(tabs.nth(0)).toHaveAttribute('tabindex', '0');
   await expect(tabs.nth(1)).toHaveAttribute('tabindex', '-1');
@@ -131,14 +133,14 @@ test('tabs, keyboard and content use one selection state', async ({ page }) => {
 test('real touch swipes change feeds, clamp boundaries and preserve vertical scroll', async ({ page }) => {
   await openDashboard(page);
   const tabs = page.getByRole('tab');
-  for (const expected of [1, 2, 2]) {
+  for (const expected of [1, 2, 3, 3]) {
     await swipe(page, { x: 300, y: 530 }, { x: 85, y: 538 });
     await expect(tabs.nth(expected)).toHaveAttribute('aria-selected', 'true');
   }
   await swipe(page, { x: 85, y: 530 }, { x: 300, y: 538 });
-  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true');
   await swipe(page, { x: 200, y: 630 }, { x: 205, y: 350 });
-  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true');
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
 });
 
@@ -151,9 +153,12 @@ test('drawer traps focus, locks scroll and closes on backdrop or touch', async (
   await expect(close).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe('hidden');
   await close.press('Shift+Tab');
+  const profileEntry = page.locator('.profile-avatar-link');
+  await expect(profileEntry).toBeFocused();
+  await profileEntry.press('Shift+Tab');
   await expect(page.getByRole('button', { name: 'Çıkış yap', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(close).toBeFocused();
+  await expect(profileEntry).toBeFocused();
   const drawerBounds = await page.getByRole('dialog').boundingBox();
   const backdropX = drawerBounds.x + drawerBounds.width + 8;
   await page.mouse.click(backdropX, 300);
@@ -192,7 +197,8 @@ test('reduced motion and unavailable visual controls have no business effects', 
     await expect(button).toBeDisabled();
   }
   await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
-  for (const button of await page.locator('.profile-menu button').all()) await expect(button).toBeDisabled();
+  for (const button of await page.locator('.profile-menu button[aria-disabled=true]').all())
+    await expect(button).toBeDisabled();
   await page.getByRole('button', { name: 'Profil menüsünü kapat' }).click();
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page).toHaveURL(/\/dashboard$/);

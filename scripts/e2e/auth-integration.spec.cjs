@@ -1,3 +1,4 @@
+const { mockSocial } = require('./mock-social.cjs');
 const { test, expect } = require('@playwright/test');
 
 const email = 'student@itu.edu.tr';
@@ -37,6 +38,7 @@ function sessionResponse() {
 
 async function mockAuth(page, handlers = {}) {
   const requests = [];
+  await mockSocial(page);
   await page.route('**/auth/v1/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -117,7 +119,7 @@ for (const remember of [false, true]) {
     await page.reload();
     await expect(page.locator('.dashboard-page')).toBeVisible();
     await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
-    await expect(page.getByRole('dialog').getByRole('heading', { name: '@student' })).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('@student', { exact: true })).toBeVisible();
     await expect(page.getByRole('dialog').getByText('Okul bilgisi eklenmemiş')).toBeVisible();
     expect(requests.some(({ operation }) => operation === 'user')).toBe(true);
   });
@@ -145,12 +147,10 @@ test('invalid credentials display a safe localized error and allow retry', async
   await submit.click();
   await expect(page).toHaveURL(/\/dashboard$/);
   expect(requests.filter(({ operation }) => operation === 'token')).toHaveLength(2);
-  expect(lookups).toEqual([{ email_address: email }]);
+  expect(lookups).toEqual([]);
 });
 
-test('a confirmed absent account shows the requested message in TR and EN and permits retry', async ({
-  page,
-}) => {
+test('an unknown email uses the same generic message in TR and EN and permits retry', async ({ page }) => {
   let missing = true;
   await mockAuth(page, {
     token: () =>
@@ -165,22 +165,22 @@ test('a confirmed absent account shows the requested message in TR and EN and pe
   const submit = page.locator('#auth-panel button[type=submit]');
   const alert = page.locator('#auth-panel [role=alert]');
   await submit.click();
-  await expect(alert).toHaveText('Böyle bir kullanıcı yok.');
+  await expect(alert).toHaveText('E-posta veya şifre yanlış. Bilgilerini kontrol et.');
   await expect(submit).toBeEnabled();
   await page.locator('kx-language-switcher button[lang=en]').first().click();
-  await expect(alert).toHaveText('No such user exists.');
-  expect(lookups).toEqual([{ email_address: email }]);
+  await expect(alert).toHaveText('The email or password is incorrect. Check your details.');
+  expect(lookups).toEqual([]);
   missing = false;
   await submit.click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  expect(lookups).toHaveLength(1);
+  expect(lookups).toHaveLength(0);
 });
 
-test('lookup errors remain distinct from missing users and incorrect credentials', async ({ page }) => {
+test('a disabled or missing legacy RPC does not affect credential error handling', async ({ page }) => {
   await mockAuth(page, {
     token: () => ({ status: 400, body: { code: 'invalid_credentials', msg: 'Invalid' } }),
   });
-  await mockLoginLookup(page, () => ({
+  const lookups = await mockLoginLookup(page, () => ({
     status: 404,
     body: { code: 'PGRST202', message: 'PRIVATE_SCHEMA_ERROR' },
   }));
@@ -189,23 +189,26 @@ test('lookup errors remain distinct from missing users and incorrect credentials
   await page.locator('#login-password').fill('LocalTestPassword123!');
   await page.locator('#auth-panel button[type=submit]').click();
   const alert = page.locator('#auth-panel [role=alert]');
-  await expect(alert).toHaveText('Hesap kontrolü tamamlanamadı. Lütfen tekrar dene.');
+  await expect(alert).toHaveText('E-posta veya şifre yanlış. Bilgilerini kontrol et.');
   await expect(alert).not.toContainText('PRIVATE_SCHEMA_ERROR');
+  expect(lookups).toHaveLength(0);
   await expect(page.locator('#auth-panel button[type=submit]')).toBeEnabled();
 });
 
-test('a slow lookup keeps submits disabled and reserves error feedback space on a narrow dark screen', async ({
+test('a slow sign-in keeps submits disabled and reserves generic error feedback on a narrow dark screen', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  let resolveToken,
+    tokenStarted = false;
+  const response = new Promise((resolve) => (resolveToken = resolve));
   await mockAuth(page, {
-    token: () => ({ status: 400, body: { code: 'invalid_credentials', msg: 'Invalid' } }),
+    token: () => {
+      tokenStarted = true;
+      return response;
+    },
   });
-  let resolveLookup;
-  const response = new Promise((resolve) => {
-    resolveLookup = resolve;
-  });
-  const lookups = await mockLoginLookup(page, () => response);
+  const lookups = await mockLoginLookup(page);
   await page.addInitScript(() => localStorage.setItem('kampusx-theme', 'dark'));
   await page.goto('/auth/login');
   await page.locator('#login-identity').fill(email);
@@ -216,15 +219,18 @@ test('a slow lookup keeps submits disabled and reserves error feedback space on 
   await submit.click();
   await expect(submit).toBeDisabled();
   await expect(page.locator('#auth-panel form')).toHaveAttribute('aria-busy', 'true');
-  await expect.poll(() => lookups.length).toBe(1);
-  resolveLookup({ body: false });
-  await expect(page.locator('#auth-panel [role=alert]')).toHaveText('Böyle bir kullanıcı yok.');
+  await expect.poll(() => tokenStarted).toBe(true);
+  resolveToken({ status: 400, body: { code: 'invalid_credentials', msg: 'Invalid' } });
+  await expect(page.locator('#auth-panel [role=alert]')).toHaveText(
+    'E-posta veya şifre yanlış. Bilgilerini kontrol et.',
+  );
+  expect(lookups).toHaveLength(0);
   const after = await submit.boundingBox();
   expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1);
   expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1);
   await submit.focus();
   await expect(submit).toBeFocused();
-  await page.screenshot({ path: test.info().outputPath('login-missing-user-tr-dark.png'), fullPage: true });
+  await page.screenshot({ path: test.info().outputPath('login-generic-error-tr-dark.png'), fullPage: true });
 });
 
 test('registration sends metadata and displays email-verification guidance', async ({ page }) => {
@@ -234,6 +240,8 @@ test('registration sends metadata and displays email-verification guidance', asy
   await page.goto('/auth/register');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
+  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
+  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   await page.locator('#auth-panel button[type=submit]').click();
@@ -267,6 +275,8 @@ test('registration distinguishes email quota from request limits in Turkish and 
   await page.goto('/auth/register');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
+  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
+  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   const submit = page.locator('#auth-panel button[type=submit]');
@@ -331,6 +341,8 @@ test('registration opens dashboard only when Supabase returns a session', async 
   await page.goto('/auth/register');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
+  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
+  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   await page.locator('#auth-panel button[type=submit]').click();

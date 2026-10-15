@@ -11,6 +11,9 @@ export class AuthService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly currentSession = signal<Session | null>(null);
   readonly session = this.currentSession.asReadonly();
+  private readonly epoch = signal(0);
+  /** Changes on account/session replacement; token refresh alone keeps pending work valid. */
+  readonly sessionEpoch = this.epoch.asReadonly();
   readonly initialized = signal(false);
   readonly recovery = signal(false);
   readonly initializationError = signal<AuthError | null>(null);
@@ -28,6 +31,14 @@ export class AuthService {
       data: { subscription },
     } = this.supabase.auth.onAuthStateChange((event, session) => {
       if (this.destroyRef.destroyed) return;
+      const previous = this.session();
+      if (
+        previous?.user.id !== session?.user.id ||
+        event === 'SIGNED_OUT' ||
+        event === 'PASSWORD_RECOVERY' ||
+        (event === 'SIGNED_IN' && previous?.access_token !== session?.access_token)
+      )
+        this.epoch.update((value) => value + 1);
       this.revision++;
       this.currentSession.set(session);
       if (event === 'PASSWORD_RECOVERY') this.recovery.set(!!session);
@@ -69,7 +80,12 @@ export class AuthService {
     }
   }
 
-  async signUp(email: string, password: string, username: string) {
+  async signUp(
+    email: string,
+    password: string,
+    username: string,
+    academic?: { university: string; department: string },
+  ) {
     if (!this.supabase)
       return { data: { user: null, session: null }, error: this.failure('auth_not_configured') };
     try {
@@ -77,7 +93,15 @@ export class AuthService {
         email: email.trim(),
         password,
         options: {
-          data: { username: username.trim().replace(/^@/, '') },
+          data: {
+            username: username.trim().replace(/^@/, ''),
+            ...(academic
+              ? {
+                  university_name: academic.university.trim(),
+                  department_name: academic.department.trim(),
+                }
+              : {}),
+          },
           emailRedirectTo: this.callbackUrl('/auth/login'),
         },
       });
@@ -94,9 +118,6 @@ export class AuthService {
     this.connection.setRemember(remember);
     try {
       const result = await this.supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (result.error?.code === 'invalid_credentials') {
-        return { ...result, error: await this.classifyFailedLogin(email, result.error) };
-      }
       if (!result.error) this.initializationError.set(null);
       return result;
     } catch (error) {
@@ -104,24 +125,17 @@ export class AuthService {
     }
   }
 
-  private async classifyFailedLogin(email: string, originalError: AuthError): Promise<AuthError> {
-    try {
-      // Only a confirmed database false means missing. No passwords reach this RPC.
-      const { data, error } = await this.supabase!.rpc('kampusx_login_email_exists', {
-        email_address: email.trim(),
-      }).abortSignal(AbortSignal.timeout(5000));
-      if (error || typeof data !== 'boolean') return this.failure('login_account_check_failed');
-      return data ? originalError : this.failure('login_user_not_found');
-    } catch {
-      return this.failure('login_account_check_failed');
-    }
-  }
-
   async signOut(): Promise<{ error: AuthError | null }> {
     if (!this.supabase) return { error: this.failure('auth_not_configured') };
+    const owner = this.session()?.user.id;
+    const epoch = this.sessionEpoch();
     try {
       const result = await this.supabase.auth.signOut({ scope: 'local' });
-      if (!result.error) {
+      if (
+        !result.error &&
+        (!this.session() || (this.session()?.user.id === owner && this.sessionEpoch() === epoch))
+      ) {
+        this.epoch.update((value) => value + 1);
         this.currentSession.set(null);
         this.recovery.set(false);
       }
@@ -149,9 +163,14 @@ export class AuthService {
       return { error: this.failure('recovery_required'), passwordUpdated: false };
     }
     if (password.length < 8) return { error: this.failure('weak_password'), passwordUpdated: false };
+    const epoch = this.sessionEpoch();
+    const owner = this.session()!.user.id;
     try {
       const { error } = await this.supabase.auth.updateUser({ password });
       if (error) return { error, passwordUpdated: false };
+      // A completed request must never sign out an account that replaced its owner.
+      if (this.sessionEpoch() !== epoch || this.session()?.user.id !== owner || this.destroyRef.destroyed)
+        return { error: this.failure('password_updated_signout_failed'), passwordUpdated: true };
       this.recovery.set(false);
       const signedOut = await this.signOut();
       return {
@@ -171,7 +190,13 @@ export class AuthService {
     const userId = this.session()!.user.id;
     try {
       const { data, error } = await this.supabase.auth.getUser();
-      return !error && data.user?.id === userId && revision === this.revision;
+      return (
+        !this.destroyRef.destroyed &&
+        !error &&
+        data.user?.id === userId &&
+        this.session()?.user.id === userId &&
+        revision === this.revision
+      );
     } catch {
       return false;
     }
@@ -183,9 +208,8 @@ export class AuthService {
     if (value?.code === 'recovery_required' || value?.code === 'otp_expired')
       return 'auth.errors.recoveryInvalid';
     if (value?.code === 'password_updated_signout_failed') return 'auth.errors.signOut';
-    if (value?.code === 'login_user_not_found') return 'auth.errors.userNotFound';
-    if (value?.code === 'login_account_check_failed') return 'auth.errors.accountLookup';
-    if (value?.code === 'invalid_credentials') return 'auth.errors.credentials';
+    if (['invalid_credentials', 'user_not_found', 'login_user_not_found'].includes(value?.code ?? ''))
+      return 'auth.errors.credentials';
     if (value?.code === 'email_not_confirmed') return 'auth.errors.unconfirmed';
     if (value?.code === 'weak_password') return 'auth.errors.weakPassword';
     if (value?.code === 'over_email_send_rate_limit') return 'auth.errors.emailRateLimit';

@@ -22,7 +22,8 @@
     "brand": "KampüsX",
     "title": "KampüsX — Kampüsün burada konuşuyor",
     "notFound": "Bu sayfa kampüste bulunamadı.",
-    "home": "Ana sayfaya dön"
+    "home": "Ana sayfaya dön",
+    "characterCount": "{{count}} / {{max}} karakter"
   },
   "nav": {
     "explore": "Keşfet",
@@ -118,7 +119,11 @@
       "usernamePlaceholder": "@kampuslu",
       "usernameHint": "3–20 harf, rakam veya alt çizgi.",
       "submit": "KampüsX’e katıl",
-      "success": "Devam etmek için e-postanı kontrol et. Bu adresle kayıt işlemi uygunsa doğrulama bağlantısı gönderilir."
+      "success": "Devam etmek için e-postanı kontrol et. Bu adresle kayıt işlemi uygunsa doğrulama bağlantısı gönderilir.",
+      "university": "Üniversite",
+      "universityPlaceholder": "Üniversitenin tam adı",
+      "department": "Bölüm",
+      "departmentPlaceholder": "Bölümünün adı"
     },
     "reset": {
       "title": "Yeniden bağlanalım.",
@@ -145,8 +150,6 @@
     "errors": {
       "config": "Giriş hizmeti henüz yapılandırılmamış. Lütfen daha sonra tekrar dene.",
       "credentials": "E-posta veya şifre yanlış. Bilgilerini kontrol et.",
-      "userNotFound": "Böyle bir kullanıcı yok.",
-      "accountLookup": "Hesap kontrolü tamamlanamadı. Lütfen tekrar dene.",
       "unconfirmed": "Giriş yapmadan önce e-posta adresini doğrula. Gelen kutunu ve spam klasörünü kontrol et.",
       "network": "Bağlantı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.",
       "rateLimit": "İstek sınırına ulaşıldı. Biraz bekleyip tekrar dene.",
@@ -164,7 +167,8 @@
     "universityEmail": ".edu.tr uzantılı üniversite e-postanı kullan.",
     "username": "3–20 harf, rakam veya alt çizgi kullan.",
     "passwordLength": "Şifren en az 8 karakter olmalı.",
-    "passwordMismatch": "Yazdığın şifreler aynı olmalı."
+    "passwordMismatch": "Yazdığın şifreler aynı olmalı.",
+    "maxlength": "En fazla {{max}} karakter yaz."
   },
   "posts": {
     "photo": {
@@ -200,7 +204,21 @@
     "comments": "yorum",
     "share": "yeniden paylaşım",
     "anonymousTag": "Anonim",
-    "sample": "Örnek gönderi"
+    "sample": "Örnek gönderi",
+    "title": "Gönderi oluştur — KampüsX",
+    "heading": "Gönderi oluştur",
+    "content": "Gönderin",
+    "placeholder": "Kampüste neler oluyor?",
+    "attach": "Fotoğraf veya video ekle",
+    "fileHint": "JPG, PNG, WEBP: 5 MB · MP4, WEBM: 50 MB",
+    "publish": "Paylaş",
+    "saved": "Gönderin paylaşıldı.",
+    "loading": "Gönderiler yükleniyor…",
+    "empty": "Henüz paylaşım yok. İlk gönderini oluşturabilirsin.",
+    "author": "KampüsX öğrencisi",
+    "discardTitle": "Gönderi taslağı silinsin mi?",
+    "discardText": "Kaydetmediğin metin ve dosya seçimi silinecek.",
+    "navigation": "Gönderin paylaşıldı. Akışını açmak için İptal düğmesini kullanabilirsin."
   },
   "universities": {
     "itu": "İstanbul Teknik Üniversitesi",
@@ -321,7 +339,8 @@
     "mock": {
       "school": "Kırşehir Ahi Evran Üniversitesi",
       "campus": "Teknik Bilimler MYO",
-      "department": "Bilgisayar Teknolojileri"
+      "department": "Bilgisayar Teknolojileri",
+      "explore": "Bütün kampüsler"
     },
     "menu": {
       "settings": "Ayarlar",
@@ -331,7 +350,8 @@
     "tabs": {
       "university": "Üniversite",
       "campus": "Kampüs",
-      "department": "Bölüm"
+      "department": "Bölüm",
+      "explore": "Keşfet"
     },
     "nav": {
       "home": "Ana sayfa",
@@ -341,15 +361,19 @@
     "feeds": {
       "university": {
         "title": "Üniversitende neler oluyor?",
-        "description": "Henüz paylaşım yok. Üniversitendeki konuşmalar, etkinlikler ve paylaşımlar burada bir araya gelecek."
+        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
       },
       "campus": {
         "title": "Kampüsünün gündemi",
-        "description": "Henüz paylaşım yok. Kampüsündeki günlük hayat, duyurular ve buluşmalar burada yer alacak."
+        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
       },
       "department": {
         "title": "Bölümündeki konuşmalar",
-        "description": "Henüz paylaşım yok. Bölümündeki dersler, projeler ve fikirler için burası senin keşfet alanın."
+        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
+      },
+      "explore": {
+        "title": "Kampüsleri keşfet",
+        "description": "KampüsX’te paylaşılan yazılar, fotoğraflar ve videolar."
       }
     },
     "logout": "Çıkış yap",
@@ -358,5 +382,114 @@
       "schoolMissing": "Okul bilgisi eklenmemiş",
       "departmentMissing": "Bölüm bilgisi eklenmemiş"
     }
+  },
+  "profile": {
+    "title": "Profil — KampüsX",
+    "back": "Ana sayfaya dön",
+    "coverAlt": "Profil kapak fotoğrafı",
+    "addPhoto": "Profil fotoğrafı ekle",
+    "following": "Takip edilen",
+    "followers": "Takipçi",
+    "facultyMissing": "Fakülte bilgisi eklenmemiş",
+    "joined": "{{date}} tarihinde katıldı",
+    "postCount": "{{count}} gönderi",
+    "compose": "Gönderi oluştur",
+    "saved": "Profilin güncellendi.",
+    "drawer": {
+      "profile": "Profil",
+      "history": "Geçmiş",
+      "community": "Topluluklar",
+      "settings": "Ayarlar ve gizlilik",
+      "help": "Yardım Merkezi",
+      "open": "{{name}} profilini aç"
+    },
+    "tabs": {
+      "label": "Profil akışları",
+      "posts": "Gönderiler",
+      "replies": "Yanıtlar",
+      "retweets": "Retweetler"
+    },
+    "content": {
+      "reply": "Bir gönderiyi yanıtladı",
+      "retweet": "Yeniden paylaştı",
+      "mediaAlt": "Gönderiye eklenen görsel",
+      "visualOnly": "Gönderi etkileşimleri henüz kullanıma açık değil."
+    },
+    "actions": {
+      "reply": "Yanıtla",
+      "retweet": "Yeniden paylaş",
+      "like": "Beğen",
+      "views": "Görüntülenme",
+      "bookmark": "Kaydet",
+      "share": "Paylaş"
+    },
+    "empty": {
+      "title": "Henüz burada bir şey yok",
+      "text": "Bu akıştaki gönderiler burada görünecek."
+    },
+    "edit": {
+      "title": "Profili Düzenle — KampüsX",
+      "heading": "Profili Düzenle",
+      "button": "Profili Düzenle",
+      "cancel": "İptal",
+      "save": "Kaydet",
+      "name": "İsim",
+      "bio": "Bio",
+      "avatar": "Profil fotoğrafı seç",
+      "cover": "Kapak fotoğrafı seç",
+      "removeImage": "Fotoğrafı kaldır",
+      "imageHint": "JPG, PNG veya WEBP · En fazla 5 MB",
+      "readonly": "Hesap ve üniversite bilgileri",
+      "username": "Kullanıcı adı",
+      "university": "Üniversite",
+      "faculty": "Fakülte / Yüksekokul",
+      "department": "Bölüm",
+      "readonlyHint": "Kullanıcı adı ve üniversite bilgileri kayıt sırasında belirlenir.",
+      "discardTitle": "Değişiklikler silinsin mi?",
+      "discardText": "Kaydetmediğin isim, bio ve fotoğraf değişiklikleri silinecek.",
+      "keepEditing": "Düzenlemeye devam et",
+      "discard": "Değişiklikleri sil"
+    },
+    "errors": {
+      "name": "İsim boş olamaz ve en fazla 50 karakter olabilir.",
+      "bio": "Bio en fazla 160 karakter olabilir.",
+      "image": "Bu görsel okunamadı. Geçerli bir JPG, PNG veya WEBP seç.",
+      "type": "JPG, PNG veya WEBP formatında bir görsel seç.",
+      "size": "Görsel 5 MB veya daha küçük olmalı.",
+      "resolution": "Görsel çözünürlüğü çok yüksek. Daha küçük bir görsel seç.",
+      "upload": "Fotoğraf hazırlanamadı. Lütfen tekrar dene.",
+      "save": "Profil güncellenemedi. Lütfen tekrar dene.",
+      "navigation": "Profilin kaydedildi. Profil sayfasını tekrar açmayı dene."
+    },
+    "mock": {
+      "posts": {
+        "library": "Final haftası için küçük bir plan: kütüphane, kahve ve birlikte çözülen sorular. Aynı bölümde çalışmak isteyen var mı?",
+        "reply": "Ben de katılıyorum! Ders notlarını tek bir yerde toplamak hepimizin işini kolaylaştırır.",
+        "club": "Kampüste yeni dönem, yeni fikirler. Bu haftaki topluluk buluşmasında birlikte bir şeyler üretelim.",
+        "project": "İlk Angular projemi arkadaşlarımla paylaştım. En güzel kısmı: birbirimizden öğrendiklerimiz.",
+        "replyTwo": "Perşembe öğleden sonra uygun olur. Ders çıkışında kütüphanede buluşabiliriz.",
+        "week": "Kampüsün en sevdiğim tarafı, sıradan bir günün bile güzel bir sohbete dönüşebilmesi."
+      }
+    }
+  },
+  "media": {
+    "video": "Gönderiye eklenen video",
+    "retry": "Tekrar dene",
+    "publicHint": "Yüklediğin dosyalar herkese açık olarak görüntülenebilir.",
+    "errors": {
+      "type": "JPG, PNG, WEBP, MP4 veya WEBM seç. Profil fotoğraflarında yalnızca görseller kullanılabilir.",
+      "imageSize": "Görsel en fazla 5 MB olabilir.",
+      "videoSize": "Video en fazla 50 MB olabilir.",
+      "invalidVideo": "Geçerli bir MP4 veya WEBM dosyası seç.",
+      "session": "Oturumun doğrulanamadı. Yeniden giriş yap.",
+      "upload": "Dosya yüklenemedi. Bağlantını ve yükleme izinlerini kontrol edip tekrar dene.",
+      "profileRead": "Profil fotoğrafların yüklenemedi. Tekrar deneyebilirsin.",
+      "profileSave": "Fotoğraflar profil kaydına yazılamadı. İzinlerini ve profil bilgilerini kontrol edip tekrar dene.",
+      "postsRead": "Gönderiler yüklenemedi. Tekrar deneyebilirsin.",
+      "content": "Bir metin veya dosya ekle. Metin en fazla 2000 karakter olabilir.",
+      "postSave": "Gönderi kaydedilemedi. Bilgilerini ve paylaşım izinlerini kontrol et.",
+      "uncertain": "Paylaşımın sonucu doğrulanamadı. Tekrar paylaşmadan önce akışını kontrol et."
+    },
+    "remove": "Dosyayı kaldır"
   }
 }

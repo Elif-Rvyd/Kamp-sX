@@ -19,3 +19,8 @@ export * from './atoms/avatar/avatar.component';
 export * from './molecules/tab-strip/tab-strip.component';
 export * from './molecules/feed-skeleton/feed-skeleton.component';
 export * from './organisms/modal-drawer/modal-drawer.component';
+export * from './atoms/icon-button/icon-button.component';
+export * from './molecules/image-picker/image-picker.component';
+export * from './molecules/toast/toast.component';
+export * from './organisms/confirm-dialog/confirm-dialog.component';
+export * from './organisms/social-post-card/social-post-card.component';

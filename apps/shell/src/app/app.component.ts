@@ -6,10 +6,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { LanguageService } from './core/language.service';
+import { NoticeService } from './core/notice.service';
+import { ToastComponent } from '@kampusx/shared/ui';
 @Component({
   selector: 'kx-root',
   standalone: true,
-  imports: [RouterOutlet, TranslocoDirective, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, TranslocoDirective, HeaderComponent, FooterComponent, ToastComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-container *transloco="let t"
     ><a class="skip-link" href="#main">{{ t('common.skip') }}</a>
@@ -20,13 +22,19 @@ import { LanguageService } from './core/language.service';
     @if (!dashboardLayout()) {
       <kx-footer />
     }
+    @if (notices.message()) {
+      <kx-toast [messageKey]="notices.message()" (dismissed)="notices.clear()" />
+    }
   </ng-container>`,
 })
 export class AppComponent {
   readonly language = inject(LanguageService);
+  readonly notices = inject(NoticeService);
   private readonly document = inject(DOCUMENT);
   private readonly path = signal(this.document.location.pathname);
-  readonly dashboardLayout = computed(() => this.path().replace(/\/$/, '') === '/dashboard');
+  readonly dashboardLayout = computed(() =>
+    ['/dashboard', '/profile', '/profile/edit', '/compose'].includes(this.path().replace(/\/$/, '')),
+  );
   constructor() {
     const i18n = inject(TranslocoService);
     const destroyRef = inject(DestroyRef);

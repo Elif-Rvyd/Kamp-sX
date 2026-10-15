@@ -1,0 +1,116 @@
+{
+  "checkedAt": "2026-10-15",
+  "unit": {
+    "command": "npm test",
+    "passed": 94,
+    "failed": 0
+  },
+  "types": {
+    "command": "npm run typecheck",
+    "exitCode": 0
+  },
+  "format": {
+    "command": "npm run format:check",
+    "exitCode": 0
+  },
+  "i18n": {
+    "command": "npm run check:i18n",
+    "matchingNonEmptyKeys": 381,
+    "exitCode": 0
+  },
+  "production": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "verifiedJavaScriptFiles": 18,
+    "lazyComposeAndProfile": true
+  },
+  "browser": {
+    "finalCompleteRun": {
+      "command": "CI=true NODE_ENV=production npm run test:ui",
+      "passed": 76,
+      "failed": 0,
+      "isolatedSdkTransport": true,
+      "includesCrossTabSignoutAndLateUpload": true
+    },
+    "realSupabaseMutationsPerformed": false
+  },
+  "security": {
+    "command": "npm run test:security",
+    "passed": 9,
+    "failed": 0,
+    "includesStoredPostHtmlAndMediaAllowlist": true,
+    "livePoliciesVerified": false,
+    "sqlAutomaticallyApplied": false,
+    "report": "../GUVENLIK-INCELEMESI-2026-10-15.md"
+  },
+  "staticAudit": {
+    "originalErrors": 14,
+    "originalReason": "Angular event and visual aria-disabled syntax is not recognized by the upstream static auditor.",
+    "angularRecognitionErrors": 0,
+    "angularRecognitionWarnings": 0,
+    "adapterDocument": "STATIC-AUDIT.md",
+    "installedAuditorModified": false
+  },
+  "designLint": {
+    "command": "npx --package @google/design.md designmd lint DESIGN.md",
+    "errors": 0,
+    "warnings": 0
+  },
+  "localPreview": "http://127.0.0.1:4200",
+  "profilePersistence": {
+    "avatarBanner": "public.profiles by user_id",
+    "nameBio": "in-memory display only"
+  },
+  "postsPersistence": "public.posts by user_id",
+  "academicScopeFilters": "visual only; schema relationships not supplied",
+  "themeTokensChanged": false,
+  "architectureMovedOrRenamed": false,
+  "genericLoginMessageUpdate": {
+    "checkedAt": "2026-10-15",
+    "decision": "One generic credential error; no account-existence RPC request.",
+    "unit": {
+      "command": "npm test",
+      "passed": 94,
+      "failed": 0
+    },
+    "browser": {
+      "command": "npx playwright test scripts/e2e/auth-integration.spec.cjs scripts/e2e/auth-accessibility.spec.cjs",
+      "passed": 14,
+      "failed": 0
+    },
+    "productionSecurity": {
+      "command": "npm run test:security",
+      "passed": 9,
+      "failed": 0
+    },
+    "sql": {
+      "command": "node scripts/verify-login-email-lookup.cjs",
+      "passed": 16,
+      "failed": 0,
+      "engine": "Isolated local PGlite PostgreSQL",
+      "liveDatabaseChanged": false
+    },
+    "build": {
+      "command": "npm run build",
+      "exitCode": 0,
+      "retiredRpcAbsentFromProductionJavaScript": true,
+      "verifiedJavaScriptFiles": 18
+    },
+    "types": {
+      "exitCode": 0
+    },
+    "format": {
+      "exitCode": 0
+    },
+    "i18n": {
+      "matchingNonEmptyKeys": 381,
+      "exitCode": 0
+    },
+    "liveFollowup": {
+      "sqlApplied": false,
+      "migration": "supabase/migrations/20261015180000_disable_login_email_lookup.sql",
+      "tableChanges": false,
+      "deploymentPerformed": false
+    }
+  }
+}

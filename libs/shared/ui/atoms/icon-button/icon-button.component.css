@@ -1,0 +1,32 @@
+:host {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform var(--motion-fast) ease-out;
+}
+:host(.icon-button-surface) {
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border-color: var(--color-border);
+}
+:host(:hover) {
+  background: var(--color-surface-alt);
+}
+:host(:active) {
+  transform: scale(0.95);
+}
+:host(:disabled),
+:host([aria-disabled='true']) {
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}

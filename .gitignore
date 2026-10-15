@@ -4,6 +4,7 @@ dist/
 .angular/
 .vercel/
 test-results/
+test-results-security/
 playwright-report/
 *.log
 .env*

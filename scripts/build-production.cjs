@@ -3,11 +3,13 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { generateEnvironment } = require('./generate-environment.cjs');
 const { ProductionOutputError, verifyProductionOutput } = require('./verify-production-output.cjs');
+const { ProductionSecurityError, secureProductionIndex } = require('./production-security.cjs');
 
 function runProductionBuild() {
   const root = path.resolve(__dirname, '..');
+  let configuration;
   try {
-    generateEnvironment({ root, strict: true });
+    configuration = generateEnvironment({ root, strict: true });
   } catch {
     console.error('Production build requires valid SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY configuration.');
     return 1;
@@ -42,12 +44,13 @@ function runProductionBuild() {
   if (result.status !== 0) return result.status;
 
   try {
+    secureProductionIndex(path.join(root, 'dist/apps/shell/browser'), configuration.supabaseUrl);
     const { fileCount } = verifyProductionOutput(path.join(root, 'dist/apps/shell/browser'));
     console.log(`Production output verified: ${fileCount} JavaScript files.`);
     return 0;
   } catch (error) {
     console.error(
-      error instanceof ProductionOutputError
+      error instanceof ProductionOutputError || error instanceof ProductionSecurityError
         ? error.message
         : 'Could not verify production JavaScript files.',
     );

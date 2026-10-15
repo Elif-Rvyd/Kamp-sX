@@ -9,6 +9,14 @@ export interface DiscoverFeed extends TabStripItem {
 
 export const DISCOVER_FEEDS: readonly DiscoverFeed[] = [
   {
+    id: 'explore',
+    labelKey: 'dashboard.tabs.explore',
+    headingKey: 'dashboard.feeds.explore.title',
+    descriptionKey: 'dashboard.feeds.explore.description',
+    scopeKey: 'dashboard.mock.explore',
+    icon: 'explore',
+  },
+  {
     id: 'university',
     labelKey: 'dashboard.tabs.university',
     headingKey: 'dashboard.feeds.university.title',
@@ -35,9 +43,11 @@ export const DISCOVER_FEEDS: readonly DiscoverFeed[] = [
 ];
 
 export const PROFILE_MENU = [
-  { id: 'settings', key: 'dashboard.menu.settings', icon: 'settings' },
-  { id: 'account', key: 'dashboard.menu.account', icon: 'person' },
-  { id: 'community', key: 'dashboard.menu.community', icon: 'groups' },
+  { id: 'profile', key: 'profile.drawer.profile', icon: 'person' },
+  { id: 'history', key: 'profile.drawer.history', icon: 'history' },
+  { id: 'community', key: 'profile.drawer.community', icon: 'groups' },
+  { id: 'settings', key: 'profile.drawer.settings', icon: 'settings' },
+  { id: 'help', key: 'profile.drawer.help', icon: 'help_outline' },
 ] as const;
 
 export const BOTTOM_NAV = [
