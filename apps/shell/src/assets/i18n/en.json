@@ -123,7 +123,13 @@
       "university": "University",
       "universityPlaceholder": "Your university’s full name",
       "department": "Department",
-      "departmentPlaceholder": "Your department’s name"
+      "departmentPlaceholder": "Your department’s name",
+      "fullName": "Name",
+      "fullNamePlaceholder": "Your full name",
+      "bio": "Bio (optional)",
+      "bioPlaceholder": "A little about you",
+      "faculty": "Faculty / School",
+      "facultyPlaceholder": "Your faculty or school"
     },
     "reset": {
       "title": "Let’s reconnect.",
@@ -439,27 +445,35 @@
       "cover": "Choose a cover photo",
       "removeImage": "Remove photo",
       "imageHint": "JPG, PNG or WEBP · Up to 5 MB",
-      "readonly": "Account and university details",
+      "readonly": "Account details",
       "username": "Username",
       "university": "University",
       "faculty": "Faculty / School",
       "department": "Department",
-      "readonlyHint": "Your username and university details are set during registration.",
+      "readonlyHint": "Your username and faculty / school cannot be changed on this screen.",
+      "academicHint": "Your university and department are saved to your account. These details do not verify your enrollment.",
       "discardTitle": "Discard your changes?",
-      "discardText": "Your unsaved name, bio and photo changes will be discarded.",
+      "discardText": "Your unsaved profile changes will be discarded.",
       "keepEditing": "Keep editing",
       "discard": "Discard changes"
     },
     "errors": {
       "name": "Enter a name with up to 50 characters.",
       "bio": "Your bio can contain up to 160 characters.",
+      "university": "University is required and can contain up to 150 characters.",
+      "department": "Department is required and can contain up to 150 characters.",
+      "academicSave": "Your university and department could not be saved to your account. Check your connection and try again.",
+      "partialSave": "Your profile details were saved, but your photos were not. You can try saving the photos again.",
       "image": "This image could not be read. Choose a valid JPG, PNG or WEBP.",
       "type": "Choose an image in JPG, PNG or WEBP format.",
       "size": "The image must be 5 MB or smaller.",
       "resolution": "The image resolution is too high. Choose a smaller image.",
       "upload": "The photo could not be prepared. Please try again.",
       "save": "Your profile could not be updated. Please try again.",
-      "navigation": "Your profile was saved. Try opening the profile page again."
+      "navigation": "Your profile was saved. Try opening the profile page again.",
+      "inputSize": "Choose a photo of 20 MB or less.",
+      "compression": "The photo could not be resized. Try a different photo.",
+      "detailsSave": "Your profile details could not be saved. Check your connection and try again."
     },
     "mock": {
       "posts": {
@@ -483,6 +497,12 @@
       "invalidVideo": "Choose a valid MP4 or WEBM file.",
       "session": "Your session could not be verified. Sign in again.",
       "upload": "The file could not be uploaded. Check your connection and upload permissions, then try again.",
+      "uploadDenied": "File upload permission was denied. Upload access must be enabled for your account.",
+      "bucket": "The file storage area was not found or is unavailable. The application's storage settings need to be checked.",
+      "bucketSize": "The file exceeds the storage size limit. Choose a smaller file.",
+      "bucketType": "Storage does not accept this file type. Choose another file.",
+      "uploadRateLimit": "The upload limit was reached. Wait a little and try again.",
+      "uploadNetwork": "The connection was interrupted during upload. Check your connection and try again.",
       "profileRead": "Your profile photos could not be loaded. You can try again.",
       "profileSave": "The photos could not be saved to your profile. Check your permissions and profile details, then try again.",
       "postsRead": "Posts could not be loaded. You can try again.",
@@ -491,5 +511,11 @@
       "uncertain": "We could not confirm whether your post was published. Check your feed before posting again."
     },
     "remove": "Remove file"
+  },
+  "follows": {
+    "label": "Follow information",
+    "readError": "Follow counts could not be loaded.",
+    "liveError": "Live updates are unavailable. Counts may be out of date.",
+    "saveError": "The follow action could not be completed. Try again."
   }
 }

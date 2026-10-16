@@ -42,13 +42,13 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
     </div>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="busy()">
       <kx-form-field
-        fieldId="register-email"
-        type="email"
-        autocomplete="email"
-        labelKey="auth.register.email"
-        placeholderKey="auth.register.emailPlaceholder"
-        hintKey="auth.register.emailHint"
-        [control]="form.controls.email"
+        fieldId="register-name"
+        icon="person"
+        autocomplete="name"
+        labelKey="auth.register.fullName"
+        placeholderKey="auth.register.fullNamePlaceholder"
+        [control]="form.controls.fullName"
+        [maxLength]="50"
       /><kx-form-field
         fieldId="register-username"
         icon="person"
@@ -58,6 +58,13 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         hintKey="auth.register.usernameHint"
         [control]="form.controls.username"
       /><kx-form-field
+        fieldId="register-bio"
+        icon="notes"
+        labelKey="auth.register.bio"
+        placeholderKey="auth.register.bioPlaceholder"
+        [control]="form.controls.bio"
+        [maxLength]="160"
+      /><kx-form-field
         fieldId="register-university"
         icon="school"
         autocomplete="organization"
@@ -66,12 +73,27 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         [control]="form.controls.university"
         [maxLength]="150"
       /><kx-form-field
+        fieldId="register-faculty"
+        icon="apartment"
+        labelKey="auth.register.faculty"
+        placeholderKey="auth.register.facultyPlaceholder"
+        [control]="form.controls.faculty"
+        [maxLength]="150"
+      /><kx-form-field
         fieldId="register-department"
         icon="code"
         labelKey="auth.register.department"
         placeholderKey="auth.register.departmentPlaceholder"
         [control]="form.controls.department"
         [maxLength]="150"
+      /><kx-form-field
+        fieldId="register-email"
+        type="email"
+        autocomplete="email"
+        labelKey="auth.register.email"
+        placeholderKey="auth.register.emailPlaceholder"
+        hintKey="auth.register.emailHint"
+        [control]="form.controls.email"
       /><kx-password-field
         fieldId="register-password"
         [control]="form.controls.password"
@@ -121,6 +143,23 @@ export class RegisterFormComponent {
   private readonly router = inject(Router);
   readonly errorKey = signal('');
   readonly form = new FormGroup({
+    fullName: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(50),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
+    bio: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(160)] }),
+    faculty: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(150),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email, universityEmail],
@@ -159,6 +198,9 @@ export class RegisterFormComponent {
       const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim(), {
         university: v.university.trim(),
         department: v.department.trim(),
+        faculty: v.faculty.trim(),
+        fullName: v.fullName.trim(),
+        bio: v.bio.trim(),
       });
       if (this.destroyRef.destroyed) return;
       if (error) this.errorKey.set(this.api.errorKey(error));

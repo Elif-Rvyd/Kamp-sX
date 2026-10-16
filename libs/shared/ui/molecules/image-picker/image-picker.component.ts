@@ -14,6 +14,7 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
     class="picker"
     [class.cover-picker]="mode() === 'cover'"
     [class.avatar-picker]="mode() === 'avatar'"
+    [class.has-image]="!!imageUrl()"
     [attr.aria-busy]="busy()"
   >
     @if (mode() === 'avatar') {
@@ -32,7 +33,7 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
       accept="image/jpeg,image/png,image/webp"
       [disabled]="busy()"
       [attr.aria-label]="t(labelKey())"
-      [attr.aria-describedby]="pickerId() + '-help ' + pickerId() + '-error'"
+      [attr.aria-describedby]="pickerId() + '-error'"
       (change)="onFile($event)"
     />
     <button
@@ -42,7 +43,6 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
       [disabled]="busy()"
       class="choose-image"
       [attr.aria-label]="t(labelKey())"
-      [attr.aria-describedby]="pickerId() + '-help'"
       (click)="file.click()"
     >
       <kx-icon [name]="busy() ? 'hourglass_top' : 'photo_camera'" />
@@ -51,7 +51,6 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
       <button
         kxIconButton
         type="button"
-        [surface]="true"
         [disabled]="busy()"
         class="remove-image"
         [attr.aria-label]="t('profile.edit.removeImage')"
@@ -60,7 +59,6 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
         <kx-icon name="close" />
       </button>
     }
-    <p class="sr-only" [id]="pickerId() + '-help'">{{ t('profile.edit.imageHint') }}</p>
     <p class="picker-error error-text" [id]="pickerId() + '-error'" role="alert">
       {{ errorKey() ? t(errorKey()) : '' }}
     </p>

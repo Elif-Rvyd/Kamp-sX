@@ -6,3 +6,4 @@ export * from './mock-data';
 export * from './horizontal-swipe';
 export * from './social-post';
 export * from './image-header';
+export * from './profile-image';

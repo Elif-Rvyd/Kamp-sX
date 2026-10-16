@@ -70,13 +70,14 @@
       <kx-icon name="calendar_month" />{{ t('profile.joined', { date: joined() }) }}
     </p>
     <div class="profile-meta-row">
-      <div class="profile-counts">
-        <span
-          ><strong>{{ profile().followingCount | kxNumber }}</strong> {{ t('profile.following') }}</span
-        ><span
-          ><strong>{{ profile().followersCount | kxNumber }}</strong> {{ t('profile.followers') }}</span
-        >
-      </div>
+      <kx-follow-counts
+        class="profile-counts"
+        [following]="profile().followingCount"
+        [followers]="profile().followersCount"
+        [loading]="followLoading()"
+        [errorKey]="followError()"
+        (retried)="followRetry.emit()"
+      />
       <div class="profile-preferences">
         <kx-language-switcher
           [touch]="true"

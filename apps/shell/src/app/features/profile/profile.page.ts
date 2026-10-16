@@ -13,6 +13,7 @@ import { ButtonComponent, IconButtonComponent, IconComponent, TabStripComponent 
 import { PostsService } from '../../core/posts.service';
 import { filterProfilePosts, horizontalSwipe, swipePoint, type SwipePoint } from '@kampusx/shared/util';
 import { ProfileService } from '../../core/profile.service';
+import { FollowsService } from '../../core/follows.service';
 import { LanguageService } from '../../core/language.service';
 import { ThemeService } from '../../core/theme.service';
 import { DashboardBottomNavComponent } from '../dashboard/bottom-nav/bottom-nav.component';
@@ -37,6 +38,7 @@ import { bindProfilePage } from './profile-page-context';
 })
 export class ProfilePage {
   readonly profiles = inject(ProfileService);
+  readonly follows = inject(FollowsService);
   readonly postsApi = inject(PostsService);
   readonly language = inject(LanguageService);
   readonly theme = inject(ThemeService);

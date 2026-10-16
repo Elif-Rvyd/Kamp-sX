@@ -20,8 +20,9 @@ import {
   IconComponent,
   LanguageSwitcherComponent,
   ThemeToggleComponent,
+  FollowCountsComponent,
 } from '@kampusx/shared/ui';
-import { LocalizedNumberPipe, profileInitials } from '@kampusx/shared/util';
+import { profileInitials } from '@kampusx/shared/util';
 import type { Profile } from '../../../core/profile.model';
 @Component({
   selector: 'kx-profile-header',
@@ -32,9 +33,9 @@ import type { Profile } from '../../../core/profile.model';
     ButtonComponent,
     IconButtonComponent,
     IconComponent,
-    LocalizedNumberPipe,
     LanguageSwitcherComponent,
     ThemeToggleComponent,
+    FollowCountsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile-header.component.html',
@@ -48,6 +49,9 @@ export class ProfileHeaderComponent {
   readonly editRequested = output<void>();
   readonly languageChanged = output<string>();
   readonly themeChanged = output<void>();
+  readonly followError = input('');
+  readonly followLoading = input(false);
+  readonly followRetry = output<void>();
   readonly collapsed = signal(false);
   readonly initials = computed(() => profileInitials(this.profile().fullName));
   readonly joined = computed(() =>

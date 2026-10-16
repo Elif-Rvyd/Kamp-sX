@@ -108,12 +108,17 @@ export class MediaService {
     this.assertOwner(owner, epoch);
     const path = `${owner}/${purpose}/${this.document.defaultView!.crypto.randomUUID()}.${EXTENSIONS[file.type]}`;
     const bucket = this.connection.client.storage.from('uploads');
-    const { error } = await bucket.upload(path, file, {
-      contentType: file.type,
-      cacheControl: '3600',
-      upsert: false,
-    });
-    if (error) throw new MediaError('media.errors.upload');
+    let response;
+    try {
+      response = await bucket.upload(path, file, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false,
+      });
+    } catch (error) {
+      throw new MediaError(this.uploadErrorKey(error));
+    }
+    if (response.error) throw new MediaError(this.uploadErrorKey(response.error));
     this.assertOwner(owner, epoch);
     const result = { path, url: bucket.getPublicUrl(path).data.publicUrl, type };
     if (!this.isPublicUrl(result.url, owner, purpose)) throw new MediaError('media.errors.upload');
@@ -122,6 +127,31 @@ export class MediaService {
     this.completed.set(file, cache);
     this.assertOwner(owner, epoch);
     return result;
+  }
+  private uploadErrorKey(error: unknown): string {
+    const value = error as {
+      code?: string;
+      statusCode?: string | number;
+      status?: number;
+      message?: string;
+      originalError?: unknown;
+    } | null;
+    const code = value?.code;
+    const status = Number(value?.status) || Number(value?.statusCode);
+    if (['InvalidJWT', 'JWTExpired'].includes(code ?? '') || status === 401) return 'media.errors.session';
+    if (code === 'NoSuchBucket') return 'media.errors.bucket';
+    if (
+      code === 'AccessDenied' ||
+      status === 403 ||
+      /row.level.security|permission denied|policy/i.test(value?.message ?? '')
+    )
+      return 'media.errors.uploadDenied';
+    if (code === 'EntityTooLarge' || status === 413) return 'media.errors.bucketSize';
+    if (code === 'InvalidMimeType' || status === 415) return 'media.errors.bucketType';
+    if (status === 429 || code === 'SlowDown') return 'media.errors.uploadRateLimit';
+    if (error instanceof TypeError || value?.originalError instanceof TypeError || status === 0)
+      return 'media.errors.uploadNetwork';
+    return 'media.errors.upload';
   }
   assertOwner(owner: string, epoch = this.auth.sessionEpoch()): void {
     if (

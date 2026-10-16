@@ -10,14 +10,16 @@ export interface Profile {
   faculty: string;
   department: string;
   joinedAt: string;
-  followingCount: number;
-  followersCount: number;
+  followingCount: number | null;
+  followersCount: number | null;
   postCount: number;
 }
 export type ProfilePost = SocialPost;
 export interface ProfileUpdate {
   fullName: string;
   bio: string;
+  university?: string;
+  department?: string;
   avatarUrl?: string | null;
   coverUrl?: string | null;
 }

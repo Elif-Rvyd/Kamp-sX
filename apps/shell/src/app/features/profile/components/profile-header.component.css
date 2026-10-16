@@ -158,14 +158,9 @@ h1 {
   margin-top: 16px;
 }
 .profile-counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.profile-counts strong {
-  color: var(--color-text);
+  display: block;
+  flex: 1;
+  min-width: 160px;
 }
 .profile-preferences {
   display: flex;

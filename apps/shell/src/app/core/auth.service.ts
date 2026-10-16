@@ -84,7 +84,7 @@ export class AuthService {
     email: string,
     password: string,
     username: string,
-    academic?: { university: string; department: string },
+    academic?: { university: string; department: string; faculty?: string; fullName?: string; bio?: string },
   ) {
     if (!this.supabase)
       return { data: { user: null, session: null }, error: this.failure('auth_not_configured') };
@@ -99,6 +99,9 @@ export class AuthService {
               ? {
                   university_name: academic.university.trim(),
                   department_name: academic.department.trim(),
+                  ...(academic.faculty !== undefined ? { faculty_name: academic.faculty.trim() } : {}),
+                  ...(academic.fullName !== undefined ? { full_name: academic.fullName.trim() } : {}),
+                  ...(academic.bio !== undefined ? { bio: academic.bio.trim() } : {}),
                 }
               : {}),
           },
@@ -122,6 +125,77 @@ export class AuthService {
       return result;
     } catch (error) {
       return { data: { user: null, session: null }, error: this.normalizeError(error) };
+    }
+  }
+
+  /** User-editable display information only; never use it to grant roles or verify a school. */
+  async updateAcademic(academic: {
+    university: string;
+    department: string;
+  }): Promise<{ error: AuthError | null }> {
+    const university = academic?.university;
+    const department = academic?.department;
+    if (
+      [university, department].some(
+        (value) => typeof value !== 'string' || !value.trim() || value.length > 150,
+      )
+    )
+      return { error: this.failure('invalid_academic_details') };
+    const metadata = { university_name: university.trim(), department_name: department.trim() };
+    return this.updateDisplayMetadata(metadata);
+  }
+
+  async updateProfileDetails(details: {
+    fullName: string;
+    bio: string;
+    university: string;
+    department: string;
+  }): Promise<{ error: AuthError | null }> {
+    if (
+      !details ||
+      typeof details.fullName !== 'string' ||
+      !details.fullName.trim() ||
+      details.fullName.length > 50 ||
+      typeof details.bio !== 'string' ||
+      details.bio.length > 160 ||
+      [details.university, details.department].some(
+        (value) => typeof value !== 'string' || !value.trim() || value.length > 150,
+      )
+    )
+      return { error: this.failure('invalid_profile_details') };
+    return this.updateDisplayMetadata({
+      full_name: details.fullName.trim(),
+      bio: details.bio.trim(),
+      university_name: details.university.trim(),
+      department_name: details.department.trim(),
+    });
+  }
+
+  private async updateDisplayMetadata(
+    metadata: Record<string, string>,
+  ): Promise<{ error: AuthError | null }> {
+    await this.ready;
+    const owner = this.session()?.user.id;
+    const epoch = this.sessionEpoch();
+    const ownsSession = () =>
+      !this.destroyRef.destroyed &&
+      !!owner &&
+      this.session()?.user.id === owner &&
+      this.sessionEpoch() === epoch;
+    if (!this.supabase || !owner || this.recovery() || !(await this.hasVerifiedSession()) || !ownsSession())
+      return { error: this.failure('academic_session_invalid') };
+    try {
+      const { data, error } = await this.supabase.auth.updateUser({ data: metadata });
+      if (error) return { error };
+      if (!ownsSession() || data.user?.id !== owner)
+        return { error: this.failure('academic_session_invalid') };
+      if (Object.entries(metadata).some(([key, value]) => data.user.user_metadata?.[key] !== value))
+        return { error: this.failure('academic_save_failed') };
+      this.revision++;
+      this.currentSession.set({ ...this.session()!, user: data.user });
+      return { error: null };
+    } catch (error) {
+      return { error: this.normalizeError(error) };
     }
   }
 

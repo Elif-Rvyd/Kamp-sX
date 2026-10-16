@@ -18,9 +18,7 @@ import {
   ButtonComponent,
   ConfirmDialogComponent,
   FormFieldComponent,
-  IconComponent,
   ImagePickerComponent,
-  InputDirective,
   LanguageSwitcherComponent,
   ThemeToggleComponent,
 } from '@kampusx/shared/ui';
@@ -41,9 +39,7 @@ import { bindProfilePage } from './profile-page-context';
     ButtonComponent,
     ConfirmDialogComponent,
     FormFieldComponent,
-    IconComponent,
     ImagePickerComponent,
-    InputDirective,
     LanguageSwitcherComponent,
     ThemeToggleComponent,
   ],
@@ -76,6 +72,24 @@ export class ProfileEditPage {
       nonNullable: true,
       validators: [Validators.maxLength(160)],
     }),
+    username: new FormControl('@' + this.baseline().username, { nonNullable: true }),
+    faculty: new FormControl(this.baseline().faculty, { nonNullable: true }),
+    university: new FormControl(this.baseline().university, {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(150),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
+    department: new FormControl(this.baseline().department, {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(150),
+        (c) => (c.value.trim() ? null : { required: true }),
+      ],
+    }),
   });
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   readonly avatar = signal<string | null>(this.baseline().avatarUrl || null);
@@ -91,6 +105,8 @@ export class ProfileEditPage {
     () =>
       this.values()?.fullName?.trim() !== this.baseline().fullName ||
       this.values()?.bio?.trim() !== (this.baseline().bio || '') ||
+      this.values()?.university?.trim() !== this.baseline().university ||
+      this.values()?.department?.trim() !== this.baseline().department ||
       this.avatar() !== (this.baseline().avatarUrl || null) ||
       this.cover() !== (this.baseline().coverUrl || null),
   );
@@ -150,7 +166,10 @@ export class ProfileEditPage {
     this.error.set('');
     try {
       const next = await this.profiles.updateProfile({
-        ...this.form.getRawValue(),
+        fullName: this.form.controls.fullName.value,
+        bio: this.form.controls.bio.value,
+        university: this.form.controls.university.value,
+        department: this.form.controls.department.value,
         avatarUrl: this.avatar(),
         coverUrl: this.cover(),
       });
@@ -158,7 +177,14 @@ export class ProfileEditPage {
       this.baseline.set(next);
       this.avatar.set(next.avatarUrl || null);
       this.cover.set(next.coverUrl || null);
-      this.form.setValue({ fullName: next.fullName, bio: next.bio || '' });
+      this.form.setValue({
+        fullName: next.fullName,
+        bio: next.bio || '',
+        university: next.university,
+        department: next.department,
+        username: '@' + next.username,
+        faculty: next.faculty,
+      });
       this.notices.show('profile.saved');
       if (!(await this.router.navigateByUrl('/profile'))) this.error.set('profile.errors.navigation');
     } catch (reason) {

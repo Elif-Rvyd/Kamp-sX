@@ -8,8 +8,8 @@ export interface DashboardProfile {
   department: string | null;
   fullName: string;
   avatarUrl?: string;
-  followingCount: number;
-  followersCount: number;
+  followingCount: number | null;
+  followersCount: number | null;
 }
 
 /** Metadata is display content only; it never grants permissions. */

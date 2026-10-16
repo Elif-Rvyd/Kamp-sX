@@ -54,12 +54,39 @@
 }
 .remove-image {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 50%;
+  left: calc(50% + 28px);
+  transform: translate(-50%, -50%);
+  background: color-mix(in srgb, var(--color-surface) 65%, transparent);
+  color: var(--color-text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) ease-out;
+}
+.cover-picker.has-image .choose-image {
+  left: calc(50% - 28px);
 }
 .avatar-picker .remove-image {
-  top: -8px;
-  right: -8px;
+  left: 50%;
+}
+.picker:hover .remove-image,
+.picker:focus-within .remove-image {
+  opacity: 1;
+  pointer-events: auto;
+}
+.remove-image:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+@media (hover: none), (pointer: coarse) {
+  .remove-image {
+    opacity: 0.75;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remove-image {
+    transition: none;
+  }
 }
 .picker-error {
   position: absolute;

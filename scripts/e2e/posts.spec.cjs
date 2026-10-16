@@ -20,7 +20,7 @@ test('a failed initial profile read cannot erase an unknown saved banner', async
   await expect(page.locator('.avatar-picker img')).toBeVisible();
   const save = page.getByRole('button', { name: 'Kaydet', exact: true });
   await expect(save).toBeDisabled();
-  expect(state.requests.filter((r) => r.method !== 'GET')).toHaveLength(0);
+  expect(state.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toHaveLength(0);
   options.failProfileRead = false;
   await page.getByRole('button', { name: 'Tekrar dene', exact: true }).click();
   await expect(save).toBeEnabled();
@@ -39,7 +39,7 @@ for (const language of ['tr', 'en'])
       await expect(page.locator('.attachment-preview img')).toBeVisible();
       const publish = page.locator('button[type=submit]');
       await expect(publish).toBeEnabled();
-      expect(state.requests.filter((r) => r.method !== 'GET')).toHaveLength(0);
+      expect(state.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toHaveLength(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
       expect(axe.violations).toEqual([]);
@@ -49,7 +49,7 @@ for (const language of ['tr', 'en'])
       await expect(page.locator('kx-social-post-card').first()).toContainText(
         'A real SDK request, isolated test data.',
       );
-      const writes = state.requests.filter((r) => r.method !== 'GET');
+      const writes = state.requests.filter((r) => !['GET', 'HEAD'].includes(r.method));
       expect(writes).toHaveLength(2);
       expect(writes[0].storage).toBe(true);
       expect(writes[0].url).toContain(`/uploads/${OWNER}/post/`);
@@ -105,7 +105,7 @@ test('invalid files and discarded drafts produce no storage or database mutation
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Değişiklikleri sil', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  expect(state.requests.filter((r) => r.method !== 'GET')).toHaveLength(0);
+  expect(state.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toHaveLength(0);
 });
 test('storage denial never inserts a post', async ({ page }) => {
   await openSocial(page, 'tr', 'light', '/compose');
@@ -113,7 +113,8 @@ test('storage denial never inserts a post', async ({ page }) => {
   await page.locator('#post-file').setInputFiles(png());
   await expect(page.locator('button[type=submit]')).toBeEnabled();
   await page.locator('button[type=submit]').click();
-  await expect(page.locator('[role=alert]')).toContainText('Dosya yüklenemedi');
+  await expect(page.locator('[role=alert]')).toContainText('Dosya yükleme izni reddedildi');
+  await expect(page.locator('.attachment-preview')).toBeVisible();
   expect(state.requests.filter((r) => r.table === 'posts' && r.method === 'POST')).toHaveLength(0);
 });
 test('browser-decodable WebM files are uploaded as video with a persistent URL', async ({ page }) => {

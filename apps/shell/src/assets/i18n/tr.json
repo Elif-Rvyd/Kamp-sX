@@ -123,7 +123,13 @@
       "university": "Üniversite",
       "universityPlaceholder": "Üniversitenin tam adı",
       "department": "Bölüm",
-      "departmentPlaceholder": "Bölümünün adı"
+      "departmentPlaceholder": "Bölümünün adı",
+      "fullName": "İsim",
+      "fullNamePlaceholder": "Adın ve soyadın",
+      "bio": "Bio (isteğe bağlı)",
+      "bioPlaceholder": "Kendinden kısaca bahset",
+      "faculty": "Fakülte / Yüksekokul",
+      "facultyPlaceholder": "Fakülten veya yüksekokulun"
     },
     "reset": {
       "title": "Yeniden bağlanalım.",
@@ -439,27 +445,35 @@
       "cover": "Kapak fotoğrafı seç",
       "removeImage": "Fotoğrafı kaldır",
       "imageHint": "JPG, PNG veya WEBP · En fazla 5 MB",
-      "readonly": "Hesap ve üniversite bilgileri",
+      "readonly": "Hesap bilgileri",
       "username": "Kullanıcı adı",
       "university": "Üniversite",
       "faculty": "Fakülte / Yüksekokul",
       "department": "Bölüm",
-      "readonlyHint": "Kullanıcı adı ve üniversite bilgileri kayıt sırasında belirlenir.",
+      "readonlyHint": "Kullanıcı adı ve fakülte / yüksekokul bilgisi bu ekrandan değiştirilemez.",
+      "academicHint": "Üniversite ve bölüm bilgilerin hesabına kaydedilir. Bu bilgiler okul doğrulaması yerine geçmez.",
       "discardTitle": "Değişiklikler silinsin mi?",
-      "discardText": "Kaydetmediğin isim, bio ve fotoğraf değişiklikleri silinecek.",
+      "discardText": "Kaydetmediğin profil değişiklikleri silinecek.",
       "keepEditing": "Düzenlemeye devam et",
       "discard": "Değişiklikleri sil"
     },
     "errors": {
       "name": "İsim boş olamaz ve en fazla 50 karakter olabilir.",
       "bio": "Bio en fazla 160 karakter olabilir.",
+      "university": "Üniversite boş olamaz ve en fazla 150 karakter olabilir.",
+      "department": "Bölüm boş olamaz ve en fazla 150 karakter olabilir.",
+      "academicSave": "Üniversite ve bölüm hesabına kaydedilemedi. Bağlantını kontrol edip tekrar dene.",
+      "partialSave": "Profil bilgilerin kaydedildi; fotoğraflar kaydedilemedi. Fotoğrafları kaydetmek için tekrar deneyebilirsin.",
       "image": "Bu görsel okunamadı. Geçerli bir JPG, PNG veya WEBP seç.",
       "type": "JPG, PNG veya WEBP formatında bir görsel seç.",
       "size": "Görsel 5 MB veya daha küçük olmalı.",
       "resolution": "Görsel çözünürlüğü çok yüksek. Daha küçük bir görsel seç.",
       "upload": "Fotoğraf hazırlanamadı. Lütfen tekrar dene.",
       "save": "Profil güncellenemedi. Lütfen tekrar dene.",
-      "navigation": "Profilin kaydedildi. Profil sayfasını tekrar açmayı dene."
+      "navigation": "Profilin kaydedildi. Profil sayfasını tekrar açmayı dene.",
+      "inputSize": "Fotoğraf işlenemedi. 20 MB veya daha küçük bir dosya seç.",
+      "compression": "Fotoğraf küçültülemedi. Başka bir fotoğrafla tekrar dene.",
+      "detailsSave": "Profil bilgilerin kaydedilemedi. Bağlantını kontrol edip tekrar dene."
     },
     "mock": {
       "posts": {
@@ -483,6 +497,12 @@
       "invalidVideo": "Geçerli bir MP4 veya WEBM dosyası seç.",
       "session": "Oturumun doğrulanamadı. Yeniden giriş yap.",
       "upload": "Dosya yüklenemedi. Bağlantını ve yükleme izinlerini kontrol edip tekrar dene.",
+      "uploadDenied": "Dosya yükleme izni reddedildi. Hesabın için yükleme erişimi açılmalı.",
+      "bucket": "Dosya depolama alanı bulunamadı veya erişilemiyor. Uygulamanın depolama ayarları kontrol edilmeli.",
+      "bucketSize": "Dosya, depolama alanının boyut sınırını aşıyor. Daha küçük bir dosya seç.",
+      "bucketType": "Depolama alanı bu dosya türünü kabul etmiyor. Farklı bir dosya seç.",
+      "uploadRateLimit": "Yükleme sınırına ulaşıldı. Biraz bekleyip tekrar dene.",
+      "uploadNetwork": "Yükleme sırasında bağlantı kesildi. Bağlantını kontrol edip tekrar dene.",
       "profileRead": "Profil fotoğrafların yüklenemedi. Tekrar deneyebilirsin.",
       "profileSave": "Fotoğraflar profil kaydına yazılamadı. İzinlerini ve profil bilgilerini kontrol edip tekrar dene.",
       "postsRead": "Gönderiler yüklenemedi. Tekrar deneyebilirsin.",
@@ -491,5 +511,11 @@
       "uncertain": "Paylaşımın sonucu doğrulanamadı. Tekrar paylaşmadan önce akışını kontrol et."
     },
     "remove": "Dosyayı kaldır"
+  },
+  "follows": {
+    "label": "Takip bilgileri",
+    "readError": "Takip sayıları yüklenemedi.",
+    "liveError": "Canlı güncellemeye bağlanılamadı. Sayılar güncel olmayabilir.",
+    "saveError": "Takip işlemi tamamlanamadı. Tekrar dene."
   }
 }

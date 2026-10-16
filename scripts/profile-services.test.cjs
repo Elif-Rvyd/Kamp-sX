@@ -7,6 +7,7 @@ const root = path.resolve(__dirname, '..');
 function signal(value) {
   const read = () => value;
   read.set = (next) => (value = next);
+  read.update = (fn) => (value = fn(value));
   read.asReadonly = () => () => value;
   return read;
 }
@@ -15,6 +16,7 @@ function harness() {
   class MediaService {}
   class ProfileRepository {}
   class PostsService {}
+  class FollowsService {}
   class DestroyRef {}
   class TranslocoService {}
   const DOCUMENT = Symbol('document');
@@ -57,6 +59,9 @@ function harness() {
   const destroyRef = { destroyed: false, onDestroy: (fn) => cleanup.push(fn) };
   const stored = new Map(),
     uploads = [];
+  const academicCalls = [];
+  let academicError = null;
+  let photoError = false;
   const ownPosts = signal(
     ['post', 'reply', 'retweet', 'post', 'reply', 'post'].map((kind, i) => ({
       id: String(i),
@@ -68,11 +73,15 @@ function harness() {
   );
   const dependencies = new Map([
     [PostsService, { mine: ownPosts, ownCount: signal(6) }],
+    [FollowsService, { counts: signal({ following: 0, followers: 0 }) }],
     [
       ProfileRepository,
       {
         read: async (owner) => stored.get(owner) || null,
-        save: async (owner, value) => stored.set(owner, value),
+        save: async (owner, value) => {
+          if (photoError) throw Error('Photo save rejected');
+          stored.set(owner, value);
+        },
       },
     ],
     [
@@ -87,7 +96,31 @@ function harness() {
         },
       },
     ],
-    [AuthService, { session, sessionEpoch }],
+    [
+      AuthService,
+      {
+        session,
+        sessionEpoch,
+        updateProfileDetails: async (value) => {
+          academicCalls.push(value);
+          if (!academicError)
+            session.set({
+              ...session(),
+              user: {
+                ...session().user,
+                user_metadata: {
+                  ...session().user.user_metadata,
+                  full_name: value.fullName.trim(),
+                  bio: value.bio.trim(),
+                  university_name: value.university.trim(),
+                  department_name: value.department.trim(),
+                },
+              },
+            });
+          return { error: academicError };
+        },
+      },
+    ],
     [DestroyRef, destroyRef],
     [TranslocoService, { selectTranslation: () => dictionary }],
     [
@@ -154,13 +187,18 @@ function harness() {
                   ? { MediaService }
                   : specifier === './profile-repository.service'
                     ? { ProfileRepository }
-                    : specifier === './posts.service'
-                      ? { PostsService }
-                      : specifier === '@kampusx/shared/util'
-                        ? load('libs/shared/util/image-header.ts')
-                        : specifier.startsWith('.')
-                          ? load(path.relative(root, path.resolve(path.dirname(file), specifier + '.ts')))
-                          : require(specifier),
+                    : specifier === './follows.service'
+                      ? { FollowsService }
+                      : specifier === './posts.service'
+                        ? { PostsService }
+                        : specifier === '@kampusx/shared/util'
+                          ? {
+                              ...load('libs/shared/util/image-header.ts'),
+                              ...load('libs/shared/util/profile-image.ts'),
+                            }
+                          : specifier.startsWith('.')
+                            ? load(path.relative(root, path.resolve(path.dirname(file), specifier + '.ts')))
+                            : require(specifier),
     );
     return exports;
   };
@@ -171,6 +209,16 @@ function harness() {
     created,
     revoked,
     uploads,
+    academicCalls,
+    failAcademic: () => (academicError = Error('Denied')),
+    failPhotoSave: () => (photoError = true),
+    refreshMetadata: (metadata) => {
+      session.set({
+        ...session(),
+        user: { ...session().user, user_metadata: { ...session().user.user_metadata, ...metadata } },
+      });
+      effects.forEach((fn) => fn());
+    },
     closed: () => closed,
     decoded: () => decoded,
     pauseBitmap: () => {
@@ -206,7 +254,7 @@ const png = () =>
     { type: 'image/png' },
   );
 
-test('profile changes are atomic and cannot edit account or university fields', async () => {
+test('profile changes allow academic display fields but cannot edit account or role fields', async () => {
   const { service } = harness();
   await service.reload();
   const old = service.profile();
@@ -215,13 +263,69 @@ test('profile changes are atomic and cannot edit account or university fields', 
     bio: ' A campus bio ',
     username: 'intruder',
     university: 'Other school',
+    department: 'New department',
     id: 'other',
     followersCount: 999,
   });
   assert.equal(service.profile().fullName, 'Yeni İsim');
   assert.equal(service.profile().bio, 'A campus bio');
-  for (const key of ['id', 'username', 'university', 'faculty', 'department', 'followersCount'])
+  assert.equal(service.profile().university, 'Other school');
+  assert.equal(service.profile().department, 'New department');
+  for (const key of ['id', 'username', 'faculty', 'followersCount'])
     assert.equal(service.profile()[key], old[key]);
+});
+
+test('academic validation and a rejected account update keep the current profile and draft intact', async () => {
+  const h = harness();
+  await h.service.reload();
+  const initial = h.service.profile();
+  for (const university of [' ', 'x'.repeat(151), 123])
+    await assert.rejects(h.service.updateProfile({ fullName: 'Elif', bio: '', university }), {
+      key: 'profile.errors.university',
+    });
+  for (const department of [' ', 'x'.repeat(151), 123])
+    await assert.rejects(h.service.updateProfile({ fullName: 'Elif', bio: '', department }), {
+      key: 'profile.errors.department',
+    });
+  assert.equal(h.academicCalls.length, 0);
+  h.failAcademic();
+  await assert.rejects(
+    h.service.updateProfile({ fullName: 'Elif', bio: '', university: 'Other university' }),
+    { key: 'profile.errors.detailsSave' },
+  );
+  assert.deepEqual(h.service.profile(), initial);
+});
+
+test('account metadata refresh updates academic labels without erasing local name or bio', async () => {
+  const h = harness();
+  await h.service.reload();
+  await h.service.updateProfile({ fullName: 'Local name', bio: 'Local bio' });
+  h.refreshMetadata({ university_name: 'Updated university', department_name: 'Updated department' });
+  assert.equal(h.service.profile().university, 'Updated university');
+  assert.equal(h.service.profile().department, 'Updated department');
+  assert.equal(h.service.profile().fullName, 'Local name');
+  assert.equal(h.service.profile().bio, 'Local bio');
+});
+
+test('a photo write failure after an academic save reports the partial result honestly', async () => {
+  const h = harness();
+  await h.service.reload();
+  const avatar = await h.service.uploadAvatar(png());
+  h.failPhotoSave();
+  await assert.rejects(
+    h.service.updateProfile({
+      fullName: 'Elif',
+      bio: '',
+      university: 'New university',
+      department: 'New department',
+      avatarUrl: avatar,
+    }),
+    { key: 'profile.errors.partialSave' },
+  );
+  assert.equal(h.service.profile().university, 'New university');
+  assert.equal(h.service.profile().department, 'New department');
+  assert.equal(h.service.profile().avatarUrl, undefined);
+  assert.deepEqual(h.revoked, []);
 });
 test('whitespace names, length limits and unowned image URLs fail without changing state', async () => {
   const { service } = harness();
@@ -262,7 +366,7 @@ test('image type, actual content, size and decoding are validated before preview
   const ctx = harness();
   for (const file of [
     new File(['<svg/>'], 'x.svg', { type: 'image/svg+xml' }),
-    new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'large.png', { type: 'image/png' }),
+    new File([new Uint8Array(20 * 1024 * 1024 + 1)], 'large.png', { type: 'image/png' }),
     new File(['not a PNG'], 'fake.png', { type: 'image/png' }),
   ])
     await assert.rejects(ctx.service.uploadAvatar(file));

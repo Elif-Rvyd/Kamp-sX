@@ -18,7 +18,8 @@
   top: 0;
   z-index: 40;
   min-height: 68px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) 80px;
   align-items: center;
   padding: 10px 16px;
   border-bottom: 1px solid var(--color-border);
@@ -26,19 +27,27 @@
   backdrop-filter: blur(18px);
 }
 .edit-actions {
-  display: flex;
-  gap: 4px;
+  display: contents;
 }
 .edit-actions button {
   padding-inline: 10px;
   font-size: 12px;
 }
+.edit-actions button:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+.edit-actions button:last-child {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+}
 .edit-toolbar h1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 260px);
-  max-width: 220px;
+  grid-column: 2;
+  grid-row: 1;
+  white-space: nowrap;
+  min-width: 0;
   text-align: center;
   font-size: 15px;
   line-height: 1.4;
@@ -48,23 +57,20 @@
 .avatar-zone {
   position: relative;
   margin-top: -52px;
-  padding: 0 20px 68px;
+  padding: 0 20px 28px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 24px;
 }
-.image-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 36ch;
-  font-size: 11px;
-  line-height: 1.8;
-  color: var(--color-muted);
-}
+
 .edit-fields {
   padding: 0 24px;
+}
+.account-heading {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 24px;
 }
 .edit-fields > kx-form-field {
   display: block;
@@ -75,38 +81,6 @@
   font-size: 12px;
   line-height: 1.6;
   margin-bottom: 12px;
-}
-.readonly-section {
-  border-top: 1px solid var(--color-border);
-  padding-top: 24px;
-}
-.readonly-section h2 {
-  font-size: 13px;
-  font-weight: 800;
-  margin-bottom: 18px;
-}
-.readonly-section label {
-  display: block;
-  font-size: 11px;
-  color: var(--color-muted);
-  margin: 16px 0 6px;
-}
-.readonly-section .kx-input {
-  background: var(--color-surface-alt);
-  color: var(--color-muted);
-}
-.readonly-section textarea {
-  resize: none;
-  padding: 12px 16px;
-  height: auto;
-  font-size: 12px;
-  line-height: 1.6;
-}
-.readonly-section p {
-  margin-top: 14px;
-  font-size: 11px;
-  line-height: 1.8;
-  color: var(--color-muted);
 }
 .edit-preferences {
   display: flex;
@@ -122,9 +96,7 @@
     padding-inline: 16px;
     gap: 16px;
   }
-  .image-hint {
-    max-width: 20ch;
-  }
+
   .edit-toolbar h1 {
     font-size: 14px;
   }

@@ -10,7 +10,12 @@ import { IconComponent } from '../../atoms/icon/icon.component';
   imports: [ReactiveFormsModule, TranslocoDirective, InputDirective, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './form-field.component.css',
-  template: `<div class="form-field" *transloco="let t" [class.field-floating]="floating()">
+  template: `<div
+    class="form-field"
+    *transloco="let t"
+    [class.field-floating]="floating()"
+    [class.field-readonly]="readonly()"
+  >
     <label [for]="fieldId()">{{ t(labelKey()) }}</label>
     <div class="input-wrap">
       @if (!floating()) {
@@ -21,6 +26,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
           class="kx-input"
           [id]="fieldId()"
           [formControl]="control()"
+          [readOnly]="readonly()"
           [attr.maxlength]="maxLength() || null"
           [attr.aria-invalid]="control().touched && control().invalid"
           [attr.aria-describedby]="fieldId() + '-message ' + fieldId() + '-counter'"
@@ -32,6 +38,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
           [id]="fieldId()"
           [type]="type()"
           [formControl]="control()"
+          [readOnly]="readonly()"
           [placeholder]="floating() ? ' ' : t(placeholderKey())"
           [attr.maxlength]="maxLength() || null"
           [autocomplete]="autocomplete()"
@@ -71,6 +78,7 @@ export class FormFieldComponent {
   readonly hintKey = input('');
   readonly floating = input(false);
   readonly multiline = input(false);
+  readonly readonly = input(false);
   readonly maxLength = input(0);
   private readonly revision = signal(0);
   constructor() {

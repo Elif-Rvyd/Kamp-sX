@@ -183,6 +183,25 @@ test('actual media service uses a user-owned random path and reuses a confirmed 
   assert.equal(h.calls.length, 1);
   assert.equal(h.state.closed, 1);
 });
+
+test('storage rejection reasons are localized without leaking raw server messages or inserting posts', async () => {
+  for (const [error, key] of [
+    [{ code: 'AccessDenied', statusCode: '403', message: 'private diagnostic' }, 'uploadDenied'],
+    [{ status: 403, statusCode: 'unauthorized' }, 'uploadDenied'],
+    [{ statusCode: '400', message: 'new row violates row-level security policy' }, 'uploadDenied'],
+    [{ code: 'NoSuchBucket', statusCode: '404' }, 'bucket'],
+    [{ code: 'InvalidMimeType', statusCode: '400' }, 'bucketType'],
+    [{ code: 'EntityTooLarge', statusCode: '413' }, 'bucketSize'],
+    [{ code: 'InvalidJWT', statusCode: '401' }, 'session'],
+    [{ status: 429 }, 'uploadRateLimit'],
+    [new TypeError('private network details'), 'uploadNetwork'],
+  ]) {
+    const h = harness();
+    h.state.uploadError = error;
+    await assert.rejects(h.posts.publish('draft', png()), { key: `media.errors.${key}` });
+    assert.equal(h.calls.filter((call) => call.kind === 'database').length, 0);
+  }
+});
 test('account changes during decoding and invalid sessions cannot write Storage', async () => {
   const h = harness();
   h.state.switchAfterValidation = true;

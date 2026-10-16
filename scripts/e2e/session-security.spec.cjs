@@ -19,7 +19,7 @@ test('cross-tab sign-out leaves a dirty composer without a blocking draft dialog
   await expect(page).toHaveURL(/\/auth\/login$/);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('#post-content')).toHaveCount(0);
-  expect(backend.requests.filter((r) => r.method !== 'GET')).toHaveLength(0);
+  expect(backend.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toHaveLength(0);
 });
 
 test('an upload finishing after logout cannot insert a post', async ({ page }) => {

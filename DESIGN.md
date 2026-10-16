@@ -161,7 +161,7 @@ language and theme controls. It consumes the canonical tokens without changing t
 theme services. Shared Avatar, TabStrip, FeedSkeleton and ModalDrawer own its reusable UI.
 The left profile drawer follows the native-dialog modal contract: background isolation,
 scroll lock, focus trap/return, Escape, backdrop click and left-swipe dismissal. Its header
-contains the signed-in user's display name, handle, university, department and mock follow counts. Profile metadata is
+contains the signed-in user's display name, handle, university, department and real, nullable follow counts. Profile metadata is
 display content only; missing university/department values use honest localized placeholders.
 The drawer's sign-out control closes the real Supabase session. Discovery uses a single selected index
 for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
@@ -176,12 +176,16 @@ their visual design and welcome keeps its public chrome. Plain login URLs are no
 links; callback detection requires actual auth parameters. Explore reads authenticated public.posts rows. No fake session is created by dashboard.
 University, campus and department filtering remains a planned visual flow because no scope columns were supplied.
 The lazy `/profile` and `/profile/edit` routes retain the existing session guard. ProfileService
-seeds display identity from the existing session. Names and bios remain in memory;
-follow counts and joined date are illustrative. Avatar/banner URLs persist in public.profiles by user_id;
+seeds display identity from the existing session. Names and bios persist in allowlisted Auth display metadata;
+follow counts come from public.user_follows after the separately applied 07 SQL setup. A missing table or failed read shows an unknown count and Retry, never an invented zero. The joined date remains illustrative. Avatar/banner URLs persist in public.profiles by user_id;
 posts and post count come from public.posts. No reply/repost data is invented.
 It owns atomic name/bio/photo updates and staged object URLs, releases discarded/replaced assets,
-and resets its local state when the signed-in account changes. Academic details and username stay readonly.
-Registration now requires university and department and sends allowlisted display metadata to Auth; it does not grant roles.
+and resets its local state when the signed-in account changes. University and department can be edited in the same
+profile form (required, max 150 characters each) and persist as university_name/department_name in existing Auth
+user metadata. They are self-declared display information, never school verification or authorization. Username
+and faculty stay readonly. An academic save updates the profile/drawer immediately and survives a reload.
+Auth metadata and photo rows cannot form one transaction; partial saves report which information was retained.
+Registration requires name, username, university, faculty/school and department; bio is optional (160 characters). It sends only allowlisted display metadata to Auth; it does not grant roles. Faculty is captured as faculty_name at registration and stays readonly in the editor. The field order in both flows is name, username, bio, university, faculty, department. Email, password and consent follow those registration fields. Required fields are enforced by the registration form; metadata remains user-editable display content, not a verified academic credential.
 Upload ownership and a session epoch are checked across asynchronous boundaries. Logout or replacement login
 invalidates pending work, including a re-login to the same user; token refresh alone does not. Dirty profile/post
 editors leave on session loss without trapping the user in a discard dialog or retaining the old draft.
@@ -190,20 +194,23 @@ TypeScript payload types are not treated as a security boundary. Media URLs acce
 uid/area/safe-filename paths and the supported image/video extensions in the configured bucket. PNG, JPEG
 and WebP dimensions are checked before decoding, with browser decoding and a final pixel-limit check.
 Avatar, scrollable TabStrip and floating FormField extend existing owners through optional variants.
+FollowsService owns exact HEAD counts, an authenticated private Broadcast channel per user, debounced refetch on change, reconnect refetch and session-bound teardown. The shared FollowCounts molecule owns number/unknown/error/retry presentation in profile and drawer. The approved SQL creates only user_follows, participant-only SELECT, follower-only INSERT/DELETE, no self/duplicate follows, and private empty invalidation events for both participants. Restrictive reserved-topic policies prevent unrelated permissive policies from exposing these topics or accepting forged client events. The service exposes session-verified setFollowing for later people/profile entry points; a user directory and follow buttons are outside the existing own-profile route.
 SocialPostCard owns feed cards; the marketing PostCardPreview remains its separate existing preview.
 ImagePicker owns native file selection and staged previews, ConfirmDialog owns draft-discard confirmation,
 and Toast with NoticeService owns saved feedback across route changes. MediaService owns real uploads to the existing public uploads bucket; ProfileRepository and PostsService own the DB boundary.
 File selection only stages previews; Save/Publish performs network writes. URLs use uid/purpose/random paths and only
 the configured bucket origin is rendered. Confirmed uploads can be reused after a rejected DB write.
 Storage and database writes are separate operations; no speculative deletion of possibly referenced objects occurs.
+Storage failures distinguish session, denied access, unavailable bucket, bucket limits, throttling and network failures
+without exposing raw server responses. Failed uploads preserve the draft and never insert a post.
 Post composer uses existing FormField/Button/ConfirmDialog owners and the same protected navigation/draft contract.
 Ambiguous publication outcomes block blind retries. Only confirmed success triggers the shared toast and feed navigation.
 A post is at most 2000 characters with one optional image/video; images accept JPG/PNG/WEBP,
 up to 5 MiB and 32 megapixels, with decoded-content checks; videos accept MP4/WEBM up to 50 MiB
-with signature and metadata decode checks. Public-file visibility is disclosed before saving. Profile and media geometry stays reserved.
+with signature and metadata decode checks. Public-file visibility remains disclosed in the post composer. Profile images are decoded locally (input at most 20 MiB / 32 megapixels), scaled without upscaling to 640×640 for avatars and 1920×1080 for banners, and encoded as WebP at at most 1 MiB when resizing/compression is needed; already-small originals are retained. The existing upload service revalidates the result. Bitmap/canvas resources are released and pending work cannot cross sessions. Profile and media geometry stays reserved.
 The profile uses a 3:1 cover, an overlapping 96px avatar, a 64px sticky toolbar and sticky scrolling tabs.
 IntersectionObserver controls only opacity/transform header motion and is disconnected on teardown.
-The editor reserves centered-title space beside its left Cancel/Save controls and blocks duplicate saves.
+The editor uses equal left/right action columns (Cancel and Save), with a centered single-line title, including 320px phones. Account information heads the fields. It blocks duplicate saves. Profile ImagePicker removes files through a translucent centered X revealed on hover or keyboard focus; coarse/touch pointers keep the action visible. The avatar camera stays at the lower-right edge. Informational format/size and account/public-file disclaimers are omitted from the editor by the user’s explicit request; actionable validation errors remain.
 Dirty route departures use the native shared confirmation dialog, Escape keeps edits, focus returns,
 and saved changes update the drawer and every own post card through the same signal.
 Production builds use Angular's hashed script CSP. The build adds an exact configured Supabase

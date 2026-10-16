@@ -13,7 +13,7 @@
     "configure:environment": "node scripts/generate-environment.cjs",
     "format": "prettier --write apps libs scripts *.json *.md *.cjs",
     "format:check": "prettier --check apps libs scripts *.json *.md *.cjs",
-    "test": "node --test scripts/validators.test.cjs scripts/generate-environment.test.cjs scripts/auth-services.test.cjs scripts/auth-storage.test.cjs scripts/verify-production-output.test.cjs scripts/profile-services.test.cjs scripts/production-security.test.cjs scripts/social-services.test.cjs",
+    "test": "node --test scripts/validators.test.cjs scripts/generate-environment.test.cjs scripts/auth-services.test.cjs scripts/auth-storage.test.cjs scripts/verify-production-output.test.cjs scripts/profile-services.test.cjs scripts/production-security.test.cjs scripts/social-services.test.cjs scripts/follows-services.test.cjs",
     "check:i18n": "node scripts/check-i18n.cjs",
     "test:ui": "playwright test",
     "test:security": "playwright test --config=playwright.security.config.cjs"

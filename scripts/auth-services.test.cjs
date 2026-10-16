@@ -427,12 +427,18 @@ test('registration sends only the declared academic display metadata', async () 
   await service.signUp('student@itu.edu.tr', 'password', 'student', {
     university: ' Example University ',
     department: ' Computer Science ',
+    faculty: ' Engineering ',
+    fullName: ' Campus Student ',
+    bio: ' Hello ',
     role: 'admin',
   });
   assert.deepEqual(calls.signUp[0].options.data, {
     username: 'student',
     university_name: 'Example University',
     department_name: 'Computer Science',
+    faculty_name: 'Engineering',
+    full_name: 'Campus Student',
+    bio: 'Hello',
   });
 });
 
@@ -513,6 +519,127 @@ test('server verification rejects a token identifying another user', async () =>
   await service.ready;
   emit('SIGNED_IN', session);
   assert.equal(await service.hasVerifiedSession(), false);
+});
+
+test('academic updates persist only allowlisted display metadata and retain the session epoch', async () => {
+  const metadata = { university_name: 'New university', department_name: 'New department' };
+  const h = harness({
+    updateUser: async (attributes) => {
+      assert.deepEqual(attributes, { data: metadata });
+      return { data: { user: { ...user, user_metadata: metadata } }, error: null };
+    },
+  });
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const epoch = h.service.sessionEpoch();
+  assert.equal(
+    (
+      await h.service.updateAcademic({
+        university: ' New university ',
+        department: 'New department',
+        role: 'admin',
+      })
+    ).error,
+    null,
+  );
+  assert.deepEqual(h.service.session().user.user_metadata, metadata);
+  assert.equal(h.service.sessionEpoch(), epoch);
+});
+
+test('invalid or anonymous academic updates cannot reach the Auth write API', async () => {
+  const h = harness();
+  await h.service.ready;
+  for (const payload of [
+    null,
+    {},
+    { university: ' ', department: 'x' },
+    { university: 'x', department: 'x'.repeat(151) },
+  ])
+    assert.ok((await h.service.updateAcademic(payload)).error);
+  assert.ok(
+    (await h.service.updateAcademic({ university: 'New university', department: 'New department' })).error,
+  );
+  assert.equal(h.calls.updateUser.length, 0);
+});
+
+test('profile display updates persist name and bio while stripping identity and role changes', async () => {
+  const metadata = {
+    full_name: 'Campus Student',
+    bio: 'Hello',
+    university_name: 'University',
+    department_name: 'Department',
+  };
+  const h = harness({
+    updateUser: async (attributes) => {
+      assert.deepEqual(attributes, { data: metadata });
+      return { data: { user: { ...user, user_metadata: metadata } }, error: null };
+    },
+  });
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const epoch = h.service.sessionEpoch();
+  assert.equal(
+    (
+      await h.service.updateProfileDetails({
+        fullName: ' Campus Student ',
+        bio: ' Hello ',
+        university: 'University',
+        department: 'Department',
+        username: 'forged',
+        faculty: 'forged',
+        role: 'admin',
+      })
+    ).error,
+    null,
+  );
+  assert.deepEqual(h.service.session().user.user_metadata, metadata);
+  assert.equal(h.service.sessionEpoch(), epoch);
+});
+
+test('malformed or overlong profile display details never reach Auth writes', async () => {
+  const h = harness();
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const valid = { fullName: 'Student', bio: '', university: 'University', department: 'Department' };
+  for (const value of [
+    null,
+    {},
+    { ...valid, fullName: ' ' },
+    { ...valid, fullName: 'x'.repeat(51) },
+    { ...valid, bio: 'x'.repeat(161) },
+    { ...valid, university: '' },
+    { ...valid, department: 123 },
+  ])
+    assert.ok((await h.service.updateProfileDetails(value)).error);
+  assert.equal(h.calls.updateUser.length, 0);
+});
+
+test('a delayed academic response cannot replace a new account session', async () => {
+  const started = deferred(),
+    response = deferred();
+  const h = harness({
+    updateUser: () => {
+      started.resolve();
+      return response.promise;
+    },
+  });
+  await h.service.ready;
+  h.emit('SIGNED_IN', session);
+  const pending = h.service.updateAcademic({ university: 'New university', department: 'New department' });
+  await started.promise;
+  const replacement = { ...session, user: { ...user, id: 'other-user' } };
+  h.emit('SIGNED_IN', replacement);
+  response.resolve({
+    data: {
+      user: {
+        ...user,
+        user_metadata: { university_name: 'New university', department_name: 'New department' },
+      },
+    },
+    error: null,
+  });
+  assert.ok((await pending).error);
+  assert.equal(h.service.session().user.id, 'other-user');
 });
 
 test('server verification denies a stored session rejected by Supabase', async () => {

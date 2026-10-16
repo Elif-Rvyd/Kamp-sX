@@ -45,9 +45,9 @@
           (selected)="selectImage('avatar',$event)"
           (removed)="removeImage('avatar')"
         />
-        <p class="image-hint"><kx-icon name="info" />{{ t('profile.edit.imageHint') }}</p>
       </div>
       <div class="edit-fields">
+        <h2 class="account-heading">{{ t('profile.edit.readonly') }}</h2>
         <kx-form-field
           fieldId="profile-name"
           labelKey="profile.edit.name"
@@ -56,7 +56,16 @@
           [control]="form.controls.fullName"
           [floating]="true"
           [maxLength]="50"
-        /><kx-form-field
+        />
+        <kx-form-field
+          fieldId="profile-username"
+          labelKey="profile.edit.username"
+          placeholderKey="profile.edit.username"
+          [control]="form.controls.username"
+          [floating]="true"
+          [readonly]="true"
+        />
+        <kx-form-field
           fieldId="profile-bio"
           labelKey="profile.edit.bio"
           placeholderKey="profile.edit.bio"
@@ -65,7 +74,30 @@
           [multiline]="true"
           [maxLength]="160"
         />
-        <p class="image-hint">{{t('media.publicHint')}}</p>
+        <kx-form-field
+          fieldId="profile-university"
+          labelKey="profile.edit.university"
+          placeholderKey="auth.register.universityPlaceholder"
+          [control]="form.controls.university"
+          [floating]="true"
+          [maxLength]="150"
+        />
+        <kx-form-field
+          fieldId="profile-faculty"
+          labelKey="profile.edit.faculty"
+          placeholderKey="profile.edit.faculty"
+          [control]="form.controls.faculty"
+          [floating]="true"
+          [readonly]="true"
+        />
+        <kx-form-field
+          fieldId="profile-department"
+          labelKey="profile.edit.department"
+          placeholderKey="auth.register.departmentPlaceholder"
+          [control]="form.controls.department"
+          [floating]="true"
+          [maxLength]="150"
+        />
         <p class="save-error error-text" role="alert">
           {{ (error() || profiles.readError()) ? t(error() || profiles.readError()) : '' }}
         </p>
@@ -78,36 +110,6 @@
         >
           {{t('media.retry')}}</button
         >}
-        <section class="readonly-section" [attr.aria-label]="t('profile.edit.readonly')">
-          <h2>{{ t('profile.edit.readonly') }}</h2>
-          <label for="profile-username">{{ t('profile.edit.username') }}</label
-          ><input kxInput id="profile-username" readonly [value]="'@'+baseline().username" />
-          <label for="profile-university">{{ t('profile.edit.university') }}</label
-          ><textarea
-            id="profile-university"
-            class="kx-input resize-none"
-            rows="2"
-            readonly
-            [value]="baseline().university || t('dashboard.profile.schoolMissing')"
-          ></textarea>
-          <label for="profile-faculty">{{ t('profile.edit.faculty') }}</label
-          ><textarea
-            id="profile-faculty"
-            class="kx-input resize-none"
-            rows="2"
-            readonly
-            [value]="baseline().faculty || t('profile.facultyMissing')"
-          ></textarea>
-          <label for="profile-department">{{ t('profile.edit.department') }}</label
-          ><textarea
-            id="profile-department"
-            class="kx-input resize-none"
-            rows="2"
-            readonly
-            [value]="baseline().department || t('dashboard.profile.departmentMissing')"
-          ></textarea>
-          <p>{{ t('profile.edit.readonlyHint') }}</p>
-        </section>
         <div class="edit-preferences">
           <kx-language-switcher
             [touch]="true"

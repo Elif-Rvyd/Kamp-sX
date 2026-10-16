@@ -27,6 +27,7 @@ import { ThemeService } from '../../core/theme.service';
 import { LanguageService } from '../../core/language.service';
 import { AuthService } from '../../core/auth.service';
 import { ProfileService } from '../../core/profile.service';
+import { FollowsService } from '../../core/follows.service';
 import { dashboardProfile } from './dashboard-profile';
 import { DashboardTopBarComponent } from './top-bar/top-bar.component';
 import { DashboardProfileDrawerComponent } from './profile-drawer/profile-drawer.component';
@@ -53,6 +54,7 @@ import { DISCOVER_FEEDS, SKELETON_CARDS } from './mock-data';
   styleUrl: './dashboard.page.css',
 })
 export class DashboardPage {
+  readonly follows = inject(FollowsService);
   readonly posts = inject(PostsService);
   private readonly i18n = inject(TranslocoService);
   compose(): void {

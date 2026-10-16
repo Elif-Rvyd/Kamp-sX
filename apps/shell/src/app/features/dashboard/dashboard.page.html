@@ -72,6 +72,9 @@
   <kx-dashboard-profile-drawer
     #profileDrawerView
     [profile]="profile()"
+    [followError]="follows.error()"
+    [followLoading]="follows.loading()"
+    (followRetry)="follows.retry()"
     [logoutBusy]="logoutBusy()"
     [logoutErrorKey]="logoutErrorKey()"
     (logoutRequested)="logout()"

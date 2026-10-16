@@ -41,9 +41,11 @@ async function openProfile(page, language = 'tr', theme = 'light', url = '/profi
     },
     { language, theme, session },
   );
-  await page.route('**/auth/v1/**', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }),
-  );
+  await page.route('**/auth/v1/**', (route) => {
+    if (route.request().method() === 'PUT')
+      user.user_metadata = { ...user.user_metadata, ...route.request().postDataJSON().data };
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) });
+  });
   const backend = [];
   page.on('request', (request) => {
     if (/\/rest\/v1\/|\/storage\/v1\/|\/functions\/v1\//.test(request.url())) backend.push(request.url());
@@ -84,8 +86,10 @@ for (const language of ['tr', 'en'])
       await expect(
         page.getByRole('button', { name: language === 'tr' ? 'Kaydet' : 'Save', exact: true }),
       ).toBeDisabled();
-      for (const id of ['profile-username', 'profile-university', 'profile-faculty', 'profile-department'])
+      for (const id of ['profile-username', 'profile-faculty'])
         await expect(page.locator('#' + id)).toHaveAttribute('readonly', '');
+      for (const id of ['profile-university', 'profile-department'])
+        await expect(page.locator('#' + id)).toBeEditable();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.screenshot({
@@ -93,7 +97,7 @@ for (const language of ['tr', 'en'])
         fullPage: true,
       });
       expect(errors).toEqual([]);
-      expect(backend.requests.filter((r) => r.method !== 'GET')).toEqual([]);
+      expect(backend.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toEqual([]);
     });
   }
 test('drawer contains exactly five items and both entry points close before opening profile', async ({
@@ -201,8 +205,8 @@ test('invalid images show localized errors and names/bios enforce counters and r
   await expect(page.locator('#profile-avatar-file-error')).toContainText('JPG, PNG veya WEBP');
   await page
     .locator('#profile-cover-file')
-    .setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) });
-  await expect(page.locator('#profile-cover-file-error')).toContainText('5 MB');
+    .setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(20 * 1024 * 1024 + 1) });
+  await expect(page.locator('#profile-cover-file-error')).toContainText('20 MB');
   await page
     .locator('#profile-avatar-file')
     .setInputFiles({ name: 'fake.png', mimeType: 'image/png', buffer: Buffer.from('not an image') });
@@ -216,7 +220,7 @@ test('invalid images show localized errors and names/bios enforce counters and r
   await page.locator('#profile-bio').fill('a'.repeat(160));
   await expect(page.locator('#profile-bio-counter')).toHaveText('160 / 160');
   await page.locator('kx-language-switcher button[lang=en]').click();
-  await expect(page.locator('#profile-cover-file-error')).toContainText('5 MB');
+  await expect(page.locator('#profile-cover-file-error')).toContainText('20 MB');
 });
 test('desktop column, live locale/theme and reduced motion keep user content intact', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });

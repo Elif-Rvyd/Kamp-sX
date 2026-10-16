@@ -35,3 +35,7 @@
   bottom: 0;
   right: 0;
 }
+:host .field-readonly .kx-input {
+  background: var(--color-surface-alt);
+  color: var(--color-muted);
+}

@@ -12,7 +12,12 @@ const user = {
   email: 'student@university.edu.tr',
   email_confirmed_at: '2026-01-01T00:00:00Z',
   app_metadata: { provider: 'email' },
-  user_metadata: { username: 'student', full_name: 'Campus Student' },
+  user_metadata: {
+    username: 'student',
+    full_name: 'Campus Student',
+    university_name: 'Campus University',
+    department_name: 'Computer Science',
+  },
   identities: [],
 };
 async function initialize(page, language, theme, signedIn = true) {
@@ -45,10 +50,13 @@ async function initialize(page, language, theme, signedIn = true) {
     },
     { language, theme, session, storageKey, signedIn },
   );
+  const currentUser = structuredClone(user);
   // All production auth traffic is isolated; no live Auth or database mutation occurs.
-  await page.route(`${provider.origin}/auth/v1/**`, (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }),
-  );
+  await page.route(`${provider.origin}/auth/v1/**`, (route) => {
+    if (route.request().method() === 'PUT')
+      currentUser.user_metadata = { ...currentUser.user_metadata, ...route.request().postDataJSON().data };
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(currentUser) });
+  });
   return errors;
 }
 const png = {

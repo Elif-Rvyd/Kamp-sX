@@ -1,10 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
-import { imageDimensions } from '@kampusx/shared/util';
+import { prepareProfileImage, ProfileImageError } from '@kampusx/shared/util';
 import { MediaService } from './media.service';
 import { ProfileRepository } from './profile-repository.service';
 import { PostsService } from './posts.service';
 import { AuthService } from './auth.service';
+import { FollowsService } from './follows.service';
 import { ProfileError, type Profile, type ProfilePost, type ProfileUpdate } from './profile.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,12 +16,18 @@ export class ProfileService {
   private readonly media = inject(MediaService);
   private readonly repository = inject(ProfileRepository);
   private readonly postsApi = inject(PostsService);
+  private readonly follows = inject(FollowsService);
   readonly loading = signal(false);
   readonly readError = signal('');
   private readVersion = 0;
   private readonly files = new Map<string, File>();
   private readonly state = signal<Profile>(this.seed());
-  readonly profile = computed(() => ({ ...this.state(), postCount: this.postsApi.ownCount() }));
+  readonly profile = computed(() => ({
+    ...this.state(),
+    postCount: this.postsApi.ownCount(),
+    followingCount: this.follows.counts().following,
+    followersCount: this.follows.counts().followers,
+  }));
   private ownerId = this.auth.session()?.user.id;
   private ownerEpoch = this.auth.sessionEpoch();
   private readonly objectUrls = new Set<string>();
@@ -31,7 +38,17 @@ export class ProfileService {
     effect(() => {
       const id = this.auth.session()?.user.id;
       const epoch = this.auth.sessionEpoch();
-      if (id === this.ownerId && epoch === this.ownerEpoch) return;
+      if (id === this.ownerId && epoch === this.ownerEpoch) {
+        const identity = this.seed();
+        this.state.update((value) => ({
+          ...value,
+          university: identity.university,
+          department: identity.department,
+          fullName: identity.fullName,
+          bio: identity.bio,
+        }));
+        return;
+      }
       this.readVersion++;
       this.releaseAll();
       this.ownerId = id;
@@ -52,7 +69,7 @@ export class ProfileService {
       id: user?.id || 'mock-student',
       username,
       fullName: value('full_name') || (user ? username : 'Elif Yılmaz'),
-      bio: '',
+      bio: value('bio'),
       avatarUrl: undefined,
       coverUrl: undefined,
       university:
@@ -60,8 +77,8 @@ export class ProfileService {
       faculty: value('faculty_name') || (user ? '' : 'Teknik Bilimler Meslek Yüksekokulu'),
       department: value('department_name') || value('department') || (user ? '' : 'Bilgisayar Programcılığı'),
       joinedAt: '2024-01-12T12:00:00Z',
-      followingCount: 28,
-      followersCount: 4,
+      followingCount: null,
+      followersCount: null,
       postCount: 0,
     };
   }
@@ -78,6 +95,20 @@ export class ProfileService {
     const fullName = payload.fullName.trim();
     if (!fullName || fullName.length > 50) throw new ProfileError('profile.errors.name');
     if (payload.bio.length > 160) throw new ProfileError('profile.errors.bio');
+    const bio = payload.bio.trim();
+    const academic = {
+      university: payload.university ?? current.university,
+      department: payload.department ?? current.department,
+    };
+    for (const field of ['university', 'department'] as const) {
+      if (
+        payload[field] !== undefined &&
+        (typeof payload[field] !== 'string' || !payload[field]!.trim() || payload[field]!.length > 150)
+      )
+        throw new ProfileError(`profile.errors.${field}`);
+    }
+    const academicChanged =
+      academic.university.trim() !== current.university || academic.department.trim() !== current.department;
     const image = (value: string | null | undefined, previous: string | undefined) => {
       if (value === undefined) return previous;
       if (value === null) return undefined;
@@ -95,20 +126,38 @@ export class ProfileService {
         ? (await this.media.upload(this.files.get(cover)!, 'banner', current.id)).url
         : cover;
     this.assertOwner(current.id, 'profile.errors.save', epoch);
+    const detailsChanged = academicChanged || fullName !== current.fullName || bio !== (current.bio || '');
+    if (detailsChanged) {
+      const { error } = await this.auth.updateProfileDetails({ ...academic, fullName, bio });
+      this.assertOwner(current.id, 'profile.errors.save', epoch);
+      if (error) throw new ProfileError('profile.errors.detailsSave');
+      this.state.update((value) => ({
+        ...value,
+        university: academic.university.trim(),
+        department: academic.department.trim(),
+        fullName,
+        bio,
+      }));
+    }
     if (avatar !== current.avatarUrl || cover !== current.coverUrl) {
-      await this.repository.save(current.id, {
-        avatar_url: uploadedAvatar ?? null,
-        banner_url: uploadedCover ?? null,
-      });
+      try {
+        await this.repository.save(current.id, {
+          avatar_url: uploadedAvatar ?? null,
+          banner_url: uploadedCover ?? null,
+        });
+      } catch (error) {
+        if (detailsChanged) throw new ProfileError('profile.errors.partialSave');
+        throw error;
+      }
       this.assertOwner(current.id, 'profile.errors.save', epoch);
     }
     this.readVersion++;
     this.loading.set(false);
     this.readError.set('');
     const next: Profile = {
-      ...current,
+      ...this.state(),
       fullName,
-      bio: payload.bio.trim(),
+      bio,
       avatarUrl: uploadedAvatar,
       coverUrl: uploadedCover,
     };
@@ -120,40 +169,25 @@ export class ProfileService {
     return next;
   }
   async uploadAvatar(file: File): Promise<string> {
-    return this.prepareImage(file);
+    return this.prepareImage(file, 'avatar');
   }
   async uploadCover(file: File): Promise<string> {
-    return this.prepareImage(file);
+    return this.prepareImage(file, 'banner');
   }
-  private async prepareImage(file: File): Promise<string> {
+  private async prepareImage(file: File, purpose: 'avatar' | 'banner'): Promise<string> {
     const owner = this.state().id;
     const epoch = this.ownerEpoch;
     this.assertOwner(owner, 'profile.errors.upload', epoch);
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type))
-      throw new ProfileError('profile.errors.type');
-    if (!file.size || file.size > 5 * 1024 * 1024) throw new ProfileError('profile.errors.size');
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    this.assertOwner(owner, 'profile.errors.upload', epoch);
-    const dimensions = imageDimensions(bytes, file.type);
-    if (!dimensions || !dimensions.width || !dimensions.height)
-      throw new ProfileError('profile.errors.image');
-    if (dimensions.width * dimensions.height > 32_000_000)
-      throw new ProfileError('profile.errors.resolution');
-    const window = this.document.defaultView;
-    if (!window) throw new ProfileError('profile.errors.upload');
-    let bitmap: ImageBitmap;
+    let prepared: File;
     try {
-      bitmap = await window.createImageBitmap(file);
-    } catch {
-      throw new ProfileError('profile.errors.image');
+      prepared = await prepareProfileImage(file, purpose, this.document);
+    } catch (error) {
+      throw new ProfileError(error instanceof ProfileImageError ? error.key : 'profile.errors.upload');
     }
-    const pixels = bitmap.width * bitmap.height;
-    bitmap.close();
-    if (!pixels || pixels > 32_000_000) throw new ProfileError('profile.errors.resolution');
     this.assertOwner(owner, 'profile.errors.upload', epoch);
-    const url = window.URL.createObjectURL(file);
+    const url = this.document.defaultView!.URL.createObjectURL(prepared);
     this.objectUrls.add(url);
-    this.files.set(url, file);
+    this.files.set(url, prepared);
     return url;
   }
   private assertOwner(id: string, key: string, epoch = this.ownerEpoch): void {

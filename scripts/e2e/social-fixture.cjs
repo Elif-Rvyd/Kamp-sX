@@ -43,18 +43,32 @@ async function openSocial(
     ({ language, theme, session }) => {
       localStorage.setItem('kampusx-language', language);
       localStorage.setItem('kampusx-theme', theme);
-      sessionStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
+      if (!sessionStorage.getItem('sb-auth-auth-token'))
+        sessionStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
     },
     { language, theme, session },
   );
-  await page.route('**/auth/v1/**', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }),
-  );
+  const authRequests = [];
+  await page.route('**/auth/v1/**', (route) => {
+    if (route.request().method() === 'PUT') {
+      const payload = route.request().postDataJSON();
+      authRequests.push(payload);
+      if (options.failAcademic)
+        return route.fulfill({
+          status: 403,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'unexpected_failure', msg: 'Update rejected' }),
+        });
+      user.user_metadata = { ...user.user_metadata, ...payload.data };
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) });
+  });
   const backend = [];
   page.on('request', (request) => {
     if (/\/rest\/v1\/|\/storage\/v1\/|\/functions\/v1\//.test(request.url())) backend.push(request.url());
   });
   const social = await mockSocial(page, options);
+  social.authRequests = authRequests;
   await page.goto(url);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);

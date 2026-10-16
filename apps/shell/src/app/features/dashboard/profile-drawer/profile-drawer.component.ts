@@ -1,9 +1,14 @@
 import { ChangeDetectionStrategy, Component, input, output, viewChild } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { AvatarComponent, ButtonComponent, IconComponent, ModalDrawerComponent } from '@kampusx/shared/ui';
+import {
+  AvatarComponent,
+  ButtonComponent,
+  IconComponent,
+  ModalDrawerComponent,
+  FollowCountsComponent,
+} from '@kampusx/shared/ui';
 import { PROFILE_MENU } from '../mock-data';
 import type { DashboardProfile } from '../dashboard-profile';
-import { LocalizedNumberPipe } from '@kampusx/shared/util';
 
 @Component({
   selector: 'kx-dashboard-profile-drawer',
@@ -14,7 +19,7 @@ import { LocalizedNumberPipe } from '@kampusx/shared/util';
     ButtonComponent,
     IconComponent,
     ModalDrawerComponent,
-    LocalizedNumberPipe,
+    FollowCountsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<kx-modal-drawer
@@ -53,13 +58,14 @@ import { LocalizedNumberPipe } from '@kampusx/shared/util';
         <p id="dashboard-profile-department">
           {{ profile().department || t('dashboard.profile.departmentMissing') }}
         </p>
-        <div class="drawer-counts">
-          <span
-            ><strong>{{ profile().followingCount | kxNumber }}</strong> {{ t('profile.following') }}</span
-          ><span
-            ><strong>{{ profile().followersCount | kxNumber }}</strong> {{ t('profile.followers') }}</span
-          >
-        </div>
+        <kx-follow-counts
+          class="drawer-counts"
+          [following]="profile().followingCount"
+          [followers]="profile().followersCount"
+          [loading]="followLoading()"
+          [errorKey]="followError()"
+          (retried)="followRetry.emit()"
+        />
       </div>
       <nav class="profile-menu" [attr.aria-label]="t('dashboard.profileMenu')">
         @for (item of menu; track item.id) {
@@ -100,6 +106,9 @@ import { LocalizedNumberPipe } from '@kampusx/shared/util';
 })
 export class DashboardProfileDrawerComponent {
   readonly profile = input.required<DashboardProfile>();
+  readonly followError = input('');
+  readonly followLoading = input(false);
+  readonly followRetry = output<void>();
   readonly logoutBusy = input(false);
   readonly logoutErrorKey = input('');
   readonly logoutRequested = output<void>();
