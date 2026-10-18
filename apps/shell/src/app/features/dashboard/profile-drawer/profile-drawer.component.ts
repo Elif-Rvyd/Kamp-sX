@@ -1,107 +1,142 @@
-import { ChangeDetectionStrategy, Component, input, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import {
   AvatarComponent,
   ButtonComponent,
   IconComponent,
-  ModalDrawerComponent,
   FollowCountsComponent,
+  LogoComponent,
 } from '@kampusx/shared/ui';
-import { PROFILE_MENU } from '../mock-data';
+import { PROFILE_MENU, BOTTOM_NAV } from '../mock-data';
 import type { DashboardProfile } from '../dashboard-profile';
 
+/** Permanent navigation for authenticated routes; retained at its existing feature path. */
 @Component({
   selector: 'kx-dashboard-profile-drawer',
   standalone: true,
   imports: [
     TranslocoDirective,
+    RouterLink,
+    RouterLinkActive,
     AvatarComponent,
     ButtonComponent,
     IconComponent,
-    ModalDrawerComponent,
     FollowCountsComponent,
+    LogoComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<kx-modal-drawer
-    #drawer
-    drawerId="dashboard-profile-drawer"
-    labelledBy="dashboard-profile-name"
-    describedBy="dashboard-profile-school dashboard-profile-department"
-    (changed)="onChanged($event)"
-  >
-    <div class="profile-content" *transloco="let t">
-      <div class="drawer-top">
-        <button
-          type="button"
-          class="profile-avatar-link"
-          [attr.aria-label]="t('profile.drawer.open', { name: profile().fullName })"
-          (click)="goToProfile()"
-        >
-          <kx-avatar [initials]="profile().initials" [src]="profile().avatarUrl" size="large" />
-        </button>
-        <button
-          type="button"
-          data-drawer-close
-          class="close-button"
-          [attr.aria-label]="t('dashboard.closeProfile')"
-          (click)="drawer.close()"
-        >
-          <kx-icon name="close" />
-        </button>
-      </div>
-      <div class="profile-details">
-        <button type="button" class="profile-name-link" (click)="goToProfile()">
-          <h2 id="dashboard-profile-name">{{ profile().fullName }}</h2>
-          <span class="profile-handle">{{ profile().handle }}</span>
-        </button>
-        <p id="dashboard-profile-school">{{ profile().school || t('dashboard.profile.schoolMissing') }}</p>
-        <p id="dashboard-profile-department">
-          {{ profile().department || t('dashboard.profile.departmentMissing') }}
-        </p>
-        <kx-follow-counts
-          class="drawer-counts"
-          [following]="profile().followingCount"
-          [followers]="profile().followersCount"
-          [loading]="followLoading()"
-          [errorKey]="followError()"
-          (retried)="followRetry.emit()"
-        />
-      </div>
-      <nav class="profile-menu" [attr.aria-label]="t('dashboard.profileMenu')">
-        @for (item of menu; track item.id) {
-          @if (item.id === 'settings') {
-            <div class="menu-divider" aria-hidden="true"></div>
-          }
+  template: `<aside class="profile-content" *transloco="let t" [attr.aria-label]="t('dashboard.profileMenu')">
+    <a class="sidebar-brand" routerLink="/dashboard" [attr.aria-label]="t('dashboard.nav.home')">
+      <kx-logo class="sidebar-wordmark" />
+      <img class="sidebar-mark" src="assets/logo.svg" width="36" height="36" alt="" />
+    </a>
+    <button
+      type="button"
+      class="profile-avatar-link"
+      [attr.aria-label]="t('profile.drawer.open', { name: profile().fullName })"
+      [title]="t('profile.drawer.profile')"
+      (click)="profileRequested.emit()"
+    >
+      <kx-avatar [initials]="profile().initials" [src]="profile().avatarUrl" />
+      <span class="profile-identity"
+        ><strong>{{ profile().fullName }}</strong
+        ><span>{{ profile().handle }}</span></span
+      >
+    </button>
+    <div class="profile-details">
+      <p>{{ profile().school || t('dashboard.profile.schoolMissing') }}</p>
+      <p>{{ profile().department || t('dashboard.profile.departmentMissing') }}</p>
+      <kx-follow-counts
+        followingLink="/profile/following"
+        followersLink="/profile/followers"
+        class="drawer-counts"
+        [following]="profile().followingCount"
+        [followers]="profile().followersCount"
+        [loading]="followLoading()"
+        [errorKey]="followError()"
+        (retried)="followRetry.emit()"
+      />
+    </div>
+    <nav class="profile-menu" [attr.aria-label]="t('dashboard.navigationLabel')">
+      @for (item of primary; track item.id) {
+        @if (item.id === 'home' || item.id === 'search') {
+          <a
+            class="profile-menu-item"
+            [routerLink]="item.id === 'home' ? '/dashboard' : '/search'"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="t(item.key)"
+            [title]="t(item.key)"
+          >
+            <kx-icon [name]="item.icon || 'home'" /><span class="menu-label">{{ t(item.key) }}</span>
+          </a>
+        } @else {
           <button
             type="button"
             class="profile-menu-item"
-            [attr.aria-disabled]="item.id === 'profile' ? null : true"
-            [attr.aria-describedby]="item.id === 'profile' ? null : 'dashboard-menu-note'"
-            (click)="item.id === 'profile' && goToProfile()"
+            disabled
+            [attr.aria-label]="t(item.key)"
+            [title]="t(item.key)"
           >
-            <kx-icon [name]="item.icon" /><span>{{ t(item.key) }}</span
-            ><kx-icon name="chevron_right" />
+            <kx-icon [name]="item.icon || 'home'" /><span class="menu-label">{{ t(item.key) }}</span>
           </button>
         }
-      </nav>
-      <p class="sr-only" id="dashboard-menu-note">{{ t('dashboard.visualOnly') }}</p>
-      <div class="logout-section">
-        <button
-          kxButton
-          type="button"
-          emphasis="outline"
-          class="full-width logout-button"
-          [busy]="logoutBusy()"
-          (click)="logoutRequested.emit()"
-        >
-          <kx-icon name="logout" />{{ t('dashboard.logout') }}
-        </button>
-        @if (logoutErrorKey()) {
-          <p class="field-message error-text" role="alert">{{ t(logoutErrorKey()) }}</p>
+      }
+      <div class="menu-divider" aria-hidden="true"></div>
+      @for (item of menu; track item.id) {
+        @if (item.id === 'profile' || item.id === 'settings') {
+          <a
+            class="profile-menu-item"
+            [routerLink]="item.id === 'profile' ? '/profile' : '/settings'"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="t(item.key)"
+            [title]="t(item.key)"
+          >
+            <kx-icon [name]="item.icon" /><span class="menu-label">{{ t(item.key) }}</span>
+          </a>
+        } @else {
+          <button
+            type="button"
+            class="profile-menu-item"
+            disabled
+            [attr.aria-label]="t(item.key)"
+            [title]="t(item.key)"
+          >
+            <kx-icon [name]="item.icon" /><span class="menu-label">{{ t(item.key) }}</span>
+          </button>
         }
-      </div>
+      }
+      <button
+        kxButton
+        type="button"
+        class="compose-link"
+        (click)="composeRequested.emit()"
+        [attr.aria-label]="t('posts.publish')"
+        [title]="t('posts.publish')"
+      >
+        <kx-icon name="add" /><span class="menu-label">{{ t('posts.publish') }}</span>
+      </button>
+    </nav>
+    <div class="logout-section">
+      <button
+        kxButton
+        type="button"
+        emphasis="ghost"
+        class="logout-button"
+        [busy]="logoutBusy()"
+        [attr.aria-label]="t('dashboard.logout')"
+        [title]="t('dashboard.logout')"
+        (click)="logoutRequested.emit()"
+      >
+        <kx-icon name="logout" /><span class="menu-label">{{ t('dashboard.logout') }}</span>
+      </button>
+      @if (logoutErrorKey()) {
+        <p class="field-message error-text" role="alert">{{ t(logoutErrorKey()) }}</p>
+      }
     </div>
-  </kx-modal-drawer>`,
+  </aside>`,
   styleUrl: './profile-drawer.component.css',
 })
 export class DashboardProfileDrawerComponent {
@@ -113,25 +148,7 @@ export class DashboardProfileDrawerComponent {
   readonly logoutErrorKey = input('');
   readonly logoutRequested = output<void>();
   readonly profileRequested = output<void>();
+  readonly composeRequested = output<void>();
   readonly menu = PROFILE_MENU;
-  readonly changed = output<boolean>();
-  private readonly drawer = viewChild.required<ModalDrawerComponent>('drawer');
-  private pendingProfile = false;
-  goToProfile(): void {
-    this.pendingProfile = true;
-    this.drawer().close();
-  }
-  onChanged(open: boolean): void {
-    this.changed.emit(open);
-    if (!open && this.pendingProfile) {
-      this.pendingProfile = false;
-      this.profileRequested.emit();
-    }
-  }
-  open(): void {
-    this.drawer().open();
-  }
-  close(): void {
-    this.drawer().close();
-  }
+  readonly primary = BOTTOM_NAV;
 }

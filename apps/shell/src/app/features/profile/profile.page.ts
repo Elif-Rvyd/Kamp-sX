@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   inject,
@@ -9,14 +10,19 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { ButtonComponent, IconButtonComponent, IconComponent, TabStripComponent } from '@kampusx/shared/ui';
+import { ButtonComponent, TabStripComponent } from '@kampusx/shared/ui';
 import { PostsService } from '../../core/posts.service';
-import { filterProfilePosts, horizontalSwipe, swipePoint, type SwipePoint } from '@kampusx/shared/util';
+import {
+  filterProfilePosts,
+  horizontalSwipe,
+  SwipeClickGuard,
+  swipePoint,
+  type SwipePoint,
+} from '@kampusx/shared/util';
 import { ProfileService } from '../../core/profile.service';
 import { FollowsService } from '../../core/follows.service';
 import { LanguageService } from '../../core/language.service';
 import { ThemeService } from '../../core/theme.service';
-import { DashboardBottomNavComponent } from '../dashboard/bottom-nav/bottom-nav.component';
 import { ProfileHeaderComponent } from './components/profile-header.component';
 import { ProfilePostListComponent } from './components/profile-post-list.component';
 import { bindProfilePage } from './profile-page-context';
@@ -25,10 +31,7 @@ import { bindProfilePage } from './profile-page-context';
   imports: [
     TranslocoDirective,
     ButtonComponent,
-    IconButtonComponent,
-    IconComponent,
     TabStripComponent,
-    DashboardBottomNavComponent,
     ProfileHeaderComponent,
     ProfilePostListComponent,
   ],
@@ -52,30 +55,36 @@ export class ProfilePage {
   ];
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private swipe: SwipePoint | null = null;
+  private readonly swipeClick = new SwipeClickGuard();
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.swipeClick.reset());
     bindProfilePage('profile.title');
   }
   edit(): void {
     void this.router.navigateByUrl('/profile/edit');
   }
-  compose(): void {
-    void this.router.navigateByUrl('/compose');
-  }
   back(): void {
     void this.router.navigateByUrl('/dashboard');
   }
   pointerDown(event: PointerEvent): void {
+    this.swipeClick.reset();
+    if ((event.target as Element).closest('input,textarea,video,[role="menu"]')) {
+      this.swipe = null;
+      return;
+    }
     if (!event.isPrimary || !['touch', 'pen'].includes(event.pointerType)) {
       this.swipe = null;
       return;
     }
     this.swipe = swipePoint(event);
-    this.viewport().nativeElement.setPointerCapture(event.pointerId);
   }
   pointerUp(event: PointerEvent): void {
     const direction = horizontalSwipe(this.swipe, swipePoint(event));
     this.swipe = null;
-    if (direction) this.active.set(Math.max(0, Math.min(2, this.active() + direction)));
+    if (direction) {
+      this.swipeClick.block(this.viewport().nativeElement);
+      this.active.set(Math.max(0, Math.min(2, this.active() + direction)));
+    }
   }
   cancelSwipe(): void {
     this.swipe = null;

@@ -25,3 +25,5 @@ export * from './molecules/follow-counts/follow-counts.component';
 export * from './molecules/toast/toast.component';
 export * from './organisms/confirm-dialog/confirm-dialog.component';
 export * from './organisms/social-post-card/social-post-card.component';
+export * from './molecules/action-menu/action-menu.component';
+export { FollowPersonComponent } from './molecules/follow-person/follow-person.component';

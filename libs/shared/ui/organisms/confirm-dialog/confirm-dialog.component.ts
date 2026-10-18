@@ -25,6 +25,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   >
     <h2 [id]="dialogId() + '-title'">{{ t(titleKey()) }}</h2>
     <p [id]="dialogId() + '-body'">{{ t(bodyKey()) }}</p>
+    <ng-content />
     <div class="actions">
       <button #keep kxButton type="button" emphasis="outline" (click)="finish(false)">
         {{ t(cancelKey()) }}</button

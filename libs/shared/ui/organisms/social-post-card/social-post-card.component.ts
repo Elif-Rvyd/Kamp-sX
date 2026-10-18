@@ -1,15 +1,24 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { LocalizedNumberPipe, profileInitials, type PostAuthor, type SocialPost } from '@kampusx/shared/util';
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
+import { ActionMenuComponent, type ActionMenuItem } from '../../molecules/action-menu/action-menu.component';
+export type PostAction =
+  'like' | 'bookmark' | 'comments' | 'delete' | 'pin' | 'archive' | 'restore' | 'report' | 'block';
 @Component({
   selector: 'kx-social-post-card',
   standalone: true,
-  imports: [TranslocoDirective, LocalizedNumberPipe, AvatarComponent, IconComponent],
+  imports: [TranslocoDirective, LocalizedNumberPipe, AvatarComponent, IconComponent, ActionMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './social-post-card.component.css',
   template: `<article class="social-post" *transloco="let t" [attr.data-kind]="post().kind">
+    @if (post().pinSlot) {
+      <p class="post-kind"><kx-icon name="push_pin" />{{ t('social.pinned') }}</p>
+    }
+    @if (post().deletionPending) {
+      <p class="post-kind">{{ t('social.pendingDelete') }}</p>
+    }
     @if (post().kind !== 'post') {
       <p class="post-kind">
         <kx-icon [name]="post().kind === 'reply' ? 'reply' : 'repeat'" />{{
@@ -30,7 +39,11 @@ import { IconComponent } from '../../atoms/icon/icon.component';
           }
         </p>
       </div>
-      <kx-icon name="more_horiz" />
+      <kx-action-menu
+        [items]="menuItems()"
+        [disabled]="busy() || !post().userId"
+        (selected)="menuSelected($event)"
+      />
     </div>
     <p class="post-text">{{ post().text }}</p>
     @if (post().mediaUrl && post().mediaType === 'video') {
@@ -56,9 +69,21 @@ import { IconComponent } from '../../atoms/icon/icon.component';
       @for (action of actions; track action.id) {
         <button
           type="button"
-          aria-disabled="true"
+          [disabled]="
+            busy() ||
+            !interactive(action.id) ||
+            ((action.id === 'like' || action.id === 'bookmark') && !reactionsReady()) ||
+            !!post().archivedAt ||
+            post().deletionPending
+          "
+          [class.selected]="
+            action.id === 'like' ? post().liked : action.id === 'bookmark' && post().bookmarked
+          "
+          [attr.aria-pressed]="
+            action.id === 'like' ? !!post().liked : action.id === 'bookmark' ? !!post().bookmarked : null
+          "
           [attr.aria-label]="t(action.labelKey)"
-          [attr.aria-describedby]="'profile-post-note-' + post().id"
+          (click)="activate(action.id)"
         >
           <kx-icon [name]="action.icon" />
           @if (action.stat) {
@@ -67,13 +92,59 @@ import { IconComponent } from '../../atoms/icon/icon.component';
         </button>
       }
     </div>
-    <p class="sr-only" [id]="'profile-post-note-' + post().id">{{ t('profile.content.visualOnly') }}</p>
   </article>`,
 })
 export class SocialPostCardComponent {
   readonly post = input.required<SocialPost>();
   readonly author = input.required<PostAuthor>();
   readonly language = input('tr');
+  readonly ownerId = input('');
+  readonly busy = input(false);
+  readonly reactionsReady = input(false);
+  readonly action = output<PostAction>();
+  readonly own = computed(() => !!this.ownerId() && this.post().userId === this.ownerId());
+  readonly menuItems = computed<readonly ActionMenuItem[]>(() =>
+    this.own()
+      ? this.post().deletionPending
+        ? [{ id: 'delete', labelKey: 'social.menu.retryDelete', icon: 'delete', danger: true }]
+        : [
+            ...(!this.post().archivedAt
+              ? [
+                  {
+                    id: 'pin',
+                    labelKey: this.post().pinSlot ? 'social.menu.unpin' : 'social.menu.pin',
+                    icon: 'push_pin',
+                  },
+                ]
+              : []),
+            {
+              id: this.post().archivedAt ? 'restore' : 'archive',
+              labelKey: this.post().archivedAt ? 'social.menu.restore' : 'social.menu.archive',
+              icon: 'archive',
+            },
+            { id: 'delete', labelKey: 'social.menu.delete', icon: 'delete', danger: true },
+          ]
+      : [
+          {
+            id: 'bookmark',
+            labelKey: this.post().bookmarked ? 'social.menu.unbookmark' : 'social.menu.bookmark',
+            icon: 'bookmark',
+            disabled: !this.reactionsReady(),
+          },
+          { id: 'report', labelKey: 'social.menu.report', icon: 'flag' },
+          { id: 'block', labelKey: 'social.menu.block', icon: 'block', danger: true },
+        ],
+  );
+  interactive(id: string): boolean {
+    return ['reply', 'like', 'bookmark'].includes(id);
+  }
+  activate(id: string): void {
+    if (!this.busy() && this.interactive(id))
+      this.action.emit(id === 'reply' ? 'comments' : (id as PostAction));
+  }
+  menuSelected(id: string): void {
+    if (!this.busy() && this.menuItems().some((item) => item.id === id)) this.action.emit(id as PostAction);
+  }
   readonly initials = computed(() => profileInitials(this.author().fullName));
   readonly date = computed(() =>
     this.post().createdAt

@@ -73,13 +73,21 @@ video.post-media {
   border-radius: var(--radius-control);
   background: transparent;
   color: var(--color-muted);
-  cursor: default;
+  cursor: pointer;
 }
 .post-actions button:hover {
   background: var(--color-surface-alt);
 }
 .post-actions span {
   font-size: 10px;
+}
+.post-actions button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.post-actions button.selected {
+  color: var(--color-primary);
+  background: var(--color-soft-primary);
 }
 @media (max-width: 640px) {
   .social-post {

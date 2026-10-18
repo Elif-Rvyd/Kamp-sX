@@ -216,7 +216,7 @@
     "content": "Your post",
     "placeholder": "What’s happening on campus?",
     "attach": "Add photo or video",
-    "fileHint": "JPG, PNG, WEBP: 5 MB · MP4, WEBM: 50 MB",
+    "fileHint": "Photos are resized automatically. MP4/WEBM videos over 50 MB are compressed before upload, keeping their full duration.",
     "publish": "Publish",
     "saved": "Your post was published.",
     "loading": "Loading posts…",
@@ -224,7 +224,12 @@
     "author": "KampüsX student",
     "discardTitle": "Discard this post?",
     "discardText": "Your unsaved text and file selection will be discarded.",
-    "navigation": "Your post was published. Use Cancel to return to your feed."
+    "navigation": "Your post was published. Use Cancel to return to your feed.",
+    "mediaPreparing": "Preparing media…",
+    "videoCompressing": "Compressing video… {{progress}}%",
+    "cancelPreparation": "Cancel preparation",
+    "mediaUploading": "Uploading file…",
+    "mediaSaving": "Saving post…"
   },
   "universities": {
     "itu": "Istanbul Technical University",
@@ -336,7 +341,7 @@
   },
   "dashboard": {
     "title": "Home — KampüsX",
-    "openProfile": "Open profile menu",
+    "openProfile": "Open your profile",
     "closeProfile": "Close profile menu",
     "profileMenu": "Profile menu",
     "discoverLabel": "Discovery feeds",
@@ -494,6 +499,10 @@
       "type": "Choose JPG, PNG, WEBP, MP4 or WEBM. Profile photos accept images only.",
       "imageSize": "Images must be 5 MB or smaller.",
       "videoSize": "Videos must be 50 MB or smaller.",
+      "videoSourceSize": "The source video must be 512 MB or smaller. Choose a smaller file.",
+      "videoDuration": "Automatic compression supports videos up to 30 minutes. Choose a shorter video.",
+      "videoUnsupported": "Your browser cannot compress this video while keeping its audio. Use an updated browser or choose a video under 50 MB.",
+      "videoCompression": "The video could not be compressed. Try again or choose a smaller video.",
       "invalidVideo": "Choose a valid MP4 or WEBM file.",
       "session": "Your session could not be verified. Sign in again.",
       "upload": "The file could not be uploaded. Check your connection and upload permissions, then try again.",
@@ -516,6 +525,137 @@
     "label": "Follow information",
     "readError": "Follow counts could not be loaded.",
     "liveError": "Live updates are unavailable. Counts may be out of date.",
-    "saveError": "The follow action could not be completed. Try again."
+    "saveError": "The follow action could not be completed. Try again.",
+    "titles": {
+      "followers": "Followers",
+      "following": "Following",
+      "requests": "Follow requests"
+    },
+    "actions": {
+      "follow": "Follow",
+      "cancel": "Cancel request",
+      "unfollow": "Unfollow",
+      "accept": "Accept",
+      "reject": "Decline",
+      "remove": "Remove follower"
+    },
+    "empty": {
+      "followers": "You have no followers yet.",
+      "following": "You are not following anyone yet.",
+      "requests": "You have no pending follow requests."
+    },
+    "navigation": "Follow connections",
+    "unnamed": "KampüsX user",
+    "personActions": "Follow actions for {{name}}",
+    "searchLabel": "Find by username",
+    "searchPlaceholder": "username",
+    "search": "Find",
+    "searchResult": "Matching user",
+    "noPerson": "No accessible profile was found for this username.",
+    "listLoading": "Loading connections…",
+    "listError": "Connections could not be loaded. Try again.",
+    "changed": "This connection changed in another session. Refresh the list and try again.",
+    "saved": "Follow details updated.",
+    "unavailable": "Follow actions are currently unavailable. Try again."
+  },
+  "social": {
+    "settings": "Settings and privacy",
+    "back": "Back",
+    "cancel": "Cancel",
+    "loadMore": "Show more",
+    "pinned": "Pinned to profile",
+    "pendingDelete": "Deletion is waiting to finish",
+    "menu": {
+      "label": "Post options",
+      "delete": "Delete",
+      "retryDelete": "Finish deletion",
+      "pin": "Pin to profile",
+      "unpin": "Unpin",
+      "archive": "Archive",
+      "restore": "Restore from archive",
+      "report": "Report",
+      "bookmark": "Bookmark",
+      "unbookmark": "Remove bookmark",
+      "block": "Block this person"
+    },
+    "delete": {
+      "title": "Delete post?",
+      "body": "This post and its media file will be permanently deleted. This cannot be undone."
+    },
+    "block": {
+      "title": "Block this person?",
+      "body": "You will no longer see each other’s profile or posts in the app, or be able to follow or interact. Following connections in both directions will be removed."
+    },
+    "report": {
+      "title": "Report post",
+      "body": "Choose a reason. You can submit one report per post.",
+      "reason": "Report reason",
+      "spam": "Spam",
+      "harassment": "Harassment",
+      "inappropriate": "Inappropriate content",
+      "other": "Other"
+    },
+    "archive": {
+      "title": "My archive",
+      "empty": "Your archive is empty",
+      "description": "Archived posts are visible only to you here. You can also retry unfinished deletions here."
+    },
+    "bookmarks": {
+      "title": "Bookmarks",
+      "empty": "No bookmarked posts",
+      "description": "Use the bookmark button on posts to build your reading list."
+    },
+    "blocked": {
+      "title": "Blocked people",
+      "empty": "You have not blocked anyone",
+      "unblock": "Unblock",
+      "unblockTitle": "Unblock this person?",
+      "unblockBody": "Content allowed by your privacy settings will become visible again. Previous following connections will not be restored automatically."
+    },
+    "search": {
+      "title": "Search",
+      "label": "Search posts",
+      "placeholder": "Enter a word or topic",
+      "clear": "Clear search",
+      "submit": "Search",
+      "hint": "Enter at least 2 characters to search",
+      "empty": "No matching posts",
+      "limit": "Showing the 30 most recent results. Try a more specific search."
+    },
+    "thread": {
+      "title": "Post",
+      "label": "Write a comment",
+      "send": "Comment",
+      "reply": "Reply",
+      "replying": "Replying to",
+      "you": "You",
+      "empty": "No comments yet. Start the conversation.",
+      "discardTitle": "Discard comment?",
+      "discardBody": "Your unsent comment will be lost.",
+      "keep": "Keep writing",
+      "discard": "Discard"
+    },
+    "errors": {
+      "unavailable": "This content is unavailable or you do not have permission for this action.",
+      "save": "The action could not be saved. Check your connection and try again.",
+      "read": "Could not load this information. Try again.",
+      "cleanup": "Media cleanup failed, so the post was not deleted. Retry from My archive.",
+      "pinLimit": "You can pin up to 3 posts to your profile.",
+      "setup": "The database setup for this feature has not been completed.",
+      "comment": "Comments must contain 1–2000 characters. If sending fails, your text is preserved for retry.",
+      "busy": "Wait for the previous action on this post to finish."
+    },
+    "notice": {
+      "deleted": "Post deleted.",
+      "pinned": "Post pinned to profile.",
+      "unpinned": "Post unpinned.",
+      "archived": "Post archived.",
+      "restored": "Post restored.",
+      "blocked": "Person blocked.",
+      "unblocked": "Person unblocked.",
+      "reported": "Report received.",
+      "alreadyReported": "You have already reported this post.",
+      "commented": "Comment sent."
+    }
   }
 }

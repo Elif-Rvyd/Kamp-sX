@@ -23,9 +23,7 @@ import {
       <button
         type="button"
         class="avatar-button"
-        aria-controls="dashboard-profile-drawer"
         [attr.aria-label]="t('dashboard.openProfile')"
-        [attr.aria-expanded]="drawerOpen()"
         (click)="profileOpened.emit()"
       >
         <kx-avatar [initials]="initials()" [src]="avatarUrl()" />
@@ -45,7 +43,6 @@ import {
 export class DashboardTopBarComponent {
   readonly initials = input.required<string>();
   readonly avatarUrl = input<string>();
-  readonly drawerOpen = input(false);
   readonly language = input('tr');
   readonly dark = input(false);
   readonly profileOpened = output<void>();

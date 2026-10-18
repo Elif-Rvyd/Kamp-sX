@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const ts = require('typescript');
+const { imageCanvas } = require('./fixtures/image-canvas.cjs');
 const root = path.resolve(__dirname, '..');
 function signal(value) {
   const read = () => value;
@@ -126,6 +127,7 @@ function harness() {
     [
       DOCUMENT,
       {
+        createElement: imageCanvas,
         defaultView: {
           createImageBitmap: async () => {
             decoded++;

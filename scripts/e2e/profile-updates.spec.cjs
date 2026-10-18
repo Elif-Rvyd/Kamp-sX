@@ -106,25 +106,26 @@ test('large profile images resize locally before upload; display metadata surviv
   await expect(page.locator('.profile-bio')).toHaveText('Kalıcı bio');
 });
 test('follow counts update through the private SDK broadcast in profile and drawer', async ({ page }) => {
-  const state = await openSocial(page, 'tr', 'light', '/profile', 390, { following: 2, followers: 5 });
-  await expect(page.locator('kx-follow-counts strong')).toHaveText(['2', '5']);
-  await expect(page.locator('kx-follow-counts .counts-status')).toHaveCount(0);
+  const state = await openSocial(page, 'tr', 'light', '/profile', 1440, { following: 2, followers: 5 });
+  await expect(page.locator('kx-profile-header kx-follow-counts strong')).toHaveText(['2', '5']);
+  await expect(page.locator('kx-profile-header kx-follow-counts .counts-status')).toHaveCount(0);
   state.following = 3;
   state.followers = 8;
   state.broadcastFollows();
-  await expect(page.locator('kx-follow-counts strong')).toHaveText(['3', '8']);
+  await expect(page.locator('kx-profile-header kx-follow-counts strong')).toHaveText(['3', '8']);
   await page.getByRole('button', { name: 'Ana sayfaya dön' }).click();
-  await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
-  await expect(page.getByRole('dialog').locator('kx-follow-counts strong')).toHaveText(['3', '8']);
+  await expect(page.locator('.profile-content kx-follow-counts strong')).toHaveText(['3', '8']);
   state.followers = 9;
   state.broadcastFollows();
-  await expect(page.getByRole('dialog').locator('kx-follow-counts strong')).toHaveText(['3', '9']);
+  await expect(page.locator('.profile-content kx-follow-counts strong')).toHaveText(['3', '9']);
 });
 test('missing follow permissions show unknown counts and a safe retry, never hardcoded follower counts', async ({
   page,
 }) => {
   await openSocial(page, 'tr', 'dark', '/profile', 390, { failFollows: true });
-  await expect(page.locator('kx-follow-counts strong')).toHaveText(['—', '—']);
-  await expect(page.locator('kx-follow-counts [role=status]')).toContainText('Takip sayıları yüklenemedi');
-  await expect(page.locator('kx-follow-counts button')).toBeEnabled();
+  await expect(page.locator('kx-profile-header kx-follow-counts strong')).toHaveText(['—', '—']);
+  await expect(page.locator('kx-profile-header kx-follow-counts [role=status]')).toContainText(
+    'Takip sayıları yüklenemedi',
+  );
+  await expect(page.locator('kx-profile-header kx-follow-counts button')).toBeEnabled();
 });

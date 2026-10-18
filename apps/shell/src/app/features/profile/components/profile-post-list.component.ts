@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { IconComponent, SocialPostCardComponent } from '@kampusx/shared/ui';
+import { IconComponent } from '@kampusx/shared/ui';
+import { PostEntryComponent } from '../../posts/post-entry.component';
 import type { Profile, ProfilePost } from '../../../core/profile.model';
 @Component({
   selector: 'kx-profile-post-list',
   standalone: true,
-  imports: [TranslocoDirective, IconComponent, SocialPostCardComponent],
+  imports: [TranslocoDirective, IconComponent, PostEntryComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-container *transloco="let t">
     @for (post of posts(); track post.id) {
-      <kx-social-post-card [post]="post" [author]="profile()" [language]="language()" />
+      <kx-post-entry [post]="post" [author]="profile()" />
     } @empty {
       <div class="empty-state">
         <kx-icon name="forum" />

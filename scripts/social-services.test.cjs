@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const ts = require('typescript');
+const { imageCanvas } = require('./fixtures/image-canvas.cjs');
 const root = path.resolve(__dirname, '..');
 const OWNER = '11111111-1111-4111-8111-111111111111';
 const signal = (value) => {
@@ -55,6 +56,7 @@ function harness() {
             'maybeSingle',
             'single',
             'eq',
+            'is',
             'insert',
             'update',
           ])
@@ -83,6 +85,7 @@ function harness() {
     [
       DOCUMENT,
       {
+        createElement: imageCanvas,
         defaultView: {
           crypto: { randomUUID: () => 'random-id' },
           createImageBitmap: async () => {
@@ -110,19 +113,29 @@ function harness() {
     if (modules.has(filename)) return modules.get(filename);
     const exports = {};
     modules.set(filename, exports);
-    const js = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-      compilerOptions: {
-        target: ts.ScriptTarget.ES2022,
-        module: ts.ModuleKind.CommonJS,
-        experimentalDecorators: true,
+    const js = ts.transpileModule(
+      fs
+        .readFileSync(filename, 'utf8')
+        .replaceAll('import.meta.url', JSON.stringify('file:///post-video-test.js')),
+      {
+        compilerOptions: {
+          target: ts.ScriptTarget.ES2022,
+          module: ts.ModuleKind.CommonJS,
+          experimentalDecorators: true,
+        },
       },
-    }).outputText;
+    ).outputText;
     new Function('require', 'exports', js)((specifier) => {
       if (specifier === '@angular/core') return angular;
       if (specifier === '@angular/common') return { DOCUMENT };
       if (specifier === './auth.service') return { AuthService };
       if (specifier === './supabase.service') return { SupabaseService };
-      if (specifier === '@kampusx/shared/util') return load('libs/shared/util/image-header.ts');
+      if (specifier === '@kampusx/shared/util')
+        return {
+          ...load('libs/shared/util/image-header.ts'),
+          ...load('libs/shared/util/profile-image.ts'),
+          ...load('libs/shared/util/post-video.ts'),
+        };
       if (specifier.startsWith('.'))
         return load(path.relative(root, path.resolve(path.dirname(filename), specifier + '.ts')));
       throw Error(`Unmocked dependency ${specifier}`);
@@ -261,15 +274,87 @@ test('text posts use the current user_id and the four declared payload fields', 
 });
 test('image upload completes before a post stores its public URL', async () => {
   const h = harness(),
-    url = h.base + OWNER + '/post/random-id.png';
+    url = h.base + OWNER + '/post/random-id.webp';
   h.results.push({
     data: { id: 'p', user_id: OWNER, content: '', media_url: url, media_type: 'image' },
     error: null,
     status: 201,
   });
-  await h.posts.publish('', png());
+  const stages = [];
+  await h.posts.publish('', png(), (stage) => stages.push(stage));
+  assert.deepEqual(stages, ['preparing', 'uploading', 'saving']);
   assert.equal(h.calls[0].kind, 'upload');
   assert.deepEqual(h.calls[1].insert, [{ user_id: OWNER, content: '', media_url: url, media_type: 'image' }]);
+});
+
+test('a mismatched saved media URL or owner cannot produce a false publication success', async () => {
+  for (const changed of [
+    { user_id: 'other' },
+    { media_url: 'data:image/png;base64,invalid' },
+    { media_type: 'video' },
+    { content: 'unexpected' },
+  ]) {
+    const h = harness();
+    h.results.push({
+      data: {
+        id: 'saved',
+        user_id: OWNER,
+        content: 'Hello',
+        media_url: h.base + OWNER + '/post/random-id.webp',
+        media_type: 'image',
+        ...changed,
+      },
+      error: null,
+      status: 201,
+    });
+    await assert.rejects(h.posts.publish('Hello', png()), { key: 'media.errors.uncertain' });
+    assert.equal(h.posts.feed().length, 0);
+    assert.equal(h.calls.filter((call) => call.insert).length, 1);
+  }
+});
+
+test('feed media must match the post owner, post folder and declared media type', async () => {
+  const h = harness();
+  const rows = [
+    {
+      id: 'valid',
+      user_id: OWNER,
+      content: '',
+      media_url: h.base + OWNER + '/post/photo.png',
+      media_type: 'image',
+    },
+    {
+      id: 'avatar',
+      user_id: OWNER,
+      content: '',
+      media_url: h.base + OWNER + '/avatar/photo.png',
+      media_type: 'image',
+    },
+    {
+      id: 'foreign',
+      user_id: OWNER,
+      content: '',
+      media_url: h.base + 'other/post/photo.png',
+      media_type: 'image',
+    },
+    {
+      id: 'type',
+      user_id: OWNER,
+      content: '',
+      media_url: h.base + OWNER + '/post/video.webm',
+      media_type: 'image',
+    },
+    { id: 'blob', user_id: OWNER, content: '', media_url: 'blob:local-preview', media_type: 'image' },
+  ];
+  h.results.push({ data: rows, error: null, count: 5 }, { data: rows, error: null, count: 5 });
+  await h.posts.load();
+  assert.equal(h.posts.feed()[0].mediaUrl, rows[0].media_url);
+  assert.ok(
+    h.posts
+      .feed()
+      .slice(1)
+      .every((row) => row.mediaUrl === undefined),
+  );
 });
 test('upload failure never creates a post; ambiguous database outcomes are never blindly retried', async () => {
   const h = harness();

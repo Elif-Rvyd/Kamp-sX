@@ -1,0 +1,138 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.page {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  min-height: 100dvh;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-inline: 1px solid var(--color-border);
+}
+header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 8px;
+  align-items: center;
+  min-height: 64px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+header a {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+header a:hover {
+  background: var(--color-surface-alt);
+}
+h1 {
+  font: 800 18px var(--font-sans);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.page-content {
+  padding: 20px;
+}
+.status {
+  min-height: 64px;
+  padding: 20px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.status.error-text {
+  color: var(--color-danger);
+}
+.empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--color-muted);
+}
+.empty h2 {
+  margin-bottom: 12px;
+  color: var(--color-text);
+  font-size: 18px;
+}
+.list-link,
+.person {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  min-height: 64px;
+  border-bottom: 1px solid var(--color-border);
+}
+.list-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+.list-link:hover {
+  background: var(--color-surface-alt);
+}
+.list-link span,
+.person span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.list-link kx-icon {
+  color: var(--color-primary);
+}
+.person button {
+  flex-shrink: 0;
+}
+.more {
+  padding: 20px;
+  text-align: center;
+}
+form {
+  padding: 20px;
+}
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.comment {
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 20px;
+  overflow-wrap: anywhere;
+}
+.comment.reply {
+  margin-inline-start: 24px;
+  border-inline-start: 2px solid var(--color-border);
+}
+.comment p {
+  margin-block: 12px;
+  white-space: pre-wrap;
+}
+.comment time {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.comment button {
+  min-height: 44px;
+}
+.reply-target {
+  padding: 12px 20px;
+  background: var(--color-surface-alt);
+}
+@media (max-width: 480px) {
+  header {
+    padding-inline: 8px;
+  }
+  h1 {
+    font-size: 16px;
+  }
+  .person {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+}

@@ -6,10 +6,22 @@ export class ProfileImageError extends Error {
   }
 }
 
-/** Decode locally, preserve small originals, and bound profile uploads before creating a preview. */
+/** Rebuild decoded pixels so source EXIF/XMP/location tags never accompany public uploads. */
 export async function prepareProfileImage(
   file: File,
   purpose: 'avatar' | 'banner',
+  document: Document,
+): Promise<File> {
+  return prepareImage(file, purpose, document);
+}
+
+export async function preparePostImage(file: File, document: Document): Promise<File> {
+  return prepareImage(file, 'post', document);
+}
+
+async function prepareImage(
+  file: File,
+  purpose: 'avatar' | 'banner' | 'post',
   document: Document,
 ): Promise<File> {
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type))
@@ -31,11 +43,10 @@ export async function prepareProfileImage(
   try {
     if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > 32_000_000)
       throw new ProfileImageError('profile.errors.resolution');
-    const maxWidth = purpose === 'avatar' ? 640 : 1920;
-    const maxHeight = purpose === 'avatar' ? 640 : 1080;
-    const targetBytes = 1024 * 1024;
+    const maxWidth = purpose === 'avatar' ? 640 : purpose === 'post' ? 2048 : 1920;
+    const maxHeight = purpose === 'avatar' ? 640 : purpose === 'post' ? 2048 : 1080;
+    const targetBytes = (purpose === 'post' ? 2 : 1) * 1024 * 1024;
     const scale = Math.min(1, maxWidth / bitmap.width, maxHeight / bitmap.height);
-    if (scale === 1 && file.size <= targetBytes) return file;
     canvas = document.createElement('canvas');
     let width = Math.max(1, Math.round(bitmap.width * scale));
     let height = Math.max(1, Math.round(bitmap.height * scale));
@@ -63,7 +74,10 @@ export async function prepareProfileImage(
       });
       if (blob.type !== 'image/webp') throw new ProfileImageError('profile.errors.compression');
       if (blob.size <= targetBytes)
-        return new File([blob], 'profile.webp', { type: blob.type, lastModified: file.lastModified });
+        return new File([blob], purpose === 'post' ? 'post.webp' : 'profile.webp', {
+          type: blob.type,
+          lastModified: file.lastModified,
+        });
       width = Math.max(1, Math.round(width * 0.8));
       height = Math.max(1, Math.round(height * 0.8));
     }

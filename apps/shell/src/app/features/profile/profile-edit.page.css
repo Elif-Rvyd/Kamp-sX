@@ -89,6 +89,13 @@
   margin-top: 24px;
 }
 @media (max-width: 640px) {
+  .edit-toolbar {
+    grid-template-columns: 56px minmax(0, 1fr) 56px;
+    padding-inline: 8px;
+  }
+  .edit-actions button {
+    padding-inline: 4px;
+  }
   .edit-fields {
     padding-inline: 16px;
   }

@@ -118,9 +118,8 @@ for (const remember of [false, true]) {
     expect(persisted).toEqual({ local: remember, session: !remember });
     await page.reload();
     await expect(page.locator('.dashboard-page')).toBeVisible();
-    await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
-    await expect(page.getByRole('dialog').getByText('@student', { exact: true })).toBeVisible();
-    await expect(page.getByRole('dialog').getByText('Okul bilgisi eklenmemiş')).toBeVisible();
+    await expect(page.locator('.profile-content').getByText('@student', { exact: true })).toBeVisible();
+    await expect(page.locator('.profile-content').getByText('Okul bilgisi eklenmemiş')).toBeVisible();
     expect(requests.some(({ operation }) => operation === 'user')).toBe(true);
   });
 }
@@ -353,7 +352,6 @@ test('sign-out clears the session and denies dashboard until the next login', as
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto('/auth/login');
   await expect(page).toHaveURL(/\/dashboard$/);
-  await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
   await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
   await expect(page).toHaveURL(/\/auth\/login$/);
   expect(requests.filter(({ operation }) => operation === 'logout')).toHaveLength(1);

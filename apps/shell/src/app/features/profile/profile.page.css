@@ -6,12 +6,10 @@
   background: var(--color-bg);
 }
 .profile-shell {
-  width: min(100%, 760px);
-  margin-inline: auto;
-  border-inline: 1px solid var(--color-border);
+  width: 100%;
   background: var(--color-surface);
   min-height: 100dvh;
-  padding-bottom: calc(108px + env(safe-area-inset-bottom));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 .profile-tabs {
   position: sticky;
@@ -23,18 +21,4 @@
   min-height: 480px;
   touch-action: pan-y pinch-zoom;
   outline-offset: -4px;
-}
-.compose-fab {
-  position: fixed;
-  z-index: 35;
-  bottom: calc(100px + env(safe-area-inset-bottom));
-  right: max(20px, calc((100vw - 760px) / 2 + 20px));
-  width: 56px;
-  height: 56px;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  box-shadow: var(--shadow-panel);
-}
-.compose-fab:hover {
-  background: var(--color-primary);
 }

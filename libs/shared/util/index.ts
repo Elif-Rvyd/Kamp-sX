@@ -7,3 +7,4 @@ export * from './horizontal-swipe';
 export * from './social-post';
 export * from './image-header';
 export * from './profile-image';
+export * from './post-video';

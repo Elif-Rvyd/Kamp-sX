@@ -216,7 +216,7 @@
     "content": "Gönderin",
     "placeholder": "Kampüste neler oluyor?",
     "attach": "Fotoğraf veya video ekle",
-    "fileHint": "JPG, PNG, WEBP: 5 MB · MP4, WEBM: 50 MB",
+    "fileHint": "Fotoğraflar otomatik küçültülür. 50 MB üzerindeki MP4/WEBM videolar yüklemeden önce sıkıştırılır; süreleri korunur.",
     "publish": "Paylaş",
     "saved": "Gönderin paylaşıldı.",
     "loading": "Gönderiler yükleniyor…",
@@ -224,7 +224,12 @@
     "author": "KampüsX öğrencisi",
     "discardTitle": "Gönderi taslağı silinsin mi?",
     "discardText": "Kaydetmediğin metin ve dosya seçimi silinecek.",
-    "navigation": "Gönderin paylaşıldı. Akışını açmak için İptal düğmesini kullanabilirsin."
+    "navigation": "Gönderin paylaşıldı. Akışını açmak için İptal düğmesini kullanabilirsin.",
+    "mediaPreparing": "Medya hazırlanıyor…",
+    "videoCompressing": "Video küçültülüyor… %{{progress}}",
+    "cancelPreparation": "Hazırlamayı iptal et",
+    "mediaUploading": "Dosya yükleniyor…",
+    "mediaSaving": "Gönderi kaydediliyor…"
   },
   "universities": {
     "itu": "İstanbul Teknik Üniversitesi",
@@ -336,7 +341,7 @@
   },
   "dashboard": {
     "title": "Ana sayfa — KampüsX",
-    "openProfile": "Profil menüsünü aç",
+    "openProfile": "Profilini aç",
     "closeProfile": "Profil menüsünü kapat",
     "profileMenu": "Profil menüsü",
     "discoverLabel": "Keşfet akışları",
@@ -494,6 +499,10 @@
       "type": "JPG, PNG, WEBP, MP4 veya WEBM seç. Profil fotoğraflarında yalnızca görseller kullanılabilir.",
       "imageSize": "Görsel en fazla 5 MB olabilir.",
       "videoSize": "Video en fazla 50 MB olabilir.",
+      "videoSourceSize": "Küçültülecek kaynak video en fazla 512 MB olabilir. Daha küçük bir dosya seç.",
+      "videoDuration": "Otomatik küçültme için video en fazla 30 dakika olabilir. Daha kısa bir video seç.",
+      "videoUnsupported": "Tarayıcın bu videoyu sesini koruyarak küçültemiyor. Güncel bir tarayıcı kullan veya 50 MB altında bir video seç.",
+      "videoCompression": "Video küçültülemedi. Tekrar dene veya daha küçük bir video seç.",
       "invalidVideo": "Geçerli bir MP4 veya WEBM dosyası seç.",
       "session": "Oturumun doğrulanamadı. Yeniden giriş yap.",
       "upload": "Dosya yüklenemedi. Bağlantını ve yükleme izinlerini kontrol edip tekrar dene.",
@@ -516,6 +525,137 @@
     "label": "Takip bilgileri",
     "readError": "Takip sayıları yüklenemedi.",
     "liveError": "Canlı güncellemeye bağlanılamadı. Sayılar güncel olmayabilir.",
-    "saveError": "Takip işlemi tamamlanamadı. Tekrar dene."
+    "saveError": "Takip işlemi tamamlanamadı. Tekrar dene.",
+    "titles": {
+      "followers": "Takipçiler",
+      "following": "Takip edilenler",
+      "requests": "Takip istekleri"
+    },
+    "actions": {
+      "follow": "Takip et",
+      "cancel": "İsteği iptal et",
+      "unfollow": "Takipten çık",
+      "accept": "Kabul et",
+      "reject": "Reddet",
+      "remove": "Takipçiyi çıkar"
+    },
+    "empty": {
+      "followers": "Henüz takipçin yok.",
+      "following": "Henüz kimseyi takip etmiyorsun.",
+      "requests": "Bekleyen takip isteğin yok."
+    },
+    "navigation": "Takip bağlantıları",
+    "unnamed": "KampüsX kullanıcısı",
+    "personActions": "{{name}} için takip işlemleri",
+    "searchLabel": "Kullanıcı adıyla bul",
+    "searchPlaceholder": "kullanıcıadı",
+    "search": "Bul",
+    "searchResult": "Bulunan kullanıcı",
+    "noPerson": "Bu kullanıcı adına ait erişilebilir bir profil bulunamadı.",
+    "listLoading": "Takip listesi yükleniyor…",
+    "listError": "Takip listesi yüklenemedi. Tekrar dene.",
+    "changed": "Takip durumu başka bir oturumda değişti. Listeyi yenileyip tekrar dene.",
+    "saved": "Takip bilgileri güncellendi.",
+    "unavailable": "Takip işlemlerine şu anda ulaşılamıyor. Tekrar dene."
+  },
+  "social": {
+    "settings": "Ayarlar ve gizlilik",
+    "back": "Geri",
+    "cancel": "İptal",
+    "loadMore": "Daha fazla göster",
+    "pinned": "Profilde öne çıkarıldı",
+    "pendingDelete": "Silme işlemi tamamlanmayı bekliyor",
+    "menu": {
+      "label": "Gönderi seçenekleri",
+      "delete": "Sil",
+      "retryDelete": "Silmeyi tamamla",
+      "pin": "Profilde öne çıkar",
+      "unpin": "Öne çıkarmayı kaldır",
+      "archive": "Arşivle",
+      "restore": "Arşivden çıkar",
+      "report": "Raporla",
+      "bookmark": "Kaydet",
+      "unbookmark": "Kaydı kaldır",
+      "block": "Bu kişiyi engelle"
+    },
+    "delete": {
+      "title": "Gönderiyi sil?",
+      "body": "Bu gönderi ve ona ait medya dosyası kalıcı olarak silinecek. Bu işlem geri alınamaz."
+    },
+    "block": {
+      "title": "Bu kişiyi engelle?",
+      "body": "Birbirinizin profilini ve gönderilerini uygulama içinde göremezsiniz; takip ve etkileşim kuramazsınız. İki yöndeki takip ilişkisi kaldırılır."
+    },
+    "report": {
+      "title": "Gönderiyi raporla",
+      "body": "İçeriği neden raporladığını seç. Aynı gönderi için yalnızca bir rapor gönderebilirsin.",
+      "reason": "Rapor nedeni",
+      "spam": "Spam",
+      "harassment": "Taciz",
+      "inappropriate": "Uygunsuz içerik",
+      "other": "Diğer"
+    },
+    "archive": {
+      "title": "Arşivim",
+      "empty": "Arşivinde gönderi yok",
+      "description": "Arşivlediğin gönderiler yalnızca burada sana görünür. Tamamlanamayan silme işlemlerini de buradan yeniden deneyebilirsin."
+    },
+    "bookmarks": {
+      "title": "Kaydedilenler",
+      "empty": "Kaydedilmiş gönderi yok",
+      "description": "Gönderilerdeki kaydet düğmesiyle kendine bir okuma listesi oluştur."
+    },
+    "blocked": {
+      "title": "Engellenenler",
+      "empty": "Engellediğin kimse yok",
+      "unblock": "Engeli kaldır",
+      "unblockTitle": "Engeli kaldır?",
+      "unblockBody": "Gizlilik ayarlarınızın izin verdiği içerikler tekrar görünür olur. Önceki takip ilişkileri kendiliğinden geri gelmez."
+    },
+    "search": {
+      "title": "Ara",
+      "label": "Gönderilerde ara",
+      "placeholder": "Bir kelime veya konu yaz",
+      "clear": "Aramayı temizle",
+      "submit": "Ara",
+      "hint": "Aramak için en az 2 karakter yaz",
+      "empty": "Eşleşen gönderi bulunamadı",
+      "limit": "En yeni 30 sonuç gösteriliyor. Aramanı daraltabilirsin."
+    },
+    "thread": {
+      "title": "Gönderi",
+      "label": "Yorumunu yaz",
+      "send": "Yorum yap",
+      "reply": "Yanıtla",
+      "replying": "Yanıtlanan yorum",
+      "you": "Sen",
+      "empty": "Henüz yorum yok. İlk yorumu sen yaz.",
+      "discardTitle": "Yorumdan vazgeç?",
+      "discardBody": "Göndermediğin yorum metni kaybolacak.",
+      "keep": "Yazmaya devam et",
+      "discard": "Vazgeç"
+    },
+    "errors": {
+      "unavailable": "Bu içerik kullanılamıyor veya bu işlem için iznin yok.",
+      "save": "İşlem kaydedilemedi. Bağlantını kontrol edip tekrar dene.",
+      "read": "Bilgiler yüklenemedi. Tekrar dene.",
+      "cleanup": "Medya temizlenemediği için gönderi silinmedi. Arşivim sayfasından silmeyi tekrar deneyebilirsin.",
+      "pinLimit": "Profilinde en fazla 3 gönderi öne çıkarabilirsin.",
+      "setup": "Bu özellik için gerekli veritabanı kurulumu henüz tamamlanmamış.",
+      "comment": "Yorum 1–2000 karakter olmalı. Gönderilemediyse metnini koruyup tekrar dene.",
+      "busy": "Bu gönderideki önceki işlemin tamamlanmasını bekle."
+    },
+    "notice": {
+      "deleted": "Gönderi silindi.",
+      "pinned": "Gönderi profilde öne çıkarıldı.",
+      "unpinned": "Öne çıkarma kaldırıldı.",
+      "archived": "Gönderi arşivlendi.",
+      "restored": "Gönderi arşivden çıkarıldı.",
+      "blocked": "Kişi engellendi.",
+      "unblocked": "Engel kaldırıldı.",
+      "reported": "Raporun alındı.",
+      "alreadyReported": "Bu gönderiyi daha önce raporladın.",
+      "commented": "Yorumun gönderildi."
+    }
   }
 }

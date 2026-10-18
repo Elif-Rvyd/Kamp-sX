@@ -6,12 +6,10 @@
   background: var(--color-bg);
 }
 .dashboard-shell {
-  width: min(100%, 760px);
-  margin-inline: auto;
+  width: 100%;
   min-height: 100dvh;
-  border-inline: 1px solid var(--color-border);
   background: var(--color-surface);
-  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 .dashboard-sticky {
   position: sticky;
@@ -70,17 +68,6 @@
 .feed-placeholder-list {
   display: grid;
   gap: 16px;
-}
-.compose-fab {
-  position: fixed;
-  z-index: 35;
-  bottom: calc(100px + env(safe-area-inset-bottom));
-  right: max(20px, calc((100vw - 760px) / 2 + 20px));
-  width: 56px;
-  height: 56px;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  box-shadow: var(--shadow-panel);
 }
 @media (max-width: 640px) {
   .discover-panel {

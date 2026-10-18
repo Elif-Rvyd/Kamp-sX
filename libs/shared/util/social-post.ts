@@ -1,12 +1,26 @@
 export type PostKind = 'post' | 'reply' | 'retweet';
 export interface SocialPost {
   id: string;
+  userId?: string;
   kind: PostKind;
   text: string;
   createdAt: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
+  liked?: boolean;
+  bookmarked?: boolean;
+  pinSlot?: number | null;
+  archivedAt?: string | null;
+  deletionPending?: boolean;
   stats: { replies: number; retweets: number; likes: number; views: number };
+}
+export interface PostComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  parent_id: string | null;
+  content: string;
+  created_at: string;
 }
 export interface PostAuthor {
   fullName: string;

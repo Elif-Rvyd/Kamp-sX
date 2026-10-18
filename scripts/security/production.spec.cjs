@@ -1,4 +1,5 @@
 const { mockSocial } = require('../e2e/mock-social.cjs');
+const { selectLargeVideo } = require('../e2e/video-fixture.cjs');
 const { test, expect } = require('@playwright/test');
 const path = require('node:path');
 const { generateEnvironment } = require('../generate-environment.cjs');
@@ -159,6 +160,49 @@ test('production profile guards reject visitors with no session', async ({ page 
   expect(await page.evaluate(() => window.securityViolations)).toEqual([]);
 });
 
+test('follow routes reject visitors and never expose the pending-request interface', async ({ page }) => {
+  await initialize(page, 'tr', 'light', false);
+  for (const path of ['/profile/followers', '/profile/following', '/profile/requests']) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/auth\/login$/);
+    await expect(page.locator('kx-follow-person,.people-list')).toHaveCount(0);
+  }
+});
+
+test('follow identities remain literal text and external avatar trackers are discarded', async ({ page }) => {
+  const errors = await initialize(page, 'tr', 'light');
+  const peer = '22222222-2222-4222-8222-222222222222';
+  const payload = '<img src=x onerror="window.followXss=true">';
+  const requested = [];
+  page.on('request', (request) => {
+    if (request.url().startsWith('https://attacker.kampusx.invalid/')) requested.push(request.url());
+  });
+  await mockSocial(page, {
+    connections: [
+      { follower_id: peer, following_id: user.id, status: 'pending', created_at: '2026-10-18T10:00:00Z' },
+    ],
+    people: [
+      {
+        user_id: peer,
+        full_name: payload,
+        username: '<svg onload=alert(1)>',
+        avatar_url: 'https://attacker.kampusx.invalid/pixel.png',
+        university: '<script>alert(1)</script>',
+        studying: '<iframe src=x>',
+      },
+    ],
+  });
+  await page.goto('/profile/requests');
+  const row = page.locator('.people-list kx-follow-person');
+  await expect(row.locator('strong')).toHaveText(payload);
+  await expect(row).toContainText('<script>alert(1)</script>');
+  await expect(row.locator('img,svg,iframe,script')).toHaveCount(0);
+  expect(await page.evaluate(() => window.followXss)).toBeUndefined();
+  expect(requested).toEqual([]);
+  expect(await page.evaluate(() => window.securityViolations)).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test('persisted post HTML stays literal and unsafe storage URLs are never requested', async ({ page }) => {
   const errors = await initialize(page, 'tr', 'dark');
   const backend = await mockSocial(page);
@@ -184,4 +228,30 @@ test('production CSP blocks unauthorized image loads as well as fetch', async ({
     document.body.append(image);
   });
   await expect.poll(() => page.evaluate(() => window.securityViolations)).toContain('img-src');
+});
+
+test('production CSP permits only the local compression worker and a real large video prepares successfully', async ({
+  page,
+}) => {
+  test.setTimeout(90000);
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker;
+    window.Worker = class extends NativeWorker {
+      constructor(...args) {
+        super(...args);
+        this.addEventListener('message', (event) => {
+          if (event.data?.kind === 'done') window.preparedVideoBytes = event.data.file.size;
+        });
+      }
+    };
+  });
+  const errors = await initialize(page, 'en', 'dark');
+  await page.goto('/compose');
+  const original = await selectLargeVideo(page);
+  expect(original.bytes).toBeGreaterThan(50 * 1024 * 1024);
+  await expect(page.locator('.attachment-preview video')).toBeVisible({ timeout: 60000 });
+  const size = await page.evaluate(() => window.preparedVideoBytes);
+  expect(size).toBeLessThan(50_000_000);
+  expect(await page.evaluate(() => window.securityViolations)).toEqual([]);
+  expect(errors).toEqual([]);
 });

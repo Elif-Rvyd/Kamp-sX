@@ -31,10 +31,11 @@
         kxButton
         type="button"
         emphasis="outline"
-        [disabled]="busy() || checking() || uncertain() || published()"
-        (click)="attachment.click()"
+        [disabled]="busy() || uncertain() || published()"
+        (click)="checking() ? cancelPreparation() : attachment.click()"
       >
-        <kx-icon name="add_photo_alternate" />{{t('posts.attach')}}
+        <kx-icon [name]="checking() ? 'close' : 'add_photo_alternate'" />{{t(checking() ?
+        'posts.cancelPreparation' : 'posts.attach')}}
       </button>
       @if (file()) {<button
         kxButton
@@ -60,6 +61,9 @@
       >} @else {<img [src]="preview()" [alt]="t('profile.content.mediaAlt')" width="640" height="360" />}
     </div>
     }
+    <p class="upload-status" role="status">
+      {{statusKey() ? t(statusKey(), {progress: compressionProgress()}) : ''}}
+    </p>
     <p class="error-text compose-error" role="alert">{{error() ? t(error()) : ''}}</p>
     <button kxButton type="submit" class="full-width" [busy]="busy()" [disabled]="!canPublish()">
       {{t('posts.publish')}}

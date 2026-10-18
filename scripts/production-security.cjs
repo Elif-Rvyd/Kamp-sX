@@ -22,8 +22,10 @@ function secureProductionHtml(html, supabaseUrl) {
   )
     throw new ProductionSecurityError('Production HTML must contain the strict Angular script policy.');
   const policy =
-    content[2].replace(/(?:^|;)\s*(?:connect-src|img-src|media-src)\b[^;]*/gi, '').replace(/;\s*$/, '') +
-    `; connect-src 'self' ${url.origin} ${socket.origin}; img-src 'self' blob: data: ${url.origin}; media-src 'self' blob: ${url.origin};`;
+    content[2]
+      .replace(/(?:^|;)\s*(?:connect-src|img-src|media-src|worker-src)\b[^;]*/gi, '')
+      .replace(/;\s*$/, '') +
+    `; connect-src 'self' ${url.origin} ${socket.origin}; img-src 'self' blob: data: ${url.origin}; media-src 'self' blob: ${url.origin}; worker-src 'self';`;
   return html.replace(meta, match[0].replace(content[0], `content="${policy}"`));
 }
 

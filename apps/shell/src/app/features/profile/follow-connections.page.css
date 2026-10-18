@@ -1,0 +1,85 @@
+:host {
+  display: block;
+}
+.connections-nav {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+}
+.connections-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
+  gap: 6px;
+  min-height: 52px;
+  padding: 12px;
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 3px solid var(--color-surface);
+}
+.connections-nav a.selected {
+  color: var(--color-text);
+  border-bottom-color: var(--color-primary);
+}
+.connections-nav span {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.people-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+.people-search > button {
+  margin-top: 25px;
+}
+.people-list {
+  min-height: 180px;
+}
+.status,
+.empty,
+.more {
+  margin: 0;
+  padding: 20px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.status {
+  min-height: 56px;
+  line-height: 1.6;
+}
+.status.error-text {
+  color: var(--color-danger);
+}
+.status button {
+  margin-inline-start: 8px;
+}
+.empty {
+  padding-block: 56px;
+  text-align: center;
+}
+.empty h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.more {
+  display: flex;
+  justify-content: center;
+}
+@media (max-width: 400px) {
+  .people-search {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .people-search > button {
+    margin-top: 0;
+    justify-self: start;
+  }
+}

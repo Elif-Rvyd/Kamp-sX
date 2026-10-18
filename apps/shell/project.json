@@ -21,6 +21,7 @@
         "browser": "apps/shell/src/main.ts",
         "index": "apps/shell/src/index.html",
         "tsConfig": "apps/shell/tsconfig.app.json",
+        "webWorkerTsConfig": "apps/shell/tsconfig.worker.json",
         "assets": [{ "glob": "**/*", "input": "apps/shell/src/assets", "output": "assets" }],
         "styles": ["apps/shell/src/styles.css"]
       },

@@ -1,0 +1,356 @@
+{
+  "columns": [
+    {
+      "name": "blocker_id",
+      "type": "uuid",
+      "table": "blocks",
+      "schema": "public",
+      "default": null,
+      "nullable": false
+    },
+    {
+      "name": "blocked_id",
+      "type": "uuid",
+      "table": "blocks",
+      "schema": "public",
+      "default": null,
+      "nullable": false
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "blocks",
+      "schema": "public",
+      "default": "now()",
+      "nullable": false
+    },
+    {
+      "name": "follower_id",
+      "type": "uuid",
+      "table": "follows",
+      "schema": "public",
+      "default": null,
+      "nullable": false
+    },
+    {
+      "name": "following_id",
+      "type": "uuid",
+      "table": "follows",
+      "schema": "public",
+      "default": null,
+      "nullable": false
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "follows",
+      "schema": "public",
+      "default": "now()",
+      "nullable": false
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "follows",
+      "schema": "public",
+      "default": "'accepted'::text",
+      "nullable": false
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": false
+    },
+    {
+      "name": "username",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "full_name",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "avatar_url",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "banner_url",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "university",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "studying",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "bio",
+      "type": "text",
+      "table": "profiles",
+      "schema": "public",
+      "default": null,
+      "nullable": true
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "profiles",
+      "schema": "public",
+      "default": "timezone('utc'::text, now())",
+      "nullable": false
+    },
+    {
+      "name": "is_private",
+      "type": "boolean",
+      "table": "profiles",
+      "schema": "public",
+      "default": "true",
+      "nullable": false
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": ["public"],
+      "tablename": "blocks",
+      "permissive": "PERMISSIVE",
+      "policyname": "kendi engelini ekler",
+      "schemaname": "public",
+      "with_check": "(( SELECT auth.uid() AS uid) = blocker_id)"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(( SELECT auth.uid() AS uid) = blocker_id)",
+      "roles": ["public"],
+      "tablename": "blocks",
+      "permissive": "PERMISSIVE",
+      "policyname": "kendi engelini siler",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(( SELECT auth.uid() AS uid) = blocker_id)",
+      "roles": ["public"],
+      "tablename": "blocks",
+      "permissive": "PERMISSIVE",
+      "policyname": "kendi engellerini görür",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(following_id = ( SELECT auth.uid() AS uid))",
+      "roles": ["authenticated"],
+      "tablename": "follows",
+      "permissive": "PERMISSIVE",
+      "policyname": "follows_accept",
+      "schemaname": "public",
+      "with_check": "(following_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": ["authenticated"],
+      "tablename": "follows",
+      "permissive": "RESTRICTIVE",
+      "policyname": "follows_insert_not_blocked",
+      "schemaname": "public",
+      "with_check": "((follower_id <> following_id) AND (NOT private.is_blocked(follower_id, following_id)))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(following_id = ( SELECT auth.uid() AS uid))",
+      "roles": ["authenticated"],
+      "tablename": "follows",
+      "permissive": "PERMISSIVE",
+      "policyname": "follows_remove_follower",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((follower_id = ( SELECT auth.uid() AS uid)) OR (following_id = ( SELECT auth.uid() AS uid)) OR ((status = 'accepted'::text) AND (NOT private.is_blocked(( SELECT auth.uid() AS uid), follower_id)) AND (NOT private.is_blocked(( SELECT auth.uid() AS uid), following_id))))",
+      "roles": ["authenticated"],
+      "tablename": "follows",
+      "permissive": "PERMISSIVE",
+      "policyname": "follows_select",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": ["public"],
+      "tablename": "follows",
+      "permissive": "PERMISSIVE",
+      "policyname": "kendi takibini ekler",
+      "schemaname": "public",
+      "with_check": "(( SELECT auth.uid() AS uid) = follower_id)"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(( SELECT auth.uid() AS uid) = follower_id)",
+      "roles": ["public"],
+      "tablename": "follows",
+      "permissive": "PERMISSIVE",
+      "policyname": "kendi takibini siler",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": ["authenticated"],
+      "tablename": "profiles",
+      "permissive": "PERMISSIVE",
+      "policyname": "kampusx_profiles_insert_own",
+      "schemaname": "public",
+      "with_check": "(( SELECT auth.uid() AS uid) = user_id)"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(( SELECT auth.uid() AS uid) = user_id)",
+      "roles": ["authenticated"],
+      "tablename": "profiles",
+      "permissive": "PERMISSIVE",
+      "policyname": "kampusx_profiles_update_own",
+      "schemaname": "public",
+      "with_check": "(( SELECT auth.uid() AS uid) = user_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((user_id = ( SELECT auth.uid() AS uid)) OR (NOT private.is_blocked(( SELECT auth.uid() AS uid), user_id)))",
+      "roles": ["authenticated"],
+      "tablename": "profiles",
+      "permissive": "PERMISSIVE",
+      "policyname": "profiles_select_all",
+      "schemaname": "public",
+      "with_check": null
+    }
+  ],
+  "constraints": [
+    {
+      "name": "blocks_blocked_id_fkey",
+      "table": "blocks",
+      "validated": true,
+      "definition": "FOREIGN KEY (blocked_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "blocks_blocker_id_fkey",
+      "table": "blocks",
+      "validated": true,
+      "definition": "FOREIGN KEY (blocker_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "blocks_check",
+      "table": "blocks",
+      "validated": true,
+      "definition": "CHECK (blocker_id <> blocked_id)"
+    },
+    {
+      "name": "blocks_no_self",
+      "table": "blocks",
+      "validated": false,
+      "definition": "CHECK (blocker_id <> blocked_id) NOT VALID"
+    },
+    {
+      "name": "blocks_pkey",
+      "table": "blocks",
+      "validated": true,
+      "definition": "PRIMARY KEY (blocker_id, blocked_id)"
+    },
+    {
+      "name": "follows_check",
+      "table": "follows",
+      "validated": true,
+      "definition": "CHECK (follower_id <> following_id)"
+    },
+    {
+      "name": "follows_follower_id_fkey",
+      "table": "follows",
+      "validated": true,
+      "definition": "FOREIGN KEY (follower_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "follows_following_id_fkey",
+      "table": "follows",
+      "validated": true,
+      "definition": "FOREIGN KEY (following_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "follows_pkey",
+      "table": "follows",
+      "validated": true,
+      "definition": "PRIMARY KEY (follower_id, following_id)"
+    },
+    {
+      "name": "follows_status_check",
+      "table": "follows",
+      "validated": true,
+      "definition": "CHECK (status = ANY (ARRAY['pending'::text, 'accepted'::text]))"
+    },
+    {
+      "name": "profiles_pkey",
+      "table": "profiles",
+      "validated": true,
+      "definition": "PRIMARY KEY (user_id)"
+    },
+    {
+      "name": "profiles_user_id_fkey",
+      "table": "profiles",
+      "validated": true,
+      "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "profiles_username_key",
+      "table": "profiles",
+      "validated": true,
+      "definition": "UNIQUE (username)"
+    }
+  ],
+  "functions": [
+    {
+      "name": "can_view_user_content",
+      "definition": "CREATE OR REPLACE FUNCTION private.can_view_user_content(viewer uuid, owner uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\n  select\r\n    viewer is not null\r\n    and (\r\n      viewer = owner\r\n      or (\r\n        not private.is_blocked(viewer, owner)\r\n        and (\r\n          not coalesce((select p.is_private from public.profiles p\r\n                        where p.user_id = owner), true)\r\n          or exists (\r\n            select 1 from public.follows f\r\n            where f.follower_id = viewer\r\n              and f.following_id = owner\r\n              and f.status = 'accepted'\r\n          )\r\n        )\r\n      )\r\n    );\r\n$function$\n"
+    },
+    {
+      "name": "is_blocked",
+      "definition": "CREATE OR REPLACE FUNCTION private.is_blocked(a uuid, b uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\n  select exists (\r\n    select 1 from public.blocks\r\n    where (blocker_id = a and blocked_id = b)\r\n       or (blocker_id = b and blocked_id = a)\r\n  );\r\n$function$\n"
+    },
+    {
+      "name": "on_block",
+      "definition": "CREATE OR REPLACE FUNCTION private.on_block()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nbegin\r\n  delete from public.follows\r\n  where (follower_id = new.blocker_id and following_id = new.blocked_id)\r\n     or (follower_id = new.blocked_id and following_id = new.blocker_id);\r\n  return new;\r\nend;\r\n$function$\n"
+    }
+  ]
+}

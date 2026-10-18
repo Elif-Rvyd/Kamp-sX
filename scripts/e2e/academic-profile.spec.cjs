@@ -5,7 +5,7 @@ for (const language of ['tr', 'en'])
     test(`academic details persist after reload and update the drawer ${language}/${theme}`, async ({
       page,
     }) => {
-      const state = await openSocial(page, language, theme, '/profile/edit');
+      const state = await openSocial(page, language, theme, '/profile/edit', 1440);
       await page.locator('#profile-university').fill('İstanbul Teknik Üniversitesi');
       await page.locator('#profile-department').fill('Bilgisayar Mühendisliği');
       await page.getByRole('button', { name: language === 'tr' ? 'Kaydet' : 'Save', exact: true }).click();
@@ -26,11 +26,8 @@ for (const language of ['tr', 'en'])
       await page
         .getByRole('button', { name: language === 'tr' ? 'Ana sayfaya dön' : 'Back to home' })
         .click();
-      await page
-        .getByRole('button', { name: language === 'tr' ? 'Profil menüsünü aç' : 'Open profile menu' })
-        .click();
-      await expect(page.getByRole('dialog')).toContainText('İstanbul Teknik Üniversitesi');
-      await expect(page.getByRole('dialog')).toContainText('Bilgisayar Mühendisliği');
+      await expect(page.locator('.profile-content')).toContainText('İstanbul Teknik Üniversitesi');
+      await expect(page.locator('.profile-content')).toContainText('Bilgisayar Mühendisliği');
     });
   }
 test('academic save errors preserve edits and never show a success toast', async ({ page }) => {

@@ -4,10 +4,9 @@
       <kx-dashboard-top-bar
         [initials]="profile().initials"
         [avatarUrl]="profile().avatarUrl"
-        [drawerOpen]="drawerOpen()"
         [dark]="theme.dark()"
         [language]="language.language()"
-        (profileOpened)="profileDrawer().open()"
+        (profileOpened)="openProfile()"
         (themeChanged)="theme.toggle()"
         (languageChanged)="language.set($event)"
       />
@@ -43,10 +42,9 @@
           <p class="error-text" role="alert">{{t(posts.error())}}</p>
           <button kxButton type="button" emphasis="outline" (click)="posts.load()">
             {{t('media.retry')}}</button
-          >} @for (post of posts.feed(); track post.id) {<kx-social-post-card
+          >} @for (post of posts.feed(); track post.id) {<kx-post-entry
             [post]="post"
             [author]="authorFor(post)"
-            [language]="language.language()"
           />} @if (!posts.loading() && !posts.error() && !posts.feed().length) {
           <p class="feed-description">{{t('posts.empty')}}</p>
           } } @else {
@@ -58,27 +56,5 @@
         }
       </div>
     </div>
-    <kx-dashboard-bottom-nav />
-    <button
-      kxIconButton
-      type="button"
-      class="compose-fab"
-      [attr.aria-label]="t('profile.compose')"
-      (click)="compose()"
-    >
-      <kx-icon name="add" />
-    </button>
   </div>
-  <kx-dashboard-profile-drawer
-    #profileDrawerView
-    [profile]="profile()"
-    [followError]="follows.error()"
-    [followLoading]="follows.loading()"
-    (followRetry)="follows.retry()"
-    [logoutBusy]="logoutBusy()"
-    [logoutErrorKey]="logoutErrorKey()"
-    (logoutRequested)="logout()"
-    (profileRequested)="openProfile()"
-    (changed)="drawerOpen.set($event)"
-  />
 </div>

@@ -18,3 +18,26 @@ export function horizontalSwipe(start: SwipePoint | null, end: SwipePoint): -1 |
 export function swipePoint(event: PointerEvent): SwipePoint {
   return { x: event.clientX, y: event.clientY, time: event.timeStamp, pointerId: event.pointerId };
 }
+
+/** Prevents a swipe starting on an action from also activating that action as a tap. */
+export class SwipeClickGuard {
+  private element?: HTMLElement;
+  private timer?: ReturnType<typeof setTimeout>;
+  private readonly stop = (event: Event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    this.reset();
+  };
+  block(element: HTMLElement): void {
+    this.reset();
+    this.element = element;
+    element.addEventListener('click', this.stop, true);
+    this.timer = setTimeout(() => this.reset(), 600);
+  }
+  reset(): void {
+    this.element?.removeEventListener('click', this.stop, true);
+    this.element = undefined;
+    clearTimeout(this.timer);
+    this.timer = undefined;
+  }
+}

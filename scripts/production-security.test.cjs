@@ -15,6 +15,7 @@ test('strict script policy survives and only the configured API origin can conne
     const socket = origin.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
     assert.ok(result.includes(`connect-src 'self' ${origin} ${socket};`));
     assert.ok(result.includes("script-src 'strict-dynamic' 'sha256-test'"));
+    assert.ok(result.includes("worker-src 'self';"));
     assert.equal(secureProductionHtml(result, origin), result);
     assert.equal(result.includes('unsafe-eval'), false);
   }

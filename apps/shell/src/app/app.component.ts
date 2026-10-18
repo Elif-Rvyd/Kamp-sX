@@ -14,7 +14,9 @@ import { ToastComponent } from '@kampusx/shared/ui';
   imports: [RouterOutlet, TranslocoDirective, HeaderComponent, FooterComponent, ToastComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-container *transloco="let t"
-    ><a class="skip-link" href="#main">{{ t('common.skip') }}</a>
+    ><a class="skip-link" [attr.href]="dashboardLayout() ? '#social-content' : '#main'">{{
+      t('common.skip')
+    }}</a>
     @if (!dashboardLayout()) {
       <kx-header />
     }
@@ -33,7 +35,9 @@ export class AppComponent {
   private readonly document = inject(DOCUMENT);
   private readonly path = signal(this.document.location.pathname);
   readonly dashboardLayout = computed(() =>
-    ['/dashboard', '/profile', '/profile/edit', '/compose'].includes(this.path().replace(/\/$/, '')),
+    /^\/(dashboard|profile(?:\/(edit|followers|following|requests))?|compose|search|settings(?:\/(archive|bookmarks|blocked))?|posts\/[^/]+)\/?$/.test(
+      this.path(),
+    ),
   );
   constructor() {
     const i18n = inject(TranslocoService);

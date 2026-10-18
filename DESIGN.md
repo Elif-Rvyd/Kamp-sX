@@ -62,7 +62,7 @@ without preview labels in the campaign header or footer.
 
 This is a hybrid surface: the welcome route is marketing; the auth panel and `/auth/*`
 routes use shared product form controls. Email/password authentication now uses Supabase;
-social features remain previews and Google OAuth is not connected. A remembered session uses
+posts/profiles/follows use Supabase; academic feed scopes remain previews and Google OAuth is not connected. A remembered session uses
 persistent browser storage; an unremembered session uses session storage.
 Audience evidence: the supplied KampusX-welcome-spec2.md and the user's Angular/Nx request.
 Turkish and English are equally supported. Browser language sets the initial locale;
@@ -156,19 +156,24 @@ password updates end the current session and offer sign-in with the new password
 keeps a truthful saved-password notice and retry action instead of reporting completion.
 
 The legal dialog uses native modal dialog behavior: focus isolation, Escape dismissal and focus return.
-The authenticated `/dashboard` route uses a centered campus feed shell, with existing logo,
+The authenticated `/dashboard` route uses a full-width campus feed shell, with existing logo,
 language and theme controls. It consumes the canonical tokens without changing them or the
-theme services. Shared Avatar, TabStrip, FeedSkeleton and ModalDrawer own its reusable UI.
-The left profile drawer follows the native-dialog modal contract: background isolation,
-scroll lock, focus trap/return, Escape, backdrop click and left-swipe dismissal. Its header
+theme services. Shared Avatar, TabStrip and FeedSkeleton own its reusable UI.
+SocialLayout owns a permanent left navigation across dashboard, profile, editor and composer.
+The existing profile-menu component is reused as a semantic aside with native links, active-route
+state and no overlay, open/close state, focus trap or scroll lock. It is 280px on desktop,
+a 76px icon rail at 1100px and below, and a 60px rail at 600px and below. The content uses the
+remaining document width; normal document scrolling and the existing scrollbar gutter are retained.
+The sidebar's expanded header
 contains the signed-in user's display name, handle, university, department and real, nullable follow counts. Profile metadata is
 display content only; missing university/department values use honest localized placeholders.
-The drawer's sign-out control closes the real Supabase session. Discovery uses a single selected index
+The sidebar's sign-out control closes the real Supabase session. Home, Profile and Publish navigate;
+planned messages, search, history, communities, settings and help remain disabled visual entries.
+The skip link targets the content after the sidebar. Discovery uses a single selected index
 for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
-remains native; the bottom navigation reserves safe-area space. Motion is transform/opacity
+remains native; the shared sidebar replaces the duplicate bottom navigation and floating compose control. Motion is transform/opacity
 only and honors reduced motion. Skeletons are static decoration only for the three planned academic feeds;
-Explore uses real rows with loading, error/retry and empty states. Profile menu and bottom navigation are explicitly unavailable
-visual items with no navigation or network effects, except the active Profile entry and profile-page Home action. Email/password sign-in redirects to dashboard
+Explore uses real rows with loading, error/retry and empty states. Email/password sign-in redirects to dashboard
 only after Supabase returns a session; registration with no session keeps email-verification guidance.
 The dashboard guard verifies the session with Supabase getUser; valid signed-in users skip login/register,
 and password recovery keeps its own route. Session loss returns to login. The existing auth forms keep
@@ -177,7 +182,7 @@ links; callback detection requires actual auth parameters. Explore reads authent
 University, campus and department filtering remains a planned visual flow because no scope columns were supplied.
 The lazy `/profile` and `/profile/edit` routes retain the existing session guard. ProfileService
 seeds display identity from the existing session. Names and bios persist in allowlisted Auth display metadata;
-follow counts come from public.user_follows after the separately applied 07 SQL setup. A missing table or failed read shows an unknown count and Retry, never an invented zero. The joined date remains illustrative. Avatar/banner URLs persist in public.profiles by user_id;
+follow counts come from accepted public.follows rows after the Part A migration. Pending requests have a separate count. A missing table or failed read shows an unknown count and Retry, never an invented zero. The joined date remains illustrative. Avatar/banner URLs persist in public.profiles by user_id;
 posts and post count come from public.posts. No reply/repost data is invented.
 It owns atomic name/bio/photo updates and staged object URLs, releases discarded/replaced assets,
 and resets its local state when the signed-in account changes. University and department can be edited in the same
@@ -194,27 +199,27 @@ TypeScript payload types are not treated as a security boundary. Media URLs acce
 uid/area/safe-filename paths and the supported image/video extensions in the configured bucket. PNG, JPEG
 and WebP dimensions are checked before decoding, with browser decoding and a final pixel-limit check.
 Avatar, scrollable TabStrip and floating FormField extend existing owners through optional variants.
-FollowsService owns exact HEAD counts, an authenticated private Broadcast channel per user, debounced refetch on change, reconnect refetch and session-bound teardown. The shared FollowCounts molecule owns number/unknown/error/retry presentation in profile and drawer. The approved SQL creates only user_follows, participant-only SELECT, follower-only INSERT/DELETE, no self/duplicate follows, and private empty invalidation events for both participants. Restrictive reserved-topic policies prevent unrelated permissive policies from exposing these topics or accepting forged client events. The service exposes session-verified setFollowing for later people/profile entry points; a user directory and follow buttons are outside the existing own-profile route.
+FollowsService uses the actual public.follows follower_id/following_id/status contract and live-generated public types. Only accepted relations count; pending requests are separate. Part A uses private empty Broadcast invalidations for the two participants, guarded reserved topics, reconnect refetch, request cancellation and session-bound teardown. The database sets pending/accepted from the target privacy, limits acceptance to the recipient, serializes follow/block writes, and retains all existing relations. A version RPC blocks frontend writes until the migration is installed. Own followers/following/request routes use the existing SocialPageFrame, shared FollowPerson with Avatar/Button, FormField for exact username lookup, and NoticeService. Counts in profile/sidebar link to the lists; Settings links to requests. New routes are classified as authenticated social screens. Existing UI tokens, welcome/auth forms, profile editing and public Storage stay canonical.
 SocialPostCard owns feed cards; the marketing PostCardPreview remains its separate existing preview.
 ImagePicker owns native file selection and staged previews, ConfirmDialog owns draft-discard confirmation,
-and Toast with NoticeService owns saved feedback across route changes. MediaService owns real uploads to the existing public uploads bucket; ProfileRepository and PostsService own the DB boundary.
-File selection only stages previews; Save/Publish performs network writes. URLs use uid/purpose/random paths and only
+and Toast with NoticeService owns saved feedback across route changes. MediaService owns uploads to the existing uploads bucket; ProfileRepository and PostsService own the DB boundary. The private Storage change was reverted on 18 October 2026 at the user’s request. Media is rendered through the existing public URLs. SQL 12 preserves bucket visibility; optional SQL 13 restores Public if the private setup was applied manually. Blocking governs app rows and interactions, not access to a known public file URL. UX-CONTRACT.md and docs/adr/001-post-actions-and-media-privacy.md record the accepted interaction and permission source.
+File selection only stages previews; Save/Publish performs network writes. The post composer announces preparation, Storage upload and database saving in a reserved status region without inventing percentage progress. A successful post response must match the owner, text and expected media URL/type; mismatches are uncertain outcomes and block blind retries. Feed media must match the row owner, post area and declared format. File bytes and blob/data URLs never enter application database payloads. URLs use uid/purpose/random paths and only
 the configured bucket origin is rendered. Confirmed uploads can be reused after a rejected DB write.
-Storage and database writes are separate operations; no speculative deletion of possibly referenced objects occurs.
+Storage and database writes are separate operations; deletion reserves the post, removes its exclusively owned Storage object through the API, then finalizes DB deletion after a server absence check. Failed cleanup is retryable in My archive.
 Storage failures distinguish session, denied access, unavailable bucket, bucket limits, throttling and network failures
 without exposing raw server responses. Failed uploads preserve the draft and never insert a post.
 Post composer uses existing FormField/Button/ConfirmDialog owners and the same protected navigation/draft contract.
 Ambiguous publication outcomes block blind retries. Only confirmed success triggers the shared toast and feed navigation.
-A post is at most 2000 characters with one optional image/video; images accept JPG/PNG/WEBP,
-up to 5 MiB and 32 megapixels, with decoded-content checks; videos accept MP4/WEBM up to 50 MiB
-with signature and metadata decode checks. Public-file visibility remains disclosed in the post composer. Profile images are decoded locally (input at most 20 MiB / 32 megapixels), scaled without upscaling to 640×640 for avatars and 1920×1080 for banners, and encoded as WebP at at most 1 MiB when resizing/compression is needed; already-small originals are retained. The existing upload service revalidates the result. Bitmap/canvas resources are released and pending work cannot cross sessions. Profile and media geometry stays reserved.
+A post is at most 2000 characters with one optional image/video. Post image selection accepts JPG/PNG/WEBP sources up to 20 MiB and 32 megapixels; the existing image utility scales without upscaling to 2048×2048 and always encodes decoded pixels as WebP at at most 2 MiB, stripping source EXIF/XMP/location tags even from small images. MediaService caches prepared File objects for preview and retry; upload revalidates the final image against the 5 MiB and pixel limits.
+MP4/WEBM videos at or below 50 MiB are remuxed without re-encoding their primary audio/video packets. Descriptive container tags, attachments and source track names are omitted. Larger sources, bounded to 512 MiB and 30 minutes, use bounded compression with the same metadata cleanup. Both paths use the shared post-video preparation utility and a local Web Worker with pinned Mediabunny; only compression needs WebCodecs encoders. The worker loads on video selection and has no Supabase client, credentials or network destination. Duration and primary audio are retained; unsupported audio/video conversion fails visibly instead of silently dropping sound. Resolution is scaled without upscaling and bitrate is calculated from duration, with up to three bounded passes and an independently checked 50 MiB final limit. The source is never truncated or uploaded as a fallback. Small-video remux uses the existing preparing status; actual compression progress is announced below 100% until completion. The attachment button becomes Cancel preparation. Cancel, component destruction, session replacement, malformed worker replies, worker failures and the ten-minute deadline release the worker, while text and any previously selected valid file remain intact. Source signatures and final playback metadata are validated before upload. Public-file visibility remains disclosed in the post composer.
+Profile images are decoded locally (input at most 20 MiB / 32 megapixels), scaled without upscaling to 640×640 for avatars and 1920×1080 for banners, and always encoded from pixels as WebP at at most 1 MiB so source metadata is not published. The existing upload service revalidates the result. Bitmap/canvas/worker resources are released and pending work cannot cross sessions. Profile and media geometry stays reserved.
 The profile uses a 3:1 cover, an overlapping 96px avatar, a 64px sticky toolbar and sticky scrolling tabs.
 IntersectionObserver controls only opacity/transform header motion and is disconnected on teardown.
 The editor uses equal left/right action columns (Cancel and Save), with a centered single-line title, including 320px phones. Account information heads the fields. It blocks duplicate saves. Profile ImagePicker removes files through a translucent centered X revealed on hover or keyboard focus; coarse/touch pointers keep the action visible. The avatar camera stays at the lower-right edge. Informational format/size and account/public-file disclaimers are omitted from the editor by the user’s explicit request; actionable validation errors remain.
 Dirty route departures use the native shared confirmation dialog, Escape keeps edits, focus returns,
 and saved changes update the drawer and every own post card through the same signal.
 Production builds use Angular's hashed script CSP. The build adds an exact configured Supabase
-connection and media allowlist; Vercel supplies frame, MIME, referrer and device-permission protections.
+connection and media allowlist, with worker-src limited to self for the local compression worker; Vercel supplies frame, MIME, referrer and device-permission protections.
 Static style permissions retain Angular component styles and the existing Google font/icon sources.
 Feed tabs use standard keyboard behavior. Auth mode selectors are native pressed buttons.
 Icon-only controls use translated accessible names. Decorative symbols are hidden from assistive technology.

@@ -3,6 +3,7 @@ dist/
 .nx/
 .angular/
 .vercel/
+supabase/.temp/
 test-results/
 test-results-security/
 playwright-report/

@@ -117,34 +117,60 @@ test('storage denial never inserts a post', async ({ page }) => {
   await expect(page.locator('.attachment-preview')).toBeVisible();
   expect(state.requests.filter((r) => r.table === 'posts' && r.method === 'POST')).toHaveLength(0);
 });
-test('browser-decodable WebM files are uploaded as video with a persistent URL', async ({ page }) => {
-  const state = await openSocial(page, 'en', 'dark', '/compose');
-  const bytes = await page.evaluate(async () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 32;
-    const stream = canvas.captureStream(10),
-      chunks = [];
-    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-    const done = new Promise((resolve) => (recorder.onstop = resolve));
-    recorder.ondataavailable = (e) => chunks.push(e.data);
-    recorder.start();
-    canvas.getContext('2d').fillRect(0, 0, 32, 32);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    recorder.stop();
-    await done;
-    stream.getTracks().forEach((track) => track.stop());
-    return Array.from(new Uint8Array(await new Blob(chunks).arrayBuffer()));
-  });
-  await page
-    .locator('#post-file')
-    .setInputFiles({ name: 'campus.webm', mimeType: 'video/webm', buffer: Buffer.from(bytes) });
-  await expect(page.locator('.attachment-preview video')).toBeVisible();
-  await expect(page.locator('button[type=submit]')).toBeEnabled();
-  await page.locator('button[type=submit]').click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  const post = state.requests.find((r) => r.table === 'posts' && r.method === 'POST');
-  expect(post.payload.media_type).toBe('video');
-  expect(post.payload.media_url).toMatch(/\/post\/[^/]+\.webm$/);
-  await expect(page.locator('kx-social-post-card video').first()).toBeVisible();
-});
+for (const extension of ['webm', 'mp4']) {
+  test(
+    'browser-decodable ' + extension.toUpperCase() + ' files are uploaded as video with a persistent URL',
+    async ({ page }) => {
+      const mimeType = 'video/' + extension;
+      const supported = await page.evaluate((type) => MediaRecorder.isTypeSupported(type), mimeType);
+      test.skip(!supported, 'This browser cannot record a ' + extension + ' test fixture.');
+      const state = await openSocial(page, 'en', 'dark', '/compose');
+      const bytes = await page.evaluate(async (mimeType) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const stream = canvas.captureStream(10),
+          chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType });
+        const done = new Promise((resolve) => (recorder.onstop = resolve));
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        recorder.start();
+        canvas.getContext('2d').fillRect(0, 0, 32, 32);
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        recorder.stop();
+        await done;
+        stream.getTracks().forEach((track) => track.stop());
+        return Array.from(new Uint8Array(await new Blob(chunks).arrayBuffer()));
+      }, mimeType);
+      await page
+        .locator('#post-file')
+        .setInputFiles({ name: 'campus.' + extension, mimeType, buffer: Buffer.from(bytes) });
+      await expect(page.locator('.attachment-preview video')).toBeVisible();
+      await expect(page.locator('button[type=submit]')).toBeEnabled();
+      await page.locator('button[type=submit]').click();
+      await expect(page).toHaveURL(/\/dashboard$/);
+      const post = state.requests.find((r) => r.table === 'posts' && r.method === 'POST');
+      expect(post.payload.media_type).toBe('video');
+      expect(post.payload.media_url).toContain('/post/');
+      expect(post.payload.media_url.endsWith('.' + extension)).toBe(true);
+      await expect(page.locator('kx-social-post-card video').first()).toBeVisible();
+      await expect
+        .poll(() =>
+          page
+            .locator('kx-social-post-card video')
+            .first()
+            .evaluate((video) => video.videoWidth),
+        )
+        .toBe(32);
+      await page.reload();
+      await expect
+        .poll(() =>
+          page
+            .locator('kx-social-post-card video')
+            .first()
+            .evaluate((video) => video.videoWidth),
+        )
+        .toBe(32);
+    },
+  );
+}

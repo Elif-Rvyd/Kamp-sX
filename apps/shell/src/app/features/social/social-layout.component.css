@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+.social-layout {
+  --z-post-menu: 60;
+  --social-sidebar-width: 280px;
+  display: grid;
+  grid-template-columns: var(--social-sidebar-width) minmax(0, 1fr);
+  min-height: 100dvh;
+  background: var(--color-surface);
+}
+.social-content {
+  min-width: 0;
+}
+@media (max-width: 1100px) {
+  .social-layout {
+    --social-sidebar-width: 76px;
+  }
+}
+@media (max-width: 600px) {
+  .social-layout {
+    --social-sidebar-width: 60px;
+  }
+}

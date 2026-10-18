@@ -1,6 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, inject } from '@angular/core';
-import { imageDimensions } from '@kampusx/shared/util';
+import {
+  imageDimensions,
+  preparePostImage,
+  ProfileImageError,
+  preparePostVideo,
+  PostVideoError,
+  type PostVideoOptions,
+} from '@kampusx/shared/util';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 
@@ -30,6 +37,41 @@ export class MediaService {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly completed = new WeakMap<File, Map<string, UploadedMedia>>();
+  private readonly preparedPosts = new WeakMap<File, File>();
+
+  /** Local preparation only. Storage receives a File; database writes receive its public URL. */
+  async preparePost(file: File, options: PostVideoOptions = {}): Promise<File> {
+    options.signal?.throwIfAborted();
+    const cached = this.preparedPosts.get(file);
+    if (cached) return cached;
+    let prepared = file;
+    try {
+      if (file.type.startsWith('image/')) prepared = await preparePostImage(file, this.document);
+      else {
+        const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+        const valid =
+          file.type === 'video/mp4'
+            ? bytes.length >= 12 && String.fromCharCode(...bytes.slice(4, 8)) === 'ftyp'
+            : file.type === 'video/webm' &&
+              [26, 69, 223, 163].every((value, index) => bytes[index] === value);
+        if (!valid) throw new MediaError('media.errors.invalidVideo');
+        prepared = await preparePostVideo(file, options);
+        await this.validate(prepared, 'post');
+      }
+      options.signal?.throwIfAborted();
+    } catch (error) {
+      if (error instanceof MediaError || (error instanceof DOMException && error.name === 'AbortError'))
+        throw error;
+      throw new MediaError(
+        error instanceof ProfileImageError || error instanceof PostVideoError
+          ? error.key
+          : 'media.errors.upload',
+      );
+    }
+    this.preparedPosts.set(file, prepared);
+    this.preparedPosts.set(prepared, prepared);
+    return prepared;
+  }
 
   async validate(file: File, purpose: MediaPurpose): Promise<'image' | 'video'> {
     const image = file.type.startsWith('image/');
@@ -152,6 +194,24 @@ export class MediaService {
     if (error instanceof TypeError || value?.originalError instanceof TypeError || status === 0)
       return 'media.errors.uploadNetwork';
     return 'media.errors.upload';
+  }
+  /** Only a server-reserved post path may be removed. Final DB deletion also verifies Storage absence. */
+  async removePostMedia(path: string, owner: string): Promise<void> {
+    const epoch = this.auth.sessionEpoch();
+    if (!this.connection.client || !(await this.auth.hasVerifiedSession()))
+      throw new MediaError('media.errors.session');
+    this.assertOwner(owner, epoch);
+    if (
+      !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(owner) ||
+      typeof path !== 'string' ||
+      !new RegExp(
+        '^' + owner + '/post/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\\.(jpg|png|webp|mp4|webm)$',
+      ).test(path)
+    )
+      throw new MediaError('social.errors.cleanup');
+    const result = await this.connection.client.storage.from('uploads').remove([path]);
+    this.assertOwner(owner, epoch);
+    if (result.error) throw new MediaError('social.errors.cleanup');
   }
   assertOwner(owner: string, epoch = this.auth.sessionEpoch()): void {
     if (

@@ -100,31 +100,19 @@ for (const language of ['tr', 'en'])
       expect(backend.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toEqual([]);
     });
   }
-test('drawer contains exactly five items and both entry points close before opening profile', async ({
-  page,
-}) => {
+test('permanent menu keeps profile navigation and unavailable items distinct', async ({ page }) => {
   await openProfile(page, 'tr', 'light', '/dashboard');
-  const open = page.getByRole('button', { name: 'Profil menüsünü aç' });
-  await open.click();
-  const menu = page.locator('.profile-menu button');
-  await expect(menu).toHaveCount(5);
-  await expect(menu.locator(':scope > span')).toHaveText([
-    'Profil',
-    'Geçmiş',
-    'Topluluklar',
-    'Ayarlar ve gizlilik',
-    'Yardım Merkezi',
-  ]);
-  for (let i = 1; i < 5; i++) {
+  const menu = page.locator('.profile-menu button[disabled]');
+  await expect(menu).toHaveCount(4);
+  await expect(page.locator('.profile-menu .compose-link')).toBeEnabled();
+  for (let i = 0; i < 4; i++) {
     await expect(menu.nth(i)).toBeDisabled();
-    await menu.nth(i).click({ force: true });
     await expect(page).toHaveURL(/\/dashboard$/);
   }
-  await menu.first().click();
+  await page.locator('.profile-content').getByRole('link', { name: 'Profil', exact: true }).click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Ana sayfaya dön' }).click();
-  await open.click();
   await page.locator('.profile-avatar-link').click();
   await expect(page).toHaveURL(/\/profile$/);
 });
@@ -163,8 +151,7 @@ test('save updates profile, own post cards, dashboard avatar and drawer immediat
   await expect(page.locator('.post-header kx-avatar img')).toHaveCount(6);
   await page.getByRole('button', { name: 'Ana sayfaya dön' }).click();
   await expect(page.locator('.avatar-button img')).toBeVisible();
-  await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
-  await expect(page.getByRole('heading', { name: 'Elif Kampüs', exact: true })).toBeVisible();
+  await expect(page.locator('.profile-content')).toContainText('Elif Kampüs');
   await expect(page.locator('.profile-avatar-link img')).toBeVisible();
   expect(backend.requests.filter((request) => request.storage && request.method === 'POST')).toHaveLength(2);
   const saved = backend.requests.find(
@@ -225,7 +212,9 @@ test('invalid images show localized errors and names/bios enforce counters and r
 test('desktop column, live locale/theme and reduced motion keep user content intact', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openProfile(page, 'tr', 'light', '/profile', 1440);
-  expect((await page.locator('.profile-shell').boundingBox()).width).toBe(760);
+  const width = await page.locator('.social-content').evaluate((element) => element.clientWidth);
+  expect((await page.locator('.profile-shell').boundingBox()).width).toBe(width);
+  expect(width).toBeGreaterThan(760);
   await page.locator('kx-language-switcher button[lang=en]').click();
   await expect(page).toHaveTitle('Profile — KampüsX');
   await expect(page.getByRole('tab', { name: 'Reposts', exact: true })).toBeVisible();

@@ -1,0 +1,64 @@
+:host {
+  display: block;
+  position: relative;
+}
+.menu-trigger {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.menu-trigger:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.menu-trigger:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.action-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 100%;
+  z-index: var(--z-post-menu, 60);
+  width: min(248px, calc(100vw - 100px));
+  padding: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-panel);
+}
+.action-menu button {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  text-align: start;
+  padding: 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.action-menu button:hover {
+  background: var(--color-surface-alt);
+}
+.action-menu button:disabled {
+  opacity: 0.55;
+  cursor: default;
+  background: transparent;
+}
+.action-menu .danger {
+  color: var(--color-danger);
+  border-top: 1px solid var(--color-border);
+}

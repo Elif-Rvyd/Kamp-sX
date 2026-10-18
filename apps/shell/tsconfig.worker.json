@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/worker",
+    "rootDir": "../..",
+    "lib": ["ES2022", "WebWorker"],
+    "types": []
+  },
+  "include": ["../../libs/shared/util/post-video.worker.ts"]
+}

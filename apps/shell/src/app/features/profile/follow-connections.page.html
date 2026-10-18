@@ -1,0 +1,110 @@
+<kx-social-page-frame [titleKey]="'follows.titles.' + kind" back="/profile">
+  <ng-container *transloco="let t">
+    @if (follows.setupError()) {
+    <div class="status" role="status">
+      {{ t(follows.setupError()) }}
+      <button kxButton type="button" emphasis="ghost" (click)="follows.retry()">
+        {{ t('media.retry') }}
+      </button>
+    </div>
+    }
+    <nav class="connections-nav" [attr.aria-label]="t('follows.navigation')">
+      @for (tab of tabs; track tab) {
+      <a [routerLink]="'/profile/' + tab" routerLinkActive="selected" ariaCurrentWhenActive="page">
+        {{ t('follows.titles.' + tab) }} @if (tab === 'requests' && follows.pendingCount() !== null) {
+        <span>{{ follows.pendingCount()! | kxNumber }}</span>
+        }
+      </a>
+      }
+    </nav>
+    <form class="people-search" [formGroup]="searchForm" novalidate (ngSubmit)="search()">
+      <kx-form-field
+        fieldId="follow-username"
+        labelKey="follows.searchLabel"
+        placeholderKey="follows.searchPlaceholder"
+        icon="alternate_email"
+        [control]="username"
+        [maxLength]="50"
+        autocomplete="off"
+      />
+      <button kxButton type="submit" emphasis="outline" [busy]="searching()" [disabled]="!!busy()">
+        {{ t('follows.search') }}
+      </button>
+    </form>
+    @if (searchError()) {
+    <p class="status error-text" role="alert">{{ t(searchError()) }}</p>
+    } @if (searched() && !searchResult()) {
+    <p class="status" role="status">{{ t('follows.noPerson') }}</p>
+    } @if (searchResult(); as person) {
+    <section [attr.aria-label]="t('follows.searchResult')">
+      <kx-follow-person
+        [person]="person"
+        [disabled]="!!busy() || searching() || !follows.ready()"
+        [busy]="busy()?.userId === person.userId"
+        [activeAction]="busy()?.action ?? null"
+        (acted)="act(person,$event)"
+      />
+    </section>
+    } @if (follows.error()) {
+    <div class="status" role="status">
+      {{ t(follows.error()) }}
+      <button
+        kxButton
+        type="button"
+        emphasis="ghost"
+        [disabled]="follows.loading()"
+        (click)="follows.retry()"
+      >
+        {{ t('media.retry') }}
+      </button>
+    </div>
+    } @if (error()) {
+    <div class="status error-text" role="alert">
+      {{ t(error()) }}
+      <button
+        kxButton
+        type="button"
+        emphasis="ghost"
+        [disabled]="loading() || !!busy()"
+        (click)="load(false)"
+      >
+        {{ t('media.retry') }}
+      </button>
+    </div>
+    }
+    <div
+      class="people-list"
+      [attr.aria-busy]="loading()"
+      [style.min-height.px]="loading() ? readHeight() : 180"
+    >
+      @if (loading()) {
+      <p class="status" role="status">{{ t('follows.listLoading') }}</p>
+      } @for (person of rows(); track person.userId) {
+      <kx-follow-person
+        [person]="person"
+        [incoming]="kind === 'requests'"
+        [removable]="kind === 'followers'"
+        [disabled]="!!busy() || loading() || !follows.ready()"
+        [busy]="busy()?.userId === person.userId"
+        [activeAction]="busy()?.action ?? null"
+        (acted)="act(person,$event)"
+      />
+      } @if (!loading() && !error() && !rows().length) {
+      <div class="empty" role="status"><h2>{{ t('follows.empty.' + kind) }}</h2></div>
+      } @if (more()) {
+      <div class="more">
+        <button
+          kxButton
+          type="button"
+          emphasis="outline"
+          [busy]="loading()"
+          [disabled]="!!busy()"
+          (click)="load(true)"
+        >
+          {{ t('social.loadMore') }}
+        </button>
+      </div>
+      }
+    </div>
+  </ng-container>
+</kx-social-page-frame>
