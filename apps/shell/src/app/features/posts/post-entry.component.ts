@@ -187,7 +187,7 @@ export class PostEntryComponent {
         this.notice.show('social.notice.deleted');
       } else if (action === 'pin') {
         await this.actions.pin(post);
-        this.notice.show(post.pinSlot ? 'social.notice.unpinned' : 'social.notice.pinned');
+        this.notice.show(post.pinnedAt || post.pinSlot ? 'social.notice.unpinned' : 'social.notice.pinned');
       } else if (action === 'archive' || action === 'restore') {
         await this.actions.archive(post, action === 'archive');
         this.notice.show(action === 'archive' ? 'social.notice.archived' : 'social.notice.restored');

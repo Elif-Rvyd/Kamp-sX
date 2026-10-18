@@ -37,7 +37,7 @@
   --radius-control: 10px;
   --radius-panel: 24px;
   --space-unit: 4px;
-  --page-max: 1320px;
+  --page-max: 100%;
   --motion-fast: 180ms;
   --motion-reveal: 550ms;
 }

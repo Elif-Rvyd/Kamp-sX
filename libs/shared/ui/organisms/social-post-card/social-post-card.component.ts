@@ -13,7 +13,7 @@ export type PostAction =
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './social-post-card.component.css',
   template: `<article class="social-post" *transloco="let t" [attr.data-kind]="post().kind">
-    @if (post().pinSlot) {
+    @if (post().pinnedAt || post().pinSlot) {
       <p class="post-kind"><kx-icon name="push_pin" />{{ t('social.pinned') }}</p>
     }
     @if (post().deletionPending) {
@@ -112,7 +112,8 @@ export class SocialPostCardComponent {
               ? [
                   {
                     id: 'pin',
-                    labelKey: this.post().pinSlot ? 'social.menu.unpin' : 'social.menu.pin',
+                    labelKey:
+                      this.post().pinnedAt || this.post().pinSlot ? 'social.menu.unpin' : 'social.menu.pin',
                     icon: 'push_pin',
                   },
                 ]

@@ -23,7 +23,7 @@ rounded:
   panel: '24px'
 spacing:
   unit: '4px'
-  page-max: '1320px'
+  page-max: '100%'
 components:
   button:
     rounded: '{rounded.control}'
@@ -97,7 +97,7 @@ English copy is independently written. Long text wraps instead of truncating imp
 
 ## Layout
 
-The document owns vertical scrolling. The maximum width is 1320px with 40px desktop gutters,
+The document owns vertical scrolling. On the user's 18 October request, all routes use the available viewport width with 40px desktop gutters,
 24px tablet gutters, and 16px phone gutters. Header height decreases from 82px to 66px.
 The hero uses roughly 7/12 poster and 5/12 auth with matching top and bottom edges.
 The shared grid row stretches both surfaces; the poster's scene grows with the form's
@@ -108,6 +108,15 @@ Form fields and buttons have stable height; messages have reserved space. Images
 Auth form switching expands the desktop row when needed and never clips registration fields.
 Header actions contain language, theme and mobile navigation. About, privacy, terms
 and cookies navigation belongs in the footer; registration keeps its consent links.
+
+The runtime `--page-max: 100%` token is shared by welcome, auth and not-found containers.
+Authenticated page surfaces occupy the entire area after the persistent sidebar: composer,
+profile editor, settings, archive, bookmarks, blocked people, search, post detail and follow lists.
+Their former 760px cap is removed. Auth pages retain their campaign/form treatment with two
+equal flexible columns on desktop. This changes layout geometry only; colors, fonts, controls,
+theme switching, mobile stacking and native document scrolling remain canonical.
+Shared Material Symbols reserve a one-em square and clip descriptive fallback ligature names
+while their font is unavailable, so edge-aligned icons cannot widen a full-width page.
 
 ## Elevation & Depth
 
@@ -211,7 +220,7 @@ without exposing raw server responses. Failed uploads preserve the draft and nev
 Post composer uses existing FormField/Button/ConfirmDialog owners and the same protected navigation/draft contract.
 Ambiguous publication outcomes block blind retries. Only confirmed success triggers the shared toast and feed navigation.
 A post is at most 2000 characters with one optional image/video. Post image selection accepts JPG/PNG/WEBP sources up to 20 MiB and 32 megapixels; the existing image utility scales without upscaling to 2048×2048 and always encodes decoded pixels as WebP at at most 2 MiB, stripping source EXIF/XMP/location tags even from small images. MediaService caches prepared File objects for preview and retry; upload revalidates the final image against the 5 MiB and pixel limits.
-MP4/WEBM videos at or below 50 MiB are remuxed without re-encoding their primary audio/video packets. Descriptive container tags, attachments and source track names are omitted. Larger sources, bounded to 512 MiB and 30 minutes, use bounded compression with the same metadata cleanup. Both paths use the shared post-video preparation utility and a local Web Worker with pinned Mediabunny; only compression needs WebCodecs encoders. The worker loads on video selection and has no Supabase client, credentials or network destination. Duration and primary audio are retained; unsupported audio/video conversion fails visibly instead of silently dropping sound. Resolution is scaled without upscaling and bitrate is calculated from duration, with up to three bounded passes and an independently checked 50 MiB final limit. The source is never truncated or uploaded as a fallback. Small-video remux uses the existing preparing status; actual compression progress is announced below 100% until completion. The attachment button becomes Cancel preparation. Cancel, component destruction, session replacement, malformed worker replies, worker failures and the ten-minute deadline release the worker, while text and any previously selected valid file remain intact. Source signatures and final playback metadata are validated before upload. Public-file visibility remains disclosed in the post composer.
+MP4/WEBM videos at or below 50 MiB are remuxed without re-encoding their primary audio/video packets. Descriptive container tags, attachments and source track names are omitted. Larger sources, bounded to 512 MiB and 30 minutes, use bounded compression with the same metadata cleanup. Both paths use the shared post-video preparation utility and a local Web Worker with pinned Mediabunny; only compression needs WebCodecs encoders. The worker loads on video selection and has no Supabase client, credentials or network destination. Duration and primary audio are retained; unsupported audio/video conversion fails visibly instead of silently dropping sound. Resolution is scaled without upscaling and bitrate is calculated from duration, with up to three bounded passes and an independently checked 50 MiB final limit. The source is never truncated or uploaded as a fallback. Small-video remux uses the existing preparing status; actual compression progress is announced below 100% until completion. The attachment button becomes Cancel preparation. Cancel, component destruction, session replacement, malformed worker replies, worker failures and the ten-minute deadline release the worker, while text and any previously selected valid file remain intact. Source signatures and final playback metadata are validated before upload. At the user's request, the static compression and public-file hints are omitted from the composer; preparation, progress and actionable errors remain. Public Storage behavior is unchanged.
 Profile images are decoded locally (input at most 20 MiB / 32 megapixels), scaled without upscaling to 640×640 for avatars and 1920×1080 for banners, and always encoded from pixels as WebP at at most 1 MiB so source metadata is not published. The existing upload service revalidates the result. Bitmap/canvas/worker resources are released and pending work cannot cross sessions. Profile and media geometry stays reserved.
 The profile uses a 3:1 cover, an overlapping 96px avatar, a 64px sticky toolbar and sticky scrolling tabs.
 IntersectionObserver controls only opacity/transform header motion and is disconnected on teardown.

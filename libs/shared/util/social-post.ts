@@ -10,6 +10,7 @@ export interface SocialPost {
   liked?: boolean;
   bookmarked?: boolean;
   pinSlot?: number | null;
+  pinnedAt?: string | null;
   archivedAt?: string | null;
   deletionPending?: boolean;
   stats: { replies: number; retweets: number; likes: number; views: number };

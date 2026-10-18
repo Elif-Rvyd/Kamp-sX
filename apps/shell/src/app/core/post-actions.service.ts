@@ -210,13 +210,13 @@ export class PostActionsService {
       await this.verify(context);
       const result = await this.client!.rpc('kampusx_pin_post', {
         p_post_id: post.id,
-        p_pinned: !post.pinSlot,
+        p_pinned: !(post.pinnedAt || post.pinSlot),
       }).abortSignal(AbortSignal.timeout(20000));
       this.assert(context);
       this.check(result.error);
       const slot = result.data?.pin_slot;
       if (slot !== null && ![1, 2, 3].includes(slot)) throw new MediaError('social.errors.save');
-      this.patch(post.id, { pinSlot: slot });
+      this.patch(post.id, { pinSlot: slot, pinnedAt: null });
       await this.posts.load();
     });
   }
@@ -235,7 +235,11 @@ export class PostActionsService {
         (archived ? typeof result.data.archived_at !== 'string' : result.data.archived_at !== null)
       )
         throw new MediaError('social.errors.save');
-      this.patch(post.id, { archivedAt: result.data.archived_at, pinSlot: result.data.pin_slot ?? null });
+      this.patch(post.id, {
+        archivedAt: result.data.archived_at,
+        pinSlot: result.data.pin_slot ?? null,
+        pinnedAt: null,
+      });
       this.readRevision.update((v) => v + 1);
       await this.posts.load();
     });
@@ -257,7 +261,7 @@ export class PostActionsService {
           (begin.data.media_path !== null && typeof begin.data.media_path !== 'string')
         )
           throw new MediaError('social.errors.cleanup');
-        this.patch(post.id, { deletionPending: true, pinSlot: null });
+        this.patch(post.id, { deletionPending: true, pinSlot: null, pinnedAt: null });
         if (begin.data.media_path) await this.media.removePostMedia(begin.data.media_path, context.owner);
         this.assert(context);
         const finish = await this.client!.rpc('kampusx_finish_post_delete', {
@@ -353,7 +357,7 @@ export class PostActionsService {
             .from('posts')
             .select(POST_COLUMNS)
             .eq('user_id', context.owner)
-            .or('archived_at.not.is.null,deletion_started_at.not.is.null')
+            .or('archived_at.not.is.null,deleted_at.not.is.null')
             .order('created_at', { ascending: false })
             .order('id', { ascending: false })
             .range(offset, offset + 29)
@@ -363,7 +367,7 @@ export class PostActionsService {
             .select(`post:posts!inner(${POST_COLUMNS})`)
             .eq('user_id', context.owner)
             .is('post.archived_at', null)
-            .is('post.deletion_started_at', null)
+            .is('post.deleted_at', null)
             .order('created_at', { ascending: false })
             .order('post_id')
             .range(offset, offset + 29)
@@ -397,7 +401,7 @@ export class PostActionsService {
       .from('posts')
       .select(POST_COLUMNS)
       .is('archived_at', null)
-      .is('deletion_started_at', null)
+      .is('deleted_at', null)
       .ilike('content', '%' + term.slice(0, 120).replace(/[\\%_]/g, '\\$&') + '%')
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })

@@ -216,7 +216,6 @@
     "content": "Gönderin",
     "placeholder": "Kampüste neler oluyor?",
     "attach": "Fotoğraf veya video ekle",
-    "fileHint": "Fotoğraflar otomatik küçültülür. 50 MB üzerindeki MP4/WEBM videolar yüklemeden önce sıkıştırılır; süreleri korunur.",
     "publish": "Paylaş",
     "saved": "Gönderin paylaşıldı.",
     "loading": "Gönderiler yükleniyor…",
@@ -494,7 +493,6 @@
   "media": {
     "video": "Gönderiye eklenen video",
     "retry": "Tekrar dene",
-    "publicHint": "Yüklediğin dosyalar herkese açık olarak görüntülenebilir.",
     "errors": {
       "type": "JPG, PNG, WEBP, MP4 veya WEBM seç. Profil fotoğraflarında yalnızca görseller kullanılabilir.",
       "imageSize": "Görsel en fazla 5 MB olabilir.",

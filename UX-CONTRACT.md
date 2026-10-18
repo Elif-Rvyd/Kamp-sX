@@ -3,6 +3,16 @@
 Business source: [Post actions and media privacy ADR](docs/adr/001-post-actions-and-media-privacy.md).
 The existing welcome/auth design, runtime CSS variables and TR/EN dictionaries remain canonical.
 
+The 18 October full-width decision applies to every route. Public/auth page-container uses the
+shared percentage width token and existing responsive gutters; authenticated surfaces fill the
+space after the persistent sidebar. Forms retain native document scrolling rather than a clipped
+viewport height. Composer preparation/upload/saving status and validation errors remain visible;
+the static compression/public-file explanatory paragraphs are omitted at the user's request.
+PostsService reads only real public.posts columns from the generated Database contract. Publication
+returns only id/user_id/content/media_url/media_type/created_at within the existing basic read grants,
+and still verifies the receipt before success/navigation. File preparation and Storage visibility do
+not change. Post-action RPCs remain a separately staged backend contract.
+
 Follow requests source: [Part A contract](/C:/Users/elifr/source/project/web/KampüsX/docs/PARCA-A-TAKIP-ISTEKLERI.md),
 the supplied production catalog, and CLI-generated public types. FollowsService owns relationship
 transitions/counts/private invalidation; FollowPerson reuses Avatar/Button. Own list routes are

@@ -4,7 +4,7 @@
   background: var(--color-bg);
 }
 .compose-page {
-  width: min(100%, 760px);
+  width: 100%;
   margin-inline: auto;
   min-height: 100dvh;
   background: var(--color-surface);
@@ -37,12 +37,6 @@ form {
 }
 .attachment-actions > button:first-child {
   min-inline-size: min(100%, 240px);
-}
-.hint {
-  font-size: 12px;
-  line-height: 1.7;
-  color: var(--color-muted);
-  margin-top: 10px;
 }
 .attachment-preview {
   margin-top: 20px;

@@ -1,5 +1,7 @@
 # Medya kaydı
 
+18 Ekim 2026 güncel düzeltme: [Gönderi kaydı ve tam ekran raporu](GONDERI-KAYDI-VE-TAM-EKRAN-2026-10-18.md). Mevcut şemada kayıt sorgusunun eski sütun adları düzeltildi; bu frontend düzeltmesi için yeni SQL gerekmez. Aşağıdaki 16–17 Ekim SQL/menü notları tarihsel bağlamdır; güncel Adım 1/2 RLS kurallarının üzerine eski kurulum dosyaları yeniden uygulanmaz.
+
 Dosyanın kendisi Supabase Storage'daki mevcut `uploads` bucket'ına yüklenir. Public URL mevcut tabloya yazılır ve doğrudan görüntülenir. Kullanıcının 18 Ekim isteğiyle private Storage geçişi geri alındı. SQL 12 bucket görünürlüğünü değiştirmez. Güncel kurulum ve engelleme kuralları için [gönderi/gizlilik raporu](GONDERI-ISLEMLERI-VE-GIZLILIK.md). Veritabanı isteğinde dosya baytları, base64 veya geçici `blob:` önizleme adresi gönderilmez.
 
 | İçerik                              | Kaydedildiği yer                                      |

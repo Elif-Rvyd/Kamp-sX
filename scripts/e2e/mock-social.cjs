@@ -1,4 +1,5 @@
 const OWNER = '11111111-1111-4111-8111-111111111111';
+const { postColumns } = require('../fixtures/post-schema.cjs');
 const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGNQDH2BFTEMLQkA/vdXgZPglicAAAAASUVORK5CYII=',
   'base64',
@@ -14,6 +15,12 @@ async function mockSocial(page, options = {}) {
       media_type: null,
       created_at: new Date(Date.UTC(2026, 9, 17, 12, 0, 6 - i)).toISOString(),
       archived_at: null,
+      deleted_at: null,
+      pinned_at: null,
+      parent_id: null,
+      repost_of_id: null,
+      replies_count: 0,
+      reposts_count: 0,
       deletion_started_at: null,
       pin_slot: null,
       likes_count: 0,
@@ -61,7 +68,13 @@ async function mockSocial(page, options = {}) {
       url = new URL(request.url()),
       method = request.method();
     const payload = ['POST', 'PATCH'].includes(method) ? request.postDataJSON() : undefined;
-    state.requests.push({ table: url.pathname.split('/').at(-1), method, payload, url: url.pathname });
+    state.requests.push({
+      table: url.pathname.split('/').at(-1),
+      method,
+      payload,
+      url: url.pathname,
+      select: url.searchParams.get('select'),
+    });
     if (url.pathname.endsWith('/kampusx_follow_requests_version'))
       return route.fulfill({
         status: 200,
@@ -140,6 +153,30 @@ async function mockSocial(page, options = {}) {
     let body;
     const table = url.pathname.split('/').at(-1),
       value = (key) => url.searchParams.get(key)?.replace(/^eq\./, '');
+    if (table === 'posts') {
+      const references = [
+        ...(url.searchParams.get('select')?.split(',') ?? []),
+        ...[...url.searchParams.keys()].filter(
+          (key) => !['select', 'order', 'limit', 'offset', 'or', 'and'].includes(key),
+        ),
+        ...(url.searchParams
+          .get('order')
+          ?.split(',')
+          .map((field) => field.split('.')[0]) ?? []),
+        ...(url.searchParams
+          .get('or')
+          ?.replace(/[()]/g, '')
+          .split(',')
+          .map((field) => field.split('.')[0]) ?? []),
+        ...Object.keys(payload ?? {}),
+      ];
+      if (references.some((column) => !postColumns.has(column)))
+        return route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: '42703', message: 'Column does not exist' }),
+        });
+    }
     const visible = (post) => !state.blocks.some((b) => b.blocked_id === post.user_id);
     const fail = (message = 'post_unavailable', code = '42501') =>
       route.fulfill({
@@ -173,11 +210,13 @@ async function mockSocial(page, options = {}) {
         const used = state.posts.filter((p) => p.user_id === OWNER && p.pin_slot).map((p) => p.pin_slot);
         if (payload.p_pinned && !p.pin_slot && used.length >= 3) return fail('pin_limit', 'P0001');
         p.pin_slot = payload.p_pinned ? (p.pin_slot ?? [1, 2, 3].find((s) => !used.includes(s))) : null;
+        p.pinned_at = payload.p_pinned ? new Date().toISOString() : null;
         body = { pin_slot: p.pin_slot };
       } else if (table === 'kampusx_archive_post') {
         if (!p || p.user_id !== OWNER) return fail();
         p.archived_at = payload.p_archived ? new Date().toISOString() : null;
         if (p.archived_at) p.pin_slot = null;
+        if (p.archived_at) p.pinned_at = null;
         body = { archived_at: p.archived_at, pin_slot: p.pin_slot };
       } else if (table === 'kampusx_begin_post_delete') {
         if (!p) body = { missing: true };
@@ -185,6 +224,7 @@ async function mockSocial(page, options = {}) {
           if (p.user_id !== OWNER) return fail();
           p.deletion_started_at = new Date().toISOString();
           p.pin_slot = null;
+          p.pinned_at = null;
           body = {
             post_id: p.id,
             user_id: p.user_id,
@@ -214,6 +254,7 @@ async function mockSocial(page, options = {}) {
           };
           state.comments.push(body);
           p.comments_count++;
+          p.replies_count++;
         }
       } else return route.fallback();
     } else if (
@@ -272,6 +313,12 @@ async function mockSocial(page, options = {}) {
         const post = {
           id: require('node:crypto').randomUUID(),
           archived_at: null,
+          deleted_at: null,
+          pinned_at: null,
+          parent_id: null,
+          repost_of_id: null,
+          replies_count: 0,
+          reposts_count: 0,
           deletion_started_at: null,
           pin_slot: null,
           likes_count: 0,
@@ -291,6 +338,7 @@ async function mockSocial(page, options = {}) {
               (!value('id') || value('id') === post.id) &&
               (!url.searchParams.has('archived_at') || !post.archived_at) &&
               (!url.searchParams.has('deletion_started_at') || !post.deletion_started_at) &&
+              (!url.searchParams.has('deleted_at') || !post.deleted_at) &&
               (!url.searchParams.has('or') || post.archived_at || post.deletion_started_at) &&
               (!url.searchParams.has('content') ||
                 post.content.toLowerCase().includes(
@@ -301,7 +349,10 @@ async function mockSocial(page, options = {}) {
                 )),
           )
           .sort((a, b) =>
-            url.searchParams.get('order')?.startsWith('pin_slot') ? (a.pin_slot ?? 9) - (b.pin_slot ?? 9) : 0,
+            url.searchParams.get('order')?.startsWith('pinned_at')
+              ? Number(!!b.pinned_at) - Number(!!a.pinned_at) ||
+                (b.pinned_at ?? '').localeCompare(a.pinned_at ?? '')
+              : 0,
           );
     } else return route.fallback();
     return route.fulfill({

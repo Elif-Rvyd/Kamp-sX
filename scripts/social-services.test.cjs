@@ -5,6 +5,7 @@ const test = require('node:test');
 const ts = require('typescript');
 const { imageCanvas } = require('./fixtures/image-canvas.cjs');
 const root = path.resolve(__dirname, '..');
+const { postColumns: actualPostColumns } = require('./fixtures/post-schema.cjs');
 const OWNER = '11111111-1111-4111-8111-111111111111';
 const signal = (value) => {
   const read = () => value;
@@ -46,7 +47,7 @@ function harness() {
       assert.equal(name, 'public');
       return {
         from: (table) => {
-          const query = { table, filters: [] };
+          const query = { table, filters: [], steps: [] };
           const builder = {};
           for (const operation of [
             'select',
@@ -61,12 +62,24 @@ function harness() {
             'update',
           ])
             builder[operation] = (...args) => {
+              query.steps.push([operation, ...args]);
               if (operation === 'eq') query.filters.push(args);
               else query[operation] = args;
               return builder;
             };
           builder.then = (resolve, reject) => {
             calls.push({ kind: 'database', ...query });
+            if (state.strictPosts && table === 'posts') {
+              const references = query.steps.flatMap(([op, value]) =>
+                op === 'select' ? value.split(',') : ['order', 'eq', 'is'].includes(op) ? [value] : [],
+              );
+              if (references.some((column) => !actualPostColumns.has(column)))
+                return Promise.resolve({
+                  data: null,
+                  status: 400,
+                  error: { code: '42703', message: 'Column does not exist' },
+                }).then(resolve, reject);
+            }
             const response = results.shift() || { data: [], error: null, status: 200, count: 0 };
             return (response instanceof Error ? Promise.reject(response) : Promise.resolve(response)).then(
               resolve,
@@ -171,6 +184,58 @@ const png = () =>
     'photo.png',
     { type: 'image/png' },
   );
+
+test('publishing works against the generated production schema and returns only known basic fields', async () => {
+  const h = harness();
+  h.state.strictPosts = true;
+  h.results.push({
+    data: {
+      id: 'saved',
+      user_id: OWNER,
+      content: 'Campus update',
+      media_url: null,
+      media_type: null,
+      created_at: '2026-10-18T12:00:00Z',
+    },
+    status: 201,
+    error: null,
+  });
+  await h.posts.publish('Campus update');
+  const write = h.calls.find((call) => call.insert);
+  assert.equal(write.select[0], 'id,user_id,content,media_url,media_type,created_at');
+  assert.deepEqual(Object.keys(write.insert[0]).sort(), ['content', 'media_type', 'media_url', 'user_id']);
+});
+
+test('feed queries and counters use the production deleted_at/pinned_at/replies_count/reposts_count fields', async () => {
+  const h = harness();
+  h.state.strictPosts = true;
+  const row = {
+    id: 'existing',
+    user_id: OWNER,
+    content: 'Campus update',
+    media_url: null,
+    media_type: null,
+    created_at: '2026-10-18T12:00:00Z',
+    archived_at: null,
+    deleted_at: null,
+    pinned_at: '2026-10-18T13:00:00Z',
+    parent_id: null,
+    repost_of_id: null,
+    likes_count: 3,
+    replies_count: 4,
+    reposts_count: 5,
+  };
+  h.results.push({ data: [row], error: null, count: 1 }, { data: [row], error: null, count: 1 });
+  await h.posts.load();
+  assert.equal(h.posts.error(), '');
+  assert.equal(h.posts.mine()[0].pinnedAt, row.pinned_at);
+  assert.deepEqual(h.posts.feed()[0].stats, { likes: 3, replies: 4, retweets: 5, views: 0 });
+  assert(
+    h.calls.every((call) =>
+      call.steps.some(([op, field, value]) => op === 'is' && field === 'deleted_at' && value === null),
+    ),
+  );
+});
 test('actual media service rejects spoofed content and profile videos before uploading', async () => {
   const h = harness();
   await assert.rejects(

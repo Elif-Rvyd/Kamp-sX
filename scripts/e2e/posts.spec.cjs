@@ -34,6 +34,7 @@ for (const language of ['tr', 'en'])
   for (const theme of ['light', 'dark']) {
     test(`composer and real SDK upload/database sequence ${language}/${theme}`, async ({ page }, info) => {
       const state = await openSocial(page, language, theme, '/compose');
+      await expect(page.locator('.compose-page .hint')).toHaveCount(0);
       await page.locator('#post-content').fill('A real SDK request, isolated test data.');
       await page.locator('#post-file').setInputFiles(png());
       await expect(page.locator('.attachment-preview img')).toBeVisible();
@@ -59,6 +60,7 @@ for (const language of ['tr', 'en'])
         media_url: expect.stringContaining(`/uploads/${OWNER}/post/`),
         media_type: 'image',
       });
+      expect(writes[1].select).toBe('id,user_id,content,media_url,media_type,created_at');
       await page.reload();
       await expect(page.locator('kx-social-post-card').first()).toContainText(
         'A real SDK request, isolated test data.',

@@ -216,7 +216,6 @@
     "content": "Your post",
     "placeholder": "What’s happening on campus?",
     "attach": "Add photo or video",
-    "fileHint": "Photos are resized automatically. MP4/WEBM videos over 50 MB are compressed before upload, keeping their full duration.",
     "publish": "Publish",
     "saved": "Your post was published.",
     "loading": "Loading posts…",
@@ -494,7 +493,6 @@
   "media": {
     "video": "Video attached to the post",
     "retry": "Try again",
-    "publicHint": "Uploaded files can be viewed publicly.",
     "errors": {
       "type": "Choose JPG, PNG, WEBP, MP4 or WEBM. Profile photos accept images only.",
       "imageSize": "Images must be 5 MB or smaller.",
