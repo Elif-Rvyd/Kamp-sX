@@ -14,6 +14,19 @@ export const routes: Routes = [
       import('./features/social/social-layout.component').then((m) => m.SocialLayoutComponent),
     children: [
       {
+        path: 'settings/account-status',
+        canDeactivate: [
+          (component: import('./features/social/account-status.page').AccountStatusPage) =>
+            component.canLeave(),
+        ],
+        loadComponent: () => import('./features/social/account-status.page').then((m) => m.AccountStatusPage),
+      },
+      {
+        path: 'people/:id',
+        loadComponent: () =>
+          import('./features/profile/public-profile.page').then((m) => m.PublicProfilePage),
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./features/social/settings.page').then((m) => m.SettingsPage),
       },

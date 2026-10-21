@@ -19,7 +19,7 @@ for (const language of ['tr', 'en'])
         'profile-username',
         'profile-bio',
         'profile-university',
-        'profile-faculty',
+        'profile-campus',
         'profile-department',
       ]);
       await expect(page.locator('.account-heading')).toBeVisible();

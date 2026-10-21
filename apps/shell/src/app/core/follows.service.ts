@@ -159,7 +159,7 @@ export class FollowsService {
     this.setupReads.add(request);
     try {
       const result = await this.client
-        .rpc('kampusx_follow_requests_version', {}, { get: true })
+        .rpc('kampusx_follow_requests_version', undefined, { get: true })
         .abortSignal(AbortSignal.any([request.signal, AbortSignal.timeout(15000)]));
       if (!this.owns(owner, epoch) || revision !== this.setupRevision) return;
       const ready = !result.error && result.data === '20261018190000';
@@ -259,6 +259,39 @@ export class FollowsService {
     if (error || !data || !this.owns(owner, epoch)) throw new FollowError('follows.readError');
     if (!data.length) return null;
     return (await this.hydrate([data[0].user_id], owner, epoch, abort))[0] ?? null;
+  }
+
+  async searchPeople(term: string, signal?: AbortSignal): Promise<FollowPerson[]> {
+    const owner = this.auth.session()?.user.id,
+      epoch = this.auth.sessionEpoch();
+    if (!owner || !this.client || !this.owns(owner, epoch)) throw new FollowError('follows.readError');
+    const value = term.trim().replace(/^@/, '');
+    if (value.length < 2) return [];
+    if (value.length > 120) throw new FollowError('follows.readError');
+    const abort = signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000);
+    const pattern = '%' + value.replace(/[\\%_]/g, '\\$&') + '%';
+    // Separate scalar filters keep names out of PostgREST's raw OR expression grammar.
+    // Both reads use the caller's session and existing profile RLS, never Auth's user directory.
+    const results = await Promise.all(
+      (['username', 'full_name'] as const).map((field) =>
+        this.client!.schema('public')
+          .from('profiles')
+          .select('user_id')
+          .neq('user_id', owner)
+          .ilike(field, pattern)
+          .order(field)
+          .order('user_id')
+          .limit(20)
+          .abortSignal(abort),
+      ),
+    );
+    if (abort.aborted || !this.owns(owner, epoch) || results.some((result) => result.error || !result.data))
+      throw new FollowError('follows.readError');
+    const ids = [...new Set(results.flatMap((result) => result.data!.map((row) => row.user_id)))].slice(
+      0,
+      20,
+    );
+    return this.hydrate(ids, owner, epoch, abort);
   }
 
   private validRelation(row: FollowRow): boolean {

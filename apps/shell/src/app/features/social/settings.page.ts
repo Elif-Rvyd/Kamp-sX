@@ -21,6 +21,7 @@ import { SocialPageFrameComponent } from './social-page-frame.component';
 })
 export class SettingsPage {
   readonly links = [
+    { path: '/settings/account-status', key: 'accountStatus.title', icon: 'manage_accounts' },
     { path: '/profile/requests', key: 'follows.titles.requests', icon: 'person_add' },
     { path: '/settings/archive', key: 'social.archive.title', icon: 'archive' },
     { path: '/settings/bookmarks', key: 'social.bookmarks.title', icon: 'bookmark' },

@@ -195,7 +195,7 @@ export class MediaService {
       return 'media.errors.uploadNetwork';
     return 'media.errors.upload';
   }
-  /** Only a server-reserved post path may be removed. Final DB deletion also verifies Storage absence. */
+  /** The caller must confirm soft deletion first; only canonical owned post paths are removable. */
   async removePostMedia(path: string, owner: string): Promise<void> {
     const epoch = this.auth.sessionEpoch();
     if (!this.connection.client || !(await this.auth.hasVerifiedSession()))

@@ -6,7 +6,24 @@ const PNG = Buffer.from(
 );
 async function mockSocial(page, options = {}) {
   const state = {
-    profile: { user_id: OWNER, avatar_url: null, banner_url: null },
+    profile: {
+      user_id: OWNER,
+      username: 'elif',
+      full_name: 'Elif Yılmaz',
+      bio: '',
+      avatar_url: null,
+      banner_url: null,
+      university: 'Kırşehir Ahi Evran Üniversitesi',
+      campus: 'Teknik Bilimler Meslek Yüksekokulu',
+      studying: 'Bilgisayar Programcılığı',
+      created_at: '2026-01-01T00:00:00Z',
+      is_private: true,
+      visible_department: false,
+      visible_campus: false,
+      visible_university: false,
+      visible_explore: false,
+      audience_configured: false,
+    },
     posts: Array.from({ length: 6 }, (_, i) => ({
       id: `44444444-4444-4444-8444-${String(i + 1).padStart(12, '0')}`,
       user_id: OWNER,
@@ -41,6 +58,7 @@ async function mockSocial(page, options = {}) {
     failCleanup: false,
     denyMedia: false,
   };
+  Object.assign(state.profile, options.profile ?? {});
   let socket, channelTopic;
   await page.routeWebSocket('**/realtime/v1/**', (ws) => {
     socket = ws;
@@ -74,6 +92,7 @@ async function mockSocial(page, options = {}) {
       payload,
       url: url.pathname,
       select: url.searchParams.get('select'),
+      filters: Object.fromEntries(url.searchParams),
     });
     if (url.pathname.endsWith('/kampusx_follow_requests_version'))
       return route.fulfill({
@@ -81,6 +100,41 @@ async function mockSocial(page, options = {}) {
         contentType: 'application/json',
         body: JSON.stringify(options.followSetupMissing ? null : '20261018190000'),
       });
+    if (url.pathname.endsWith('/kampusx_reply_contract_version'))
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(options.replySetupMissing ? null : '2026102102'),
+      });
+    if (
+      url.pathname.endsWith('/kampusx_owner_actions_version') ||
+      url.pathname.endsWith('/kampusx_account_contract_version')
+    )
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(
+          (
+            url.pathname.endsWith('/kampusx_owner_actions_version')
+              ? options.ownerSetupMissing
+              : options.accountSetupMissing
+          )
+            ? null
+            : '2026102201',
+        ),
+      });
+    if (url.pathname.endsWith('/kampusx_soft_delete_post')) {
+      const post = state.posts.find((p) => p.id === payload.p_post_id && p.user_id === OWNER);
+      if (!post || state.failActions)
+        return route.fulfill({
+          status: 403,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: '42501', message: 'post_unavailable' }),
+        });
+      post.deleted_at = new Date().toISOString();
+      post.pinned_at = null;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: 'true' });
+    }
     if (url.pathname.endsWith('/follows')) {
       const matches = (row) =>
         [...url.searchParams].every(([key, filter]) => {
@@ -155,9 +209,14 @@ async function mockSocial(page, options = {}) {
       value = (key) => url.searchParams.get(key)?.replace(/^eq\./, '');
     if (table === 'posts') {
       const references = [
-        ...(url.searchParams.get('select')?.split(',') ?? []),
+        ...(url.searchParams
+          .get('select')
+          ?.replace(/,profiles!inner\([^)]*\)/, '')
+          .split(',') ?? []),
         ...[...url.searchParams.keys()].filter(
-          (key) => !['select', 'order', 'limit', 'offset', 'or', 'and'].includes(key),
+          (key) =>
+            !['select', 'order', 'limit', 'offset', 'or', 'and'].includes(key) &&
+            !key.startsWith('profiles.'),
         ),
         ...(url.searchParams
           .get('order')
@@ -184,7 +243,62 @@ async function mockSocial(page, options = {}) {
         contentType: 'application/json',
         body: JSON.stringify({ code, message }),
       });
-    if (table.startsWith('kampusx_')) {
+    if (table === 'reports' || table === 'blocks') {
+      if (state.failActions && method !== 'GET') return fail();
+      const rows = state[table];
+      if (method === 'POST') {
+        const duplicate = rows.some((r) =>
+          table === 'reports'
+            ? r.reporter_id === payload.reporter_id && r.post_id === payload.post_id
+            : r.blocker_id === payload.blocker_id && r.blocked_id === payload.blocked_id,
+        );
+        if (duplicate) return fail('duplicate', '23505');
+        rows.push({ ...payload, created_at: new Date().toISOString() });
+        if (table === 'blocks') {
+          state.follows = state.follows.filter(
+            (r) => ![r.follower_id, r.following_id].includes(payload.blocked_id),
+          );
+          state.following = 0;
+        }
+      } else if (method === 'DELETE')
+        state[table] = rows.filter((r) => r.blocked_id !== value('blocked_id') || r.blocker_id !== OWNER);
+      body = method === 'GET' ? state[table] : null;
+    } else if (table === 'likes' || table === 'bookmarks') {
+      if (state.failActions && method !== 'GET') return fail();
+      const matches = (row) =>
+        [...url.searchParams].every(([key, filter]) => {
+          if (!['user_id', 'post_id'].includes(key)) return true;
+          return filter.startsWith('eq.')
+            ? row[key] === filter.slice(3)
+            : filter.startsWith('in.(')
+              ? filter.slice(4, -1).split(',').includes(row[key])
+              : true;
+        });
+      if (method === 'POST') {
+        if (
+          Object.keys(payload).some((key) => !['user_id', 'post_id'].includes(key)) ||
+          payload.user_id !== OWNER
+        )
+          return fail();
+        const post = state.posts.find((p) => p.id === payload.post_id);
+        if (!post || !visible(post) || post.deleted_at || post.archived_at) return fail();
+        if (state[table].some((r) => r.post_id === payload.post_id && r.user_id === OWNER))
+          return fail('duplicate', '23505');
+        state[table].push({ ...payload, created_at: new Date().toISOString() });
+      } else if (method === 'DELETE') state[table] = state[table].filter((row) => !matches(row));
+      state.posts.forEach((p) => (p.likes_count = state.likes.filter((r) => r.post_id === p.id).length));
+      let rows = state[table].filter(matches);
+      if (table === 'bookmarks' && url.searchParams.get('select')?.includes('posts!inner')) {
+        rows = rows.flatMap((r) => {
+          const post = state.posts.find((p) => p.id === r.post_id);
+          return post && visible(post) && !post.archived_at && !post.deleted_at ? [{ post }] : [];
+        });
+      }
+      body = rows.slice(
+        Number(url.searchParams.get('offset') || 0),
+        Number(url.searchParams.get('offset') || 0) + Number(url.searchParams.get('limit') || rows.length),
+      );
+    } else if (table.startsWith('kampusx_')) {
       if (state.failActions) return fail();
       const p = state.posts.find((p) => p.id === payload.p_post_id);
       const snapshot = () =>
@@ -293,23 +407,80 @@ async function mockSocial(page, options = {}) {
           );
         });
     } else if (url.pathname.endsWith('/profiles')) {
-      if (method !== 'GET') state.profile = { ...state.profile, ...payload };
+      if (method === 'PATCH' && options.failAccountSave) return fail();
+      if (method !== 'GET')
+        state.profile = {
+          ...state.profile,
+          ...payload,
+          ...(method === 'PATCH' && Object.keys(payload).some((k) => k.startsWith('visible_'))
+            ? { audience_configured: true }
+            : {}),
+        };
       const peers = [state.profile, ...state.people];
-      const visibleProfiles = peers.filter((p) =>
-        [...url.searchParams].every(([key, filter]) => {
-          if (!['user_id', 'username'].includes(key)) return true;
-          return filter.startsWith('eq.')
-            ? p[key] === filter.slice(3)
-            : filter.startsWith('neq.')
-              ? p[key] !== filter.slice(4)
-              : filter.startsWith('in.(')
-                ? filter.slice(4, -1).split(',').includes(p[key])
-                : true;
-        }),
+      const visibleProfiles = peers.filter(
+        (p) =>
+          (p.user_id === OWNER ||
+            !state.blocks.some((b) => b.blocked_id === p.user_id || b.blocker_id === p.user_id)) &&
+          [...url.searchParams].every(([key, filter]) => {
+            if (!['user_id', 'username', 'full_name'].includes(key)) return true;
+            if (filter.startsWith('ilike.')) {
+              const literal = filter.slice(7, -1).replace(/\\([\\%_])/g, '$1');
+              return String(p[key] ?? '')
+                .toLowerCase()
+                .includes(literal.toLowerCase());
+            }
+            return filter.startsWith('eq.')
+              ? p[key] === filter.slice(3)
+              : filter.startsWith('neq.')
+                ? p[key] !== filter.slice(4)
+                : filter.startsWith('in.(')
+                  ? filter.slice(4, -1).split(',').includes(p[key])
+                  : true;
+          }),
       );
-      body = method === 'GET' ? visibleProfiles : state.profile;
+      body =
+        method === 'GET'
+          ? visibleProfiles.slice(0, Number(url.searchParams.get('limit') || visibleProfiles.length))
+          : state.profile;
+      if (request.headers()['accept']?.includes('vnd.pgrst.object')) body = visibleProfiles[0] ?? null;
     } else if (url.pathname.endsWith('/posts')) {
+      if (method === 'PATCH') {
+        if (state.failActions) return fail();
+        const post = state.posts.find((p) => p.id === value('id') && p.user_id === OWNER && !p.deleted_at);
+        if (!post) return fail();
+        if (Object.keys(payload).some((k) => !['pinned_at', 'archived_at', 'deleted_at'].includes(k)))
+          return fail();
+        if (
+          payload.pinned_at &&
+          !post.pinned_at &&
+          state.posts.filter((p) => p.pinned_at && !p.deleted_at && !p.archived_at).length >= 3
+        )
+          return fail('pin_limit', '23514');
+        Object.assign(post, payload);
+        if (post.archived_at || post.deleted_at) post.pinned_at = null;
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: { 'content-range': '0-0/1', 'access-control-expose-headers': 'content-range' },
+          body: 'null',
+        });
+      }
       if (method === 'POST') {
+        if (state.failActions) return fail();
+        if (
+          Object.keys(payload).some(
+            (key) =>
+              !['user_id', 'content', 'media_url', 'media_type', 'parent_id', 'repost_of_id'].includes(key),
+          ) ||
+          payload.user_id !== OWNER
+        )
+          return fail();
+        if (payload.parent_id) {
+          const parent = state.posts.find((p) => p.id === payload.parent_id);
+          if (!parent || !visible(parent) || parent.deleted_at) return fail();
+          const ancestor = state.posts.find((p) => p.id === parent.parent_id);
+          if (ancestor?.parent_id) return fail('reply_depth_limit', '23514');
+        }
         const post = {
           id: require('node:crypto').randomUUID(),
           archived_at: null,
@@ -327,16 +498,42 @@ async function mockSocial(page, options = {}) {
           ...payload,
         };
         state.posts.unshift(post);
+        state.posts.forEach(
+          (p) =>
+            (p.replies_count = state.posts.filter(
+              (r) => r.parent_id === p.id && !r.deleted_at && !r.archived_at,
+            ).length),
+        );
         body = post;
       } else
         body = state.posts
           .filter(
             (post) =>
               visible(post) &&
+              !post.deleted_at &&
+              (!value('parent_id') || value('parent_id') === post.parent_id) &&
               (!url.searchParams.has('user_id') ||
                 url.searchParams.get('user_id') === `eq.${post.user_id}`) &&
-              (!value('id') || value('id') === post.id) &&
-              (!url.searchParams.has('archived_at') || !post.archived_at) &&
+              (!value('id') ||
+                value('id') === post.id ||
+                (value('id').startsWith('in.(') && value('id').slice(4, -1).split(',').includes(post.id))) &&
+              (!url.searchParams.has('archived_at') ||
+                (url.searchParams.get('archived_at') === 'not.is.null'
+                  ? !!post.archived_at
+                  : !post.archived_at)) &&
+              (!value('media_url') || value('media_url') === post.media_url) &&
+              [...url.searchParams]
+                .filter(([k]) => k.startsWith('profiles.'))
+                .every(([k, v]) => {
+                  const profile = [state.profile, ...state.people].find((p) => p.user_id === post.user_id);
+                  return (
+                    String(profile?.[k.slice(9)] ?? '').toLowerCase() ===
+                    v
+                      .slice(6)
+                      .replace(/\\([\\%_])/g, '$1')
+                      .toLowerCase()
+                  );
+                }) &&
               (!url.searchParams.has('deletion_started_at') || !post.deletion_started_at) &&
               (!url.searchParams.has('deleted_at') || !post.deleted_at) &&
               (!url.searchParams.has('or') || post.archived_at || post.deletion_started_at) &&
@@ -352,8 +549,15 @@ async function mockSocial(page, options = {}) {
             url.searchParams.get('order')?.startsWith('pinned_at')
               ? Number(!!b.pinned_at) - Number(!!a.pinned_at) ||
                 (b.pinned_at ?? '').localeCompare(a.pinned_at ?? '')
-              : 0,
+              : url.searchParams.get('order')?.startsWith('created_at.asc')
+                ? a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
+                : 0,
           );
+      if (Array.isArray(body))
+        body = body.slice(
+          Number(url.searchParams.get('offset') || 0),
+          Number(url.searchParams.get('offset') || 0) + Number(url.searchParams.get('limit') || body.length),
+        );
     } else return route.fallback();
     return route.fulfill({
       status: 200,

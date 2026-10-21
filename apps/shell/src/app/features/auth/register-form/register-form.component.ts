@@ -73,11 +73,11 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         [control]="form.controls.university"
         [maxLength]="150"
       /><kx-form-field
-        fieldId="register-faculty"
+        fieldId="register-campus"
         icon="apartment"
-        labelKey="auth.register.faculty"
-        placeholderKey="auth.register.facultyPlaceholder"
-        [control]="form.controls.faculty"
+        labelKey="auth.register.campus"
+        placeholderKey="auth.register.campusPlaceholder"
+        [control]="form.controls.campus"
         [maxLength]="150"
       /><kx-form-field
         fieldId="register-department"
@@ -152,7 +152,7 @@ export class RegisterFormComponent {
       ],
     }),
     bio: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(160)] }),
-    faculty: new FormControl('', {
+    campus: new FormControl('', {
       nonNullable: true,
       validators: [
         Validators.required,
@@ -198,7 +198,7 @@ export class RegisterFormComponent {
       const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim(), {
         university: v.university.trim(),
         department: v.department.trim(),
-        faculty: v.faculty.trim(),
+        campus: v.campus.trim(),
         fullName: v.fullName.trim(),
         bio: v.bio.trim(),
       });

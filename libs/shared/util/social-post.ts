@@ -5,6 +5,7 @@ export interface SocialPost {
   kind: PostKind;
   text: string;
   createdAt: string;
+  parentId?: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   liked?: boolean;
@@ -17,11 +18,11 @@ export interface SocialPost {
 }
 export interface PostComment {
   id: string;
-  post_id: string;
   user_id: string;
-  parent_id: string | null;
+  parent_id: string;
   content: string;
   created_at: string;
+  replies_count: number;
 }
 export interface PostAuthor {
   fullName: string;

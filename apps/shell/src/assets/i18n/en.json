@@ -23,7 +23,8 @@
     "title": "KampüsX — Your campus is talking",
     "notFound": "We couldn't find this page on campus.",
     "home": "Back to home",
-    "characterCount": "{{count}} of {{max}} characters"
+    "characterCount": "{{count}} of {{max}} characters",
+    "clear": "Clear"
   },
   "nav": {
     "explore": "Explore",
@@ -129,7 +130,9 @@
       "bio": "Bio (optional)",
       "bioPlaceholder": "A little about you",
       "faculty": "Faculty / School",
-      "facultyPlaceholder": "Your faculty or school"
+      "facultyPlaceholder": "Your faculty or school",
+      "campus": "Campus",
+      "campusPlaceholder": "Your campus"
     },
     "reset": {
       "title": "Let’s reconnect.",
@@ -228,7 +231,8 @@
     "videoCompressing": "Compressing video… {{progress}}%",
     "cancelPreparation": "Cancel preparation",
     "mediaUploading": "Uploading file…",
-    "mediaSaving": "Saving post…"
+    "mediaSaving": "Saving post…",
+    "academicMissing": "Your registered academic details are incomplete for this feed. Check your account details."
   },
   "universities": {
     "itu": "Istanbul Technical University",
@@ -371,15 +375,15 @@
     "feeds": {
       "university": {
         "title": "Around your university",
-        "description": "A dedicated feed and filters for this area will appear here."
+        "description": "Posts shared with you at your university."
       },
       "campus": {
         "title": "Life on your campus",
-        "description": "A dedicated feed and filters for this area will appear here."
+        "description": "Posts shared with you on your campus."
       },
       "department": {
         "title": "Inside your department",
-        "description": "A dedicated feed and filters for this area will appear here."
+        "description": "Posts shared with you in your department."
       },
       "explore": {
         "title": "Explore campus life",
@@ -459,7 +463,8 @@
       "discardTitle": "Discard your changes?",
       "discardText": "Your unsaved profile changes will be discarded.",
       "keepEditing": "Keep editing",
-      "discard": "Discard changes"
+      "discard": "Discard changes",
+      "campus": "Campus"
     },
     "errors": {
       "name": "Enter a name with up to 50 characters.",
@@ -488,7 +493,8 @@
         "replyTwo": "Thursday afternoon works for me. We can meet at the library after class.",
         "week": "My favorite thing about campus is how even an ordinary day can turn into a great conversation."
       }
-    }
+    },
+    "campusMissing": "Campus not added"
   },
   "media": {
     "video": "Video attached to the post",
@@ -578,7 +584,7 @@
     },
     "delete": {
       "title": "Delete post?",
-      "body": "This post and its media file will be permanently deleted. This cannot be undone."
+      "body": "The post will be removed from feeds and your profile. We will also attempt to delete its media. You cannot restore it in the app."
     },
     "block": {
       "title": "Block this person?",
@@ -596,7 +602,7 @@
     "archive": {
       "title": "My archive",
       "empty": "Your archive is empty",
-      "description": "Archived posts are visible only to you here. You can also retry unfinished deletions here."
+      "description": "Archived posts are visible only to you here. You can restore them at any time."
     },
     "bookmarks": {
       "title": "Bookmarks",
@@ -612,15 +618,26 @@
     },
     "search": {
       "title": "Search",
-      "label": "Search posts",
-      "placeholder": "Enter a word or topic",
+      "label": "Search people or posts",
+      "placeholder": "Enter a name, @username or topic",
       "clear": "Clear search",
-      "submit": "Search",
-      "hint": "Enter at least 2 characters to search",
+      "hint": "Enter at least 2 characters to find people or posts",
       "empty": "No matching posts",
-      "limit": "Showing the 30 most recent results. Try a more specific search."
+      "limit": "Showing the 30 most recent results. Try a more specific search.",
+      "people": "People",
+      "posts": "Posts",
+      "peopleLoading": "Searching people…",
+      "peopleEmpty": "No matching people",
+      "peopleError": "Could not search people. Check your connection and try again.",
+      "peopleLimit": "Showing the first 20 people. Try a more specific search.",
+      "waiting": "Searching…"
     },
     "thread": {
+      "refresh": "Refresh replies",
+      "clearDraft": "Clear draft",
+      "closed": "New replies cannot be added to this post.",
+      "showReplies": "Show replies",
+      "moreReplies": "Show more replies",
       "title": "Post",
       "label": "Write a comment",
       "send": "Comment",
@@ -634,6 +651,8 @@
       "discard": "Discard"
     },
     "errors": {
+      "replyDepth": "Replies support one nested level.",
+      "commentUncertain": "We could not confirm whether your reply was saved. Refresh the replies to check. This draft will not be sent again automatically.",
       "unavailable": "This content is unavailable or you do not have permission for this action.",
       "save": "The action could not be saved. Check your connection and try again.",
       "read": "Could not load this information. Try again.",
@@ -641,7 +660,10 @@
       "pinLimit": "You can pin up to 3 posts to your profile.",
       "setup": "The database setup for this feature has not been completed.",
       "comment": "Comments must contain 1–2000 characters. If sending fails, your text is preserved for retry.",
-      "busy": "Wait for the previous action on this post to finish."
+      "busy": "Wait for the previous action on this post to finish.",
+      "ownerSetup": "Post management is not enabled yet. Setup must be completed.",
+      "ownerUncertain": "The result could not be confirmed. Refresh before trying another action.",
+      "pinReply": "Replies and archived posts cannot be pinned."
     },
     "notice": {
       "deleted": "Post deleted.",
@@ -654,6 +676,40 @@
       "reported": "Report received.",
       "alreadyReported": "You have already reported this post.",
       "commented": "Comment sent."
-    }
+    },
+    "openProfile": "Open profile: {{name}}",
+    "openPost": "Open post",
+    "profileUnavailable": "This profile is unavailable."
+  },
+  "accountStatus": {
+    "title": "Account visibility",
+    "description": "Choose who can discover your profile and see your posts and search results. Save to apply your changes.",
+    "legacy": "You have not saved audience preferences yet. Your existing privacy rules remain in effect until you save.",
+    "everyone": "Explore is on: people at all universities can see your profile and posts.",
+    "onlyMe": "All options are off: after saving, only you can see your profile and posts.",
+    "combined": "People who match at least one enabled audience can see your profile and posts.",
+    "readError": "Account details could not be loaded. Try again.",
+    "saveError": "Your preferences could not be confirmed. Reload the current settings before saving again.",
+    "setup": "Account visibility is not enabled yet. Database setup must be completed.",
+    "saved": "Your audience preferences were saved.",
+    "academicLocked": "Academic details are set at registration and cannot be changed here.",
+    "visible_department": {
+      "title": "Department",
+      "description": "People in the same university, campus and department can see your profile and posts."
+    },
+    "visible_campus": {
+      "title": "Campus",
+      "description": "People on the same campus of your university can see your profile and posts."
+    },
+    "visible_university": {
+      "title": "University",
+      "description": "People across all campuses and departments of your university can see your profile and posts."
+    },
+    "visible_explore": {
+      "title": "Across universities (Explore)",
+      "description": "People at every university on KampüsX can discover your profile and posts."
+    },
+    "discardTitle": "Discard changes?",
+    "discardBody": "Your unsaved audience preferences will be discarded."
   }
 }

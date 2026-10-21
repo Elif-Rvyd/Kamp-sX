@@ -1,13 +1,14 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
-test('auth modes retain accessible labels, unique IDs, and error associations', async ({ page }) => {
-  test.setTimeout(60000);
-  const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
-  for (const mode of ['login', 'register', 'forgot-password']) {
-    for (const language of ['tr', 'en']) {
-      for (const theme of ['light', 'dark']) {
+for (const mode of ['login', 'register', 'forgot-password'])
+  for (const language of ['tr', 'en'])
+    for (const theme of ['light', 'dark'])
+      test(`auth labels, unique IDs, errors and invalid-field focus ${mode}/${language}/${theme}`, async ({
+        page,
+      }) => {
+        const errors = [];
+        page.on('pageerror', (error) => errors.push(error.message));
+        await page.goto('/');
         await page.evaluate(
           ({ theme, language }) => {
             localStorage.setItem('kampusx-language', language);
@@ -46,8 +47,5 @@ test('auth modes retain accessible labels, unique IDs, and error associations', 
           path: test.info().outputPath(`auth-${mode}-${theme}-${language}.png`),
           fullPage: true,
         });
-      }
-    }
-  }
-  expect(errors).toEqual([]);
-});
+        expect(errors).toEqual([]);
+      });

@@ -1,5 +1,10 @@
 # Bağımlılık güvenlik incelemesi
 
+> 22 Ekim 2026 güncellemesi: güncel tam `npm audit`, Vite 8.3.3 ve Nx altındaki
+> follow-redirects 1.16.1 yamalarından sonra **0 bulgu** veriyor. Aşağıdaki 10 Ekim sonuçları
+> tarihsel kayıttır. Güncel kapsam ve testler:
+> [güvenlik ve çakışma raporu](GUVENLIK-VE-CAKISMA-DENETIMI-2026-10-22.md).
+
 İnceleme tarihi: 10 Ekim 2026. Bu rapor auth incelemesi sırasında alınan npm audit çıktısını ve resmi paket metadatasını açıklıyor. npm audit sayıları etkilenen üst paketleri de sayar; her bulgu ayrı bir kök güvenlik açığı anlamına gelmez.
 
 ## Uygulanan yapılandırma

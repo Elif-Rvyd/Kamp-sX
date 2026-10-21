@@ -175,9 +175,11 @@ export type Database = {
       };
       profiles: {
         Row: {
+          audience_configured: boolean;
           avatar_url: string | null;
           banner_url: string | null;
           bio: string | null;
+          campus: string | null;
           created_at: string;
           full_name: string | null;
           is_private: boolean;
@@ -185,11 +187,17 @@ export type Database = {
           university: string | null;
           user_id: string;
           username: string | null;
+          visible_campus: boolean;
+          visible_department: boolean;
+          visible_explore: boolean;
+          visible_university: boolean;
         };
         Insert: {
+          audience_configured?: boolean;
           avatar_url?: string | null;
           banner_url?: string | null;
           bio?: string | null;
+          campus?: string | null;
           created_at?: string;
           full_name?: string | null;
           is_private?: boolean;
@@ -197,11 +205,17 @@ export type Database = {
           university?: string | null;
           user_id: string;
           username?: string | null;
+          visible_campus?: boolean;
+          visible_department?: boolean;
+          visible_explore?: boolean;
+          visible_university?: boolean;
         };
         Update: {
+          audience_configured?: boolean;
           avatar_url?: string | null;
           banner_url?: string | null;
           bio?: string | null;
+          campus?: string | null;
           created_at?: string;
           full_name?: string | null;
           is_private?: boolean;
@@ -209,6 +223,10 @@ export type Database = {
           university?: string | null;
           user_id?: string;
           username?: string | null;
+          visible_campus?: boolean;
+          visible_department?: boolean;
+          visible_explore?: boolean;
+          visible_university?: boolean;
         };
         Relationships: [];
       };
@@ -258,7 +276,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      kampusx_account_contract_version: { Args: never; Returns: string };
+      kampusx_follow_requests_version: { Args: never; Returns: string };
+      kampusx_owner_actions_version: { Args: never; Returns: string };
+      kampusx_reply_contract_version: { Args: never; Returns: string };
+      kampusx_soft_delete_post: {
+        Args: { p_post_id: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

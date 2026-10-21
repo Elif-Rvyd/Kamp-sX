@@ -23,7 +23,8 @@
     "title": "KampüsX — Kampüsün burada konuşuyor",
     "notFound": "Bu sayfa kampüste bulunamadı.",
     "home": "Ana sayfaya dön",
-    "characterCount": "{{count}} / {{max}} karakter"
+    "characterCount": "{{count}} / {{max}} karakter",
+    "clear": "Temizle"
   },
   "nav": {
     "explore": "Keşfet",
@@ -129,7 +130,9 @@
       "bio": "Bio (isteğe bağlı)",
       "bioPlaceholder": "Kendinden kısaca bahset",
       "faculty": "Fakülte / Yüksekokul",
-      "facultyPlaceholder": "Fakülten veya yüksekokulun"
+      "facultyPlaceholder": "Fakülten veya yüksekokulun",
+      "campus": "Kampüs",
+      "campusPlaceholder": "Kampüsün"
     },
     "reset": {
       "title": "Yeniden bağlanalım.",
@@ -228,7 +231,8 @@
     "videoCompressing": "Video küçültülüyor… %{{progress}}",
     "cancelPreparation": "Hazırlamayı iptal et",
     "mediaUploading": "Dosya yükleniyor…",
-    "mediaSaving": "Gönderi kaydediliyor…"
+    "mediaSaving": "Gönderi kaydediliyor…",
+    "academicMissing": "Bu akış için kayıtlı okul bilgilerin eksik. Hesabındaki bilgileri kontrol et."
   },
   "universities": {
     "itu": "İstanbul Teknik Üniversitesi",
@@ -371,15 +375,15 @@
     "feeds": {
       "university": {
         "title": "Üniversitende neler oluyor?",
-        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
+        "description": "Üniversitende seninle paylaşılan gönderiler."
       },
       "campus": {
         "title": "Kampüsünün gündemi",
-        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
+        "description": "Aynı kampüste seninle paylaşılan gönderiler."
       },
       "department": {
         "title": "Bölümündeki konuşmalar",
-        "description": "Bu alana özel akış ve filtreleme burada yer alacak."
+        "description": "Aynı bölümde seninle paylaşılan gönderiler."
       },
       "explore": {
         "title": "Kampüsleri keşfet",
@@ -459,7 +463,8 @@
       "discardTitle": "Değişiklikler silinsin mi?",
       "discardText": "Kaydetmediğin profil değişiklikleri silinecek.",
       "keepEditing": "Düzenlemeye devam et",
-      "discard": "Değişiklikleri sil"
+      "discard": "Değişiklikleri sil",
+      "campus": "Kampüs"
     },
     "errors": {
       "name": "İsim boş olamaz ve en fazla 50 karakter olabilir.",
@@ -488,7 +493,8 @@
         "replyTwo": "Perşembe öğleden sonra uygun olur. Ders çıkışında kütüphanede buluşabiliriz.",
         "week": "Kampüsün en sevdiğim tarafı, sıradan bir günün bile güzel bir sohbete dönüşebilmesi."
       }
-    }
+    },
+    "campusMissing": "Kampüs bilgisi eklenmemiş"
   },
   "media": {
     "video": "Gönderiye eklenen video",
@@ -578,7 +584,7 @@
     },
     "delete": {
       "title": "Gönderiyi sil?",
-      "body": "Bu gönderi ve ona ait medya dosyası kalıcı olarak silinecek. Bu işlem geri alınamaz."
+      "body": "Gönderi akıştan ve profilinden kaldırılacak. Ona ait medya dosyası da silinmeye çalışılacak. Uygulamadan geri getiremezsin."
     },
     "block": {
       "title": "Bu kişiyi engelle?",
@@ -596,7 +602,7 @@
     "archive": {
       "title": "Arşivim",
       "empty": "Arşivinde gönderi yok",
-      "description": "Arşivlediğin gönderiler yalnızca burada sana görünür. Tamamlanamayan silme işlemlerini de buradan yeniden deneyebilirsin."
+      "description": "Arşivlediğin gönderiler yalnızca burada sana görünür. İstediğin zaman arşivden çıkarabilirsin."
     },
     "bookmarks": {
       "title": "Kaydedilenler",
@@ -612,15 +618,26 @@
     },
     "search": {
       "title": "Ara",
-      "label": "Gönderilerde ara",
-      "placeholder": "Bir kelime veya konu yaz",
+      "label": "Kullanıcı veya gönderi ara",
+      "placeholder": "Ad, @kullanıcı adı veya konu yaz",
       "clear": "Aramayı temizle",
-      "submit": "Ara",
-      "hint": "Aramak için en az 2 karakter yaz",
+      "hint": "Kullanıcı veya gönderi aramak için en az 2 karakter yaz",
       "empty": "Eşleşen gönderi bulunamadı",
-      "limit": "En yeni 30 sonuç gösteriliyor. Aramanı daraltabilirsin."
+      "limit": "En yeni 30 sonuç gösteriliyor. Aramanı daraltabilirsin.",
+      "people": "Kullanıcılar",
+      "posts": "Gönderiler",
+      "peopleLoading": "Kullanıcılar aranıyor…",
+      "peopleEmpty": "Eşleşen kullanıcı bulunamadı",
+      "peopleError": "Kullanıcılar aranamadı. Bağlantını kontrol edip tekrar dene.",
+      "peopleLimit": "İlk 20 kullanıcı gösteriliyor. Daha fazla sonuç için aramanı daralt.",
+      "waiting": "Aranıyor…"
     },
     "thread": {
+      "refresh": "Yanıtları yenile",
+      "clearDraft": "Taslağı temizle",
+      "closed": "Bu gönderiye yeni yanıt eklenemez.",
+      "showReplies": "Yanıtları göster",
+      "moreReplies": "Daha fazla yanıt göster",
       "title": "Gönderi",
       "label": "Yorumunu yaz",
       "send": "Yorum yap",
@@ -634,6 +651,8 @@
       "discard": "Vazgeç"
     },
     "errors": {
+      "replyDepth": "Yanıta yalnızca bir seviye daha yanıt eklenebilir.",
+      "commentUncertain": "Yanıtın kaydedilip kaydedilmediği doğrulanamadı. Yanıtları yenileyip kontrol et. Bu taslak otomatik olarak yeniden gönderilmez.",
       "unavailable": "Bu içerik kullanılamıyor veya bu işlem için iznin yok.",
       "save": "İşlem kaydedilemedi. Bağlantını kontrol edip tekrar dene.",
       "read": "Bilgiler yüklenemedi. Tekrar dene.",
@@ -641,7 +660,10 @@
       "pinLimit": "Profilinde en fazla 3 gönderi öne çıkarabilirsin.",
       "setup": "Bu özellik için gerekli veritabanı kurulumu henüz tamamlanmamış.",
       "comment": "Yorum 1–2000 karakter olmalı. Gönderilemediyse metnini koruyup tekrar dene.",
-      "busy": "Bu gönderideki önceki işlemin tamamlanmasını bekle."
+      "busy": "Bu gönderideki önceki işlemin tamamlanmasını bekle.",
+      "ownerSetup": "Gönderi işlemleri henüz etkinleştirilmemiş. Kurulumun tamamlanması gerekiyor.",
+      "ownerUncertain": "İşlem sonucu doğrulanamadı. Tekrar işlem yapmadan önce sayfayı yenile.",
+      "pinReply": "Yanıtlar veya arşivlenmiş gönderiler öne çıkarılamaz."
     },
     "notice": {
       "deleted": "Gönderi silindi.",
@@ -654,6 +676,40 @@
       "reported": "Raporun alındı.",
       "alreadyReported": "Bu gönderiyi daha önce raporladın.",
       "commented": "Yorumun gönderildi."
-    }
+    },
+    "openProfile": "Profili aç: {{name}}",
+    "openPost": "Gönderiyi aç",
+    "profileUnavailable": "Bu profil görüntülenemiyor."
+  },
+  "accountStatus": {
+    "title": "Hesap durumu",
+    "description": "Profilini, gönderilerini ve arama sonuçlarındaki görünürlüğünü kimlerle paylaşacağını seç. Değişiklikler Kaydet ile uygulanır.",
+    "legacy": "Henüz görünürlük tercihi kaydetmedin. Kaydedene kadar mevcut gizlilik ayarların geçerlidir.",
+    "everyone": "Keşfet açık: profilin ve gönderilerin tüm üniversitelerdeki kullanıcılara görünür.",
+    "onlyMe": "Tüm seçenekler kapalı: kaydettikten sonra profilini ve gönderilerini yalnızca sen görebilirsin.",
+    "combined": "Açık seçeneklerden en az birine uyan kişiler profilini ve gönderilerini görebilir.",
+    "readError": "Hesap bilgileri okunamadı. Tekrar dene.",
+    "saveError": "Tercihler doğrulanamadı. Tekrar kaydetmeden önce mevcut ayarları yenile.",
+    "setup": "Hesap durumu ayarları henüz etkin değil. Veritabanı kurulumu tamamlanmalı.",
+    "saved": "Görünürlük tercihlerin kaydedildi.",
+    "academicLocked": "Okul bilgileri kayıt sırasında belirlenir ve bu ekrandan değiştirilemez.",
+    "visible_department": {
+      "title": "Bölüm",
+      "description": "Profilin ve gönderilerin aynı üniversite, kampüs ve bölümdeki kullanıcılara görünür."
+    },
+    "visible_campus": {
+      "title": "Kampüs",
+      "description": "Profilin ve gönderilerin aynı üniversitenin aynı kampüsündeki kullanıcılara görünür."
+    },
+    "visible_university": {
+      "title": "Üniversite",
+      "description": "Profilin ve gönderilerin üniversitendeki tüm kampüs ve bölümlerde görünür."
+    },
+    "visible_explore": {
+      "title": "Üniversiteler arası (Keşfet)",
+      "description": "Profilin ve gönderilerin KampüsX kullanan tüm üniversitelerde keşfedilebilir."
+    },
+    "discardTitle": "Değişikliklerden vazgeç?",
+    "discardBody": "Kaydetmediğin görünürlük tercihleri silinecek."
   }
 }

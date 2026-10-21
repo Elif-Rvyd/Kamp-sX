@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
+import { RouterLink } from '@angular/router';
 import { profileInitials } from '@kampusx/shared/util';
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
@@ -18,11 +19,16 @@ export interface FollowPersonView {
 @Component({
   selector: 'kx-follow-person',
   standalone: true,
-  imports: [TranslocoDirective, AvatarComponent, ButtonComponent],
+  imports: [RouterLink, TranslocoDirective, AvatarComponent, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<article class="person" *transloco="let t" [attr.aria-busy]="busy()">
-    <kx-avatar [initials]="initials()" [src]="person().avatarUrl" />
-    <div class="identity">
+    <a
+      [routerLink]="'/people/' + person().userId"
+      [attr.aria-label]="t('social.openProfile', { name: person().fullName || person().username })"
+    >
+      <kx-avatar [initials]="initials()" [src]="person().avatarUrl" />
+    </a>
+    <a class="identity" [routerLink]="'/people/' + person().userId">
       <strong>{{ person().fullName || person().username || t('follows.unnamed') }}</strong>
       @if (person().username) {
         <span>{{ '@' + person().username }}</span>
@@ -33,7 +39,7 @@ export interface FollowPersonView {
       @if (person().department) {
         <p>{{ person().department }}</p>
       }
-    </div>
+    </a>
     <div
       class="actions"
       [attr.aria-label]="
@@ -100,6 +106,8 @@ export interface FollowPersonView {
       min-height: 120px;
     }
     .identity {
+      color: inherit;
+      text-decoration: none;
       min-width: 0;
       display: grid;
       align-content: start;

@@ -6,6 +6,7 @@ import { ProfileRepository } from './profile-repository.service';
 import { PostsService } from './posts.service';
 import { AuthService } from './auth.service';
 import { FollowsService } from './follows.service';
+import { AccountService } from './account.service';
 import { ProfileError, type Profile, type ProfilePost, type ProfileUpdate } from './profile.model';
 
 @Injectable({ providedIn: 'root' })
@@ -17,6 +18,7 @@ export class ProfileService {
   private readonly repository = inject(ProfileRepository);
   private readonly postsApi = inject(PostsService);
   private readonly follows = inject(FollowsService);
+  private readonly account = inject(AccountService);
   readonly loading = signal(false);
   readonly readError = signal('');
   private readVersion = 0;
@@ -42,8 +44,6 @@ export class ProfileService {
         const identity = this.seed();
         this.state.update((value) => ({
           ...value,
-          university: identity.university,
-          department: identity.department,
           fullName: identity.fullName,
           bio: identity.bio,
         }));
@@ -75,8 +75,9 @@ export class ProfileService {
       university:
         value('university_name') || value('school') || (user ? '' : 'Kırşehir Ahi Evran Üniversitesi'),
       faculty: value('faculty_name') || (user ? '' : 'Teknik Bilimler Meslek Yüksekokulu'),
+      campus: value('campus_name') || value('faculty_name'),
       department: value('department_name') || value('department') || (user ? '' : 'Bilgisayar Programcılığı'),
-      joinedAt: '2024-01-12T12:00:00Z',
+      joinedAt: user?.created_at || '',
       followingCount: null,
       followersCount: null,
       postCount: 0,
@@ -96,19 +97,10 @@ export class ProfileService {
     if (!fullName || fullName.length > 50) throw new ProfileError('profile.errors.name');
     if (payload.bio.length > 160) throw new ProfileError('profile.errors.bio');
     const bio = payload.bio.trim();
-    const academic = {
-      university: payload.university ?? current.university,
-      department: payload.department ?? current.department,
-    };
     for (const field of ['university', 'department'] as const) {
-      if (
-        payload[field] !== undefined &&
-        (typeof payload[field] !== 'string' || !payload[field]!.trim() || payload[field]!.length > 150)
-      )
-        throw new ProfileError(`profile.errors.${field}`);
+      if (payload[field] !== undefined && payload[field] !== current[field])
+        throw new ProfileError('accountStatus.academicLocked');
     }
-    const academicChanged =
-      academic.university.trim() !== current.university || academic.department.trim() !== current.department;
     const image = (value: string | null | undefined, previous: string | undefined) => {
       if (value === undefined) return previous;
       if (value === null) return undefined;
@@ -126,15 +118,13 @@ export class ProfileService {
         ? (await this.media.upload(this.files.get(cover)!, 'banner', current.id)).url
         : cover;
     this.assertOwner(current.id, 'profile.errors.save', epoch);
-    const detailsChanged = academicChanged || fullName !== current.fullName || bio !== (current.bio || '');
+    const detailsChanged = fullName !== current.fullName || bio !== (current.bio || '');
     if (detailsChanged) {
-      const { error } = await this.auth.updateProfileDetails({ ...academic, fullName, bio });
+      const { error } = await this.auth.updateProfileDetails({ fullName, bio });
       this.assertOwner(current.id, 'profile.errors.save', epoch);
       if (error) throw new ProfileError('profile.errors.detailsSave');
       this.state.update((value) => ({
         ...value,
-        university: academic.university.trim(),
-        department: academic.department.trim(),
         fullName,
         bio,
       }));
@@ -227,7 +217,7 @@ export class ProfileService {
     this.loading.set(true);
     this.readError.set('');
     try {
-      const value = await this.repository.read(owner);
+      const [value, details] = await Promise.all([this.repository.read(owner), this.account.profile(owner)]);
       if (
         version !== this.readVersion ||
         this.auth.session()?.user.id !== owner ||
@@ -237,6 +227,18 @@ export class ProfileService {
         return;
       this.state.set({
         ...this.state(),
+        ...(details
+          ? {
+              username: details.username ?? this.state().username,
+              fullName: details.full_name ?? this.state().fullName,
+              bio: details.bio ?? this.state().bio,
+              university: details.university ?? '',
+              department: details.studying ?? '',
+              campus: details.campus,
+              faculty: details.campus,
+              joinedAt: details.created_at,
+            }
+          : {}),
         avatarUrl: value?.avatar_url || undefined,
         coverUrl: value?.banner_url || undefined,
       });

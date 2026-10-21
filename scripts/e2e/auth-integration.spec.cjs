@@ -38,7 +38,16 @@ function sessionResponse() {
 
 async function mockAuth(page, handlers = {}) {
   const requests = [];
-  await mockSocial(page);
+  await mockSocial(page, {
+    profile: {
+      username: 'student',
+      full_name: null,
+      university: null,
+      campus: null,
+      studying: null,
+      bio: null,
+    },
+  });
   await page.route('**/auth/v1/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -240,7 +249,7 @@ test('registration sends metadata and displays email-verification guidance', asy
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-faculty').fill('Faculty of Engineering');
+  await page.locator('#register-campus').fill('Faculty of Engineering');
   await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
   await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');
@@ -252,11 +261,11 @@ test('registration sends metadata and displays email-verification guidance', asy
   expect(submitted.body.email).toBe(email);
   expect(submitted.body.data.username).toBe('student');
   expect(submitted.body.data.full_name).toBe('Campus Student');
-  expect(submitted.body.data.faculty_name).toBe('Faculty of Engineering');
+  expect(submitted.body.data.campus_name).toBe('Faculty of Engineering');
   expect(submitted.body.data).not.toHaveProperty('role');
 });
 
-test('registration requires name, university, faculty and department before contacting Auth', async ({
+test('registration requires name, university, campus and department before contacting Auth', async ({
   page,
 }) => {
   const requests = await mockAuth(page);
@@ -269,7 +278,7 @@ test('registration requires name, university, faculty and department before cont
   for (const [id, value] of [
     ['name', 'Campus Student'],
     ['university', 'University'],
-    ['faculty', 'Faculty'],
+    ['campus', 'North'],
     ['department', 'Department'],
   ]) {
     await submit.click();
@@ -302,7 +311,7 @@ test('registration distinguishes email quota from request limits in Turkish and 
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-faculty').fill('Faculty of Engineering');
+  await page.locator('#register-campus').fill('Faculty of Engineering');
   await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
   await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');
@@ -369,7 +378,7 @@ test('registration opens dashboard only when Supabase returns a session', async 
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-faculty').fill('Faculty of Engineering');
+  await page.locator('#register-campus').fill('Faculty of Engineering');
   await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
   await page.locator('#register-department').fill('Bilgisayar Programcılığı');
   await page.locator('#register-password').fill('LocalTestPassword123!');

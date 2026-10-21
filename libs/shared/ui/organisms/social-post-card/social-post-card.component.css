@@ -23,6 +23,25 @@
   min-width: 0;
   flex: 1;
 }
+.post-header a {
+  color: inherit;
+  text-decoration: none;
+}
+.post-header a:hover strong {
+  text-decoration: underline;
+}
+.post-date {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 11px;
+  text-decoration: none;
+}
+.post-date:hover {
+  text-decoration: underline;
+}
 .post-author strong {
   display: block;
   font-size: 14px;
@@ -39,6 +58,9 @@
   color: var(--color-muted);
 }
 .post-text {
+  display: block;
+  color: var(--color-text);
+  text-decoration: none;
   margin: 14px 0;
   font-size: 14px;
   line-height: 1.8;

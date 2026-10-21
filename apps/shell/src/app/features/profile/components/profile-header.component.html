@@ -35,17 +35,23 @@
     }
   </div>
   <section class="profile-identity">
-    <button
-      type="button"
-      class="large-avatar"
-      [attr.aria-label]="t(profile().avatarUrl ? 'profile.edit.avatar' : 'profile.addPhoto')"
-      (click)="editRequested.emit()"
-    >
-      <kx-avatar [initials]="initials()" [src]="profile().avatarUrl" size="profile" />
-      @if (!profile().avatarUrl) {
-        <span class="camera-badge" aria-hidden="true"><kx-icon name="photo_camera" /></span>
-      }
-    </button>
+    @if (editable()) {
+      <button
+        type="button"
+        class="large-avatar"
+        [attr.aria-label]="t(profile().avatarUrl ? 'profile.edit.avatar' : 'profile.addPhoto')"
+        (click)="editRequested.emit()"
+      >
+        <kx-avatar [initials]="initials()" [src]="profile().avatarUrl" size="profile" />
+        @if (!profile().avatarUrl) {
+          <span class="camera-badge" aria-hidden="true"><kx-icon name="photo_camera" /></span>
+        }
+      </button>
+    } @else {
+      <div class="large-avatar">
+        <kx-avatar [initials]="initials()" [src]="profile().avatarUrl" size="profile" />
+      </div>
+    }
     <h1 #name>{{ profile().fullName }}</h1>
     <p class="profile-username">{{ '@' + profile().username }}</p>
     @if (profile().bio) {
@@ -58,7 +64,9 @@
         }}</span>
       </p>
       <p>
-        <kx-icon name="apartment" /><span>{{ profile().faculty || t('profile.facultyMissing') }}</span>
+        <kx-icon name="apartment" /><span>{{
+          profile().campus || profile().faculty || t('profile.campusMissing')
+        }}</span>
       </p>
       <p>
         <kx-icon name="code" /><span>{{
@@ -66,13 +74,15 @@
         }}</span>
       </p>
     </div>
-    <p class="profile-joined">
-      <kx-icon name="calendar_month" />{{ t('profile.joined', { date: joined() }) }}
-    </p>
+    @if (joined()) {
+      <p class="profile-joined">
+        <kx-icon name="calendar_month" />{{ t('profile.joined', { date: joined() }) }}
+      </p>
+    }
     <div class="profile-meta-row">
       <kx-follow-counts
-        followingLink="/profile/following"
-        followersLink="/profile/followers"
+        [followingLink]="editable() ? '/profile/following' : ''"
+        [followersLink]="editable() ? '/profile/followers' : ''"
         class="profile-counts"
         [following]="profile().followingCount"
         [followers]="profile().followersCount"
@@ -88,8 +98,11 @@
         /><kx-theme-toggle [touch]="true" [dark]="dark()" (changed)="themeChanged.emit()" />
       </div>
     </div>
-    <button kxButton type="button" emphasis="outline" class="edit-profile" (click)="editRequested.emit()">
-      {{ t('profile.edit.button') }}
-    </button>
+    @if (editable()) {
+      <button kxButton type="button" emphasis="outline" class="edit-profile" (click)="editRequested.emit()">
+        {{ t('profile.edit.button') }}
+      </button>
+    }
+    <ng-content select="[profileAction]" />
   </section>
 </ng-container>

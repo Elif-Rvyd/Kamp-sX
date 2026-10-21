@@ -14,6 +14,7 @@ function signal(value) {
 }
 function harness() {
   class AuthService {}
+  class AccountService {}
   class MediaService {}
   class ProfileRepository {}
   class PostsService {}
@@ -73,6 +74,7 @@ function harness() {
     })),
   );
   const dependencies = new Map([
+    [AccountService, { profile: async () => null }],
     [PostsService, { mine: ownPosts, ownCount: signal(6) }],
     [FollowsService, { counts: signal({ following: 0, followers: 0 }) }],
     [
@@ -113,8 +115,6 @@ function harness() {
                   ...session().user.user_metadata,
                   full_name: value.fullName.trim(),
                   bio: value.bio.trim(),
-                  university_name: value.university.trim(),
-                  department_name: value.department.trim(),
                 },
               },
             });
@@ -183,24 +183,26 @@ function harness() {
             ? { toSignal: (source) => source }
             : specifier === '@jsverse/transloco'
               ? { TranslocoService }
-              : specifier === './auth.service'
-                ? { AuthService }
-                : specifier === './media.service'
-                  ? { MediaService }
-                  : specifier === './profile-repository.service'
-                    ? { ProfileRepository }
-                    : specifier === './follows.service'
-                      ? { FollowsService }
-                      : specifier === './posts.service'
-                        ? { PostsService }
-                        : specifier === '@kampusx/shared/util'
-                          ? {
-                              ...load('libs/shared/util/image-header.ts'),
-                              ...load('libs/shared/util/profile-image.ts'),
-                            }
-                          : specifier.startsWith('.')
-                            ? load(path.relative(root, path.resolve(path.dirname(file), specifier + '.ts')))
-                            : require(specifier),
+              : specifier === './account.service'
+                ? { AccountService }
+                : specifier === './auth.service'
+                  ? { AuthService }
+                  : specifier === './media.service'
+                    ? { MediaService }
+                    : specifier === './profile-repository.service'
+                      ? { ProfileRepository }
+                      : specifier === './follows.service'
+                        ? { FollowsService }
+                        : specifier === './posts.service'
+                          ? { PostsService }
+                          : specifier === '@kampusx/shared/util'
+                            ? {
+                                ...load('libs/shared/util/image-header.ts'),
+                                ...load('libs/shared/util/profile-image.ts'),
+                              }
+                            : specifier.startsWith('.')
+                              ? load(path.relative(root, path.resolve(path.dirname(file), specifier + '.ts')))
+                              : require(specifier),
     );
     return exports;
   };
@@ -256,79 +258,59 @@ const png = () =>
     { type: 'image/png' },
   );
 
-test('profile changes allow academic display fields but cannot edit account or role fields', async () => {
-  const { service } = harness();
-  await service.reload();
-  const old = service.profile();
-  await service.updateProfile({
-    fullName: ' Yeni İsim ',
-    bio: ' A campus bio ',
-    username: 'intruder',
-    university: 'Other school',
-    department: 'New department',
-    id: 'other',
-    followersCount: 999,
+test('profile text and photos stay editable while academic identity is locked', async () => {
+  const h = harness();
+  await h.service.reload();
+  const before = h.service.profile();
+  await h.service.updateProfile({
+    fullName: 'New name',
+    bio: 'Bio',
+    username: 'forged',
+    campus: 'forged',
+    faculty: 'forged',
   });
-  assert.equal(service.profile().fullName, 'Yeni İsim');
-  assert.equal(service.profile().bio, 'A campus bio');
-  assert.equal(service.profile().university, 'Other school');
-  assert.equal(service.profile().department, 'New department');
-  for (const key of ['id', 'username', 'faculty', 'followersCount'])
-    assert.equal(service.profile()[key], old[key]);
+  assert.equal(h.service.profile().fullName, 'New name');
+  for (const key of ['university', 'department', 'campus', 'faculty', 'username'])
+    assert.equal(h.service.profile()[key], before[key]);
+  for (const field of ['university', 'department'])
+    await assert.rejects(h.service.updateProfile({ fullName: 'New name', bio: 'Bio', [field]: 'Forged' }), {
+      key: 'accountStatus.academicLocked',
+    });
+  assert.equal(h.academicCalls.length, 1);
 });
-
-test('academic validation and a rejected account update keep the current profile and draft intact', async () => {
+test('a rejected name update preserves the profile and draft', async () => {
   const h = harness();
   await h.service.reload();
-  const initial = h.service.profile();
-  for (const university of [' ', 'x'.repeat(151), 123])
-    await assert.rejects(h.service.updateProfile({ fullName: 'Elif', bio: '', university }), {
-      key: 'profile.errors.university',
-    });
-  for (const department of [' ', 'x'.repeat(151), 123])
-    await assert.rejects(h.service.updateProfile({ fullName: 'Elif', bio: '', department }), {
-      key: 'profile.errors.department',
-    });
-  assert.equal(h.academicCalls.length, 0);
+  const before = h.service.profile();
   h.failAcademic();
-  await assert.rejects(
-    h.service.updateProfile({ fullName: 'Elif', bio: '', university: 'Other university' }),
-    { key: 'profile.errors.detailsSave' },
-  );
-  assert.deepEqual(h.service.profile(), initial);
+  await assert.rejects(h.service.updateProfile({ fullName: 'Changed', bio: 'Bio' }), {
+    key: 'profile.errors.detailsSave',
+  });
+  assert.deepEqual(h.service.profile(), before);
 });
-
-test('account metadata refresh updates academic labels without erasing local name or bio', async () => {
+test('changing user metadata cannot replace canonical academic labels', async () => {
   const h = harness();
   await h.service.reload();
+  const before = h.service.profile();
   await h.service.updateProfile({ fullName: 'Local name', bio: 'Local bio' });
-  h.refreshMetadata({ university_name: 'Updated university', department_name: 'Updated department' });
-  assert.equal(h.service.profile().university, 'Updated university');
-  assert.equal(h.service.profile().department, 'Updated department');
+  h.refreshMetadata({ university_name: 'Forged', department_name: 'Forged' });
+  assert.equal(h.service.profile().university, before.university);
+  assert.equal(h.service.profile().department, before.department);
   assert.equal(h.service.profile().fullName, 'Local name');
   assert.equal(h.service.profile().bio, 'Local bio');
 });
-
-test('a photo write failure after an academic save reports the partial result honestly', async () => {
+test('photo failure after a text save reports the partial result honestly', async () => {
   const h = harness();
   await h.service.reload();
   const avatar = await h.service.uploadAvatar(png());
   h.failPhotoSave();
-  await assert.rejects(
-    h.service.updateProfile({
-      fullName: 'Elif',
-      bio: '',
-      university: 'New university',
-      department: 'New department',
-      avatarUrl: avatar,
-    }),
-    { key: 'profile.errors.partialSave' },
-  );
-  assert.equal(h.service.profile().university, 'New university');
-  assert.equal(h.service.profile().department, 'New department');
+  await assert.rejects(h.service.updateProfile({ fullName: 'New name', bio: 'Bio', avatarUrl: avatar }), {
+    key: 'profile.errors.partialSave',
+  });
+  assert.equal(h.service.profile().fullName, 'New name');
   assert.equal(h.service.profile().avatarUrl, undefined);
-  assert.deepEqual(h.revoked, []);
 });
+
 test('whitespace names, length limits and unowned image URLs fail without changing state', async () => {
   const { service } = harness();
   await service.reload();

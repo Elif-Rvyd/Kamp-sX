@@ -80,13 +80,14 @@
           placeholderKey="auth.register.universityPlaceholder"
           [control]="form.controls.university"
           [floating]="true"
+          [readonly]="true"
           [maxLength]="150"
         />
         <kx-form-field
-          fieldId="profile-faculty"
-          labelKey="profile.edit.faculty"
-          placeholderKey="profile.edit.faculty"
-          [control]="form.controls.faculty"
+          fieldId="profile-campus"
+          labelKey="profile.edit.campus"
+          placeholderKey="profile.edit.campus"
+          [control]="form.controls.campus"
           [floating]="true"
           [readonly]="true"
         />
@@ -96,6 +97,7 @@
           placeholderKey="auth.register.departmentPlaceholder"
           [control]="form.controls.department"
           [floating]="true"
+          [readonly]="true"
           [maxLength]="150"
         />
         <p class="save-error error-text" role="alert">

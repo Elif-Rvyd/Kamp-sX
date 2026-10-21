@@ -84,10 +84,16 @@ export class AuthService {
     email: string,
     password: string,
     username: string,
-    academic?: { university: string; department: string; faculty?: string; fullName?: string; bio?: string },
+    academic?: { university: string; department: string; campus: string; fullName?: string; bio?: string },
   ) {
     if (!this.supabase)
       return { data: { user: null, session: null }, error: this.failure('auth_not_configured') };
+    if (
+      [academic?.university, academic?.campus, academic?.department].some(
+        (value) => typeof value !== 'string' || !value.trim() || value.length > 150,
+      )
+    )
+      return { data: { user: null, session: null }, error: this.failure('invalid_academic_details') };
     try {
       return await this.supabase.auth.signUp({
         email: email.trim(),
@@ -99,7 +105,7 @@ export class AuthService {
               ? {
                   university_name: academic.university.trim(),
                   department_name: academic.department.trim(),
-                  ...(academic.faculty !== undefined ? { faculty_name: academic.faculty.trim() } : {}),
+                  campus_name: academic.campus.trim(),
                   ...(academic.fullName !== undefined ? { full_name: academic.fullName.trim() } : {}),
                   ...(academic.bio !== undefined ? { bio: academic.bio.trim() } : {}),
                 }
@@ -133,23 +139,13 @@ export class AuthService {
     university: string;
     department: string;
   }): Promise<{ error: AuthError | null }> {
-    const university = academic?.university;
-    const department = academic?.department;
-    if (
-      [university, department].some(
-        (value) => typeof value !== 'string' || !value.trim() || value.length > 150,
-      )
-    )
-      return { error: this.failure('invalid_academic_details') };
-    const metadata = { university_name: university.trim(), department_name: department.trim() };
-    return this.updateDisplayMetadata(metadata);
+    void academic;
+    return { error: this.failure('academic_fields_locked') };
   }
 
   async updateProfileDetails(details: {
     fullName: string;
     bio: string;
-    university: string;
-    department: string;
   }): Promise<{ error: AuthError | null }> {
     if (
       !details ||
@@ -157,17 +153,12 @@ export class AuthService {
       !details.fullName.trim() ||
       details.fullName.length > 50 ||
       typeof details.bio !== 'string' ||
-      details.bio.length > 160 ||
-      [details.university, details.department].some(
-        (value) => typeof value !== 'string' || !value.trim() || value.length > 150,
-      )
+      details.bio.length > 160
     )
       return { error: this.failure('invalid_profile_details') };
     return this.updateDisplayMetadata({
       full_name: details.fullName.trim(),
       bio: details.bio.trim(),
-      university_name: details.university.trim(),
-      department_name: details.department.trim(),
     });
   }
 

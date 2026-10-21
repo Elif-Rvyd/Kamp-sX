@@ -1,5 +1,7 @@
 # KampüsX — Frontend Geliştirme Raporu
 
+> Bu belge 4 Ekim 2026'daki ilk frontend tesliminin tarihsel kaydıdır. Güncel gerçek auth, medya, takip ve A–B durumu için [21 Ekim 2026 proje raporunu](C:/Users/elifr/source/project/web/KampüsX/docs/PROJE-DURUMU-A-B-2026-10-21.md) okuyun.
+
 **Tarih:** 4 Ekim 2026
 
 **Proje:** KampüsX

@@ -62,7 +62,7 @@ without preview labels in the campaign header or footer.
 
 This is a hybrid surface: the welcome route is marketing; the auth panel and `/auth/*`
 routes use shared product form controls. Email/password authentication now uses Supabase;
-posts/profiles/follows use Supabase; academic feed scopes remain previews and Google OAuth is not connected. A remembered session uses
+posts/profiles/follows use Supabase; academic feeds use the registered public profile scopes after SQL 23; Google OAuth is not connected. A remembered session uses
 persistent browser storage; an unremembered session uses session storage.
 Audience evidence: the supplied KampusX-welcome-spec2.md and the user's Angular/Nx request.
 Turkish and English are equally supported. Browser language sets the initial locale;
@@ -177,29 +177,20 @@ The sidebar's expanded header
 contains the signed-in user's display name, handle, university, department and real, nullable follow counts. Profile metadata is
 display content only; missing university/department values use honest localized placeholders.
 The sidebar's sign-out control closes the real Supabase session. Home, Profile and Publish navigate;
-planned messages, search, history, communities, settings and help remain disabled visual entries.
+Search and Settings use real routes; messages, history, communities and help remain disabled visual entries.
 The skip link targets the content after the sidebar. Discovery uses a single selected index
 for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
 remains native; the shared sidebar replaces the duplicate bottom navigation and floating compose control. Motion is transform/opacity
-only and honors reduced motion. Skeletons are static decoration only for the three planned academic feeds;
-Explore uses real rows with loading, error/retry and empty states. Email/password sign-in redirects to dashboard
+only and honors reduced motion. The active academic/Explore tab loads real rows with loading, error/retry and empty states. Email/password sign-in redirects to dashboard
 only after Supabase returns a session; registration with no session keeps email-verification guidance.
 The dashboard guard verifies the session with Supabase getUser; valid signed-in users skip login/register,
 and password recovery keeps its own route. Session loss returns to login. The existing auth forms keep
 their visual design and welcome keeps its public chrome. Plain login URLs are not treated as callback
 links; callback detection requires actual auth parameters. Explore reads authenticated public.posts rows. No fake session is created by dashboard.
-University, campus and department filtering remains a planned visual flow because no scope columns were supplied.
+University, campus and department feeds join canonical public profiles through posts.user_id. Filters use registered university/campus/studying, retain RLS and show an honest error for incomplete legacy identity.
 The lazy `/profile` and `/profile/edit` routes retain the existing session guard. ProfileService
-seeds display identity from the existing session. Names and bios persist in allowlisted Auth display metadata;
-follow counts come from accepted public.follows rows after the Part A migration. Pending requests have a separate count. A missing table or failed read shows an unknown count and Retry, never an invented zero. The joined date remains illustrative. Avatar/banner URLs persist in public.profiles by user_id;
-posts and post count come from public.posts. No reply/repost data is invented.
-It owns atomic name/bio/photo updates and staged object URLs, releases discarded/replaced assets,
-and resets its local state when the signed-in account changes. University and department can be edited in the same
-profile form (required, max 150 characters each) and persist as university_name/department_name in existing Auth
-user metadata. They are self-declared display information, never school verification or authorization. Username
-and faculty stay readonly. An academic save updates the profile/drawer immediately and survives a reload.
-Auth metadata and photo rows cannot form one transaction; partial saves report which information was retained.
-Registration requires name, username, university, faculty/school and department; bio is optional (160 characters). It sends only allowlisted display metadata to Auth; it does not grant roles. Faculty is captured as faculty_name at registration and stays readonly in the editor. The field order in both flows is name, username, bio, university, faculty, department. Email, password and consent follow those registration fields. Required fields are enforced by the registration form; metadata remains user-editable display content, not a verified academic credential.
+seeds display identity from the existing session and reloads canonical public profile fields. The joined date comes from the actual account/profile creation time. Name and bio use allowlisted Auth display metadata; SQL 23 synchronizes those two values to public profiles. Photos use public.profiles by user_id. Username and academic identity are readonly in the editor. Registration requires name, username, university, campus and department; bio remains optional. The visible academic field is Campus rather than a separate Faculty field. Existing faculty_name is mapped to campus only by the approved migration. Public profile rows and Auth metadata have database guards against client academic changes. These are self-declared registration details, not verified academic credentials.
+The editor sends only name, bio and photo changes; tampered academic payloads are rejected or ignored at explicit boundaries. Text and media cannot commit as one transaction, so partial saves remain truthful. Profile/drawer updates use the same session-bound signals.
 Upload ownership and a session epoch are checked across asynchronous boundaries. Logout or replacement login
 invalidates pending work, including a re-login to the same user; token refresh alone does not. Dirty profile/post
 editors leave on session loss without trapping the user in a discard dialog or retaining the old draft.
@@ -210,11 +201,26 @@ and WebP dimensions are checked before decoding, with browser decoding and a fin
 Avatar, scrollable TabStrip and floating FormField extend existing owners through optional variants.
 FollowsService uses the actual public.follows follower_id/following_id/status contract and live-generated public types. Only accepted relations count; pending requests are separate. Part A uses private empty Broadcast invalidations for the two participants, guarded reserved topics, reconnect refetch, request cancellation and session-bound teardown. The database sets pending/accepted from the target privacy, limits acceptance to the recipient, serializes follow/block writes, and retains all existing relations. A version RPC blocks frontend writes until the migration is installed. Own followers/following/request routes use the existing SocialPageFrame, shared FollowPerson with Avatar/Button, FormField for exact username lookup, and NoticeService. Counts in profile/sidebar link to the lists; Settings links to requests. New routes are classified as authenticated social screens. Existing UI tokens, welcome/auth forms, profile editing and public Storage stay canonical.
 SocialPostCard owns feed cards; the marketing PostCardPreview remains its separate existing preview.
+Likes/bookmarks reuse SocialPostCard, PostEntry and the existing collection page. Their real table
+integration changes no tokens, layout or shared-component dependencies. Pending writes disable
+duplicate actions; failures use a single inline translated message with read-only Retry. Counters
+come from posts, and saved post visibility comes from RLS. The 21 October live contract supersedes
+legacy reaction RPC assumptions; the remaining social actions are separately staged.
+PostThread reuses the same card, FormField, Button, ConfirmDialog and social page frame. Replies
+stay in the existing bordered document flow; nested replies retain the existing inset border.
+Children expand on demand with their own loading/error/paging state. No visual tokens change.
+An uncertain reply receipt keeps the draft with translated read-only Refresh and confirmed Clear
+actions, while submit is disabled. The server owns IDs and counters; no synthetic retry ID is sent.
+The search route keeps that visual language: shared FormField with an optional clear icon, then
+People and Posts sections separated by existing rules. Profile results reuse FollowPerson's
+Avatar, identity and verified follow controls. Partial name/username search runs while typing;
+the former Search submit button is removed. Existing tokens, themes, public/auth pages and
+database privacy remain unchanged.
 ImagePicker owns native file selection and staged previews, ConfirmDialog owns draft-discard confirmation,
 and Toast with NoticeService owns saved feedback across route changes. MediaService owns uploads to the existing uploads bucket; ProfileRepository and PostsService own the DB boundary. The private Storage change was reverted on 18 October 2026 at the user’s request. Media is rendered through the existing public URLs. SQL 12 preserves bucket visibility; optional SQL 13 restores Public if the private setup was applied manually. Blocking governs app rows and interactions, not access to a known public file URL. UX-CONTRACT.md and docs/adr/001-post-actions-and-media-privacy.md record the accepted interaction and permission source.
 File selection only stages previews; Save/Publish performs network writes. The post composer announces preparation, Storage upload and database saving in a reserved status region without inventing percentage progress. A successful post response must match the owner, text and expected media URL/type; mismatches are uncertain outcomes and block blind retries. Feed media must match the row owner, post area and declared format. File bytes and blob/data URLs never enter application database payloads. URLs use uid/purpose/random paths and only
 the configured bucket origin is rendered. Confirmed uploads can be reused after a rejected DB write.
-Storage and database writes are separate operations; deletion reserves the post, removes its exclusively owned Storage object through the API, then finalizes DB deletion after a server absence check. Failed cleanup is retryable in My archive.
+Storage and database writes are separate operations. SQL 22 soft deletes only an authenticated owner’s row through a narrow RPC; deleted rows remain hidden by SELECT RLS. Only after confirmation does the client attempt canonical owned post-media cleanup, skipping files referenced by another live owned post. Cleanup failure emits a safe diagnostic, never restores the row or invites a second delete. Archive contains archived, undeleted rows only.
 Storage failures distinguish session, denied access, unavailable bucket, bucket limits, throttling and network failures
 without exposing raw server responses. Failed uploads preserve the draft and never insert a post.
 Post composer uses existing FormField/Button/ConfirmDialog owners and the same protected navigation/draft contract.
@@ -239,6 +245,12 @@ The trend ticker uses the theme's surface-alt background, text, border, primary 
 and accent separators so it stays light in light mode and dark in dark mode. It has
 a persistent pause button and stops on hover/focus. Reduced motion disables
 animations, reveal movement and smooth scrolling. No real video asset was supplied; the video is a static preview.
+
+### Account visibility and linked identity (22 October 2026)
+
+Post dates appear below text/media, independently of the username. Native links on identity, text and date open /people/:id or /posts/:id; media playback controls keep their native behavior. Public profiles reuse ProfileHeader with an explicit readonly variant, real permitted posts and the existing follow actions. No new palette or layout width is introduced.
+Account visibility reuses SocialPageFrame, Button, ConfirmDialog and a shared button[kxSwitch] with role=switch, visible focus, a 44px target and token-based appearance. Department, Campus, University and Across universities are ordered consistently. Explicit Save applies the union of enabled audiences. Explore includes every university; all off means owner only. A saved audience directly controls profile discovery and posts, as chosen by the user; legacy is_private/follow rules remain until the first preference save. Existing accounts are never silently made public. Failed/uncertain saves preserve the draft and require a fresh read; navigation guards unsaved changes. Blocking overrides all audiences. Public Storage URLs remain outside row privacy.
+The current implementation and confirmed SQL 19/20/22/23 status are tracked in docs/HESAP-VE-GONDERI-GUNCELLEMELERI-2026-10-22.md. Supabase public types are generated from the actual live schema, not a proposed extension.
 
 ## Do's and Don'ts
 

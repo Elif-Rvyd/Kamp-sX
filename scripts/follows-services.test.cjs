@@ -22,6 +22,7 @@ function harness() {
     effects = [],
     cleanup = [],
     queries = [],
+    readResults = [],
     setupReads = [],
     channels = [],
     removed = [];
@@ -36,7 +37,7 @@ function harness() {
   const client = {
     rpc(name, args, options) {
       assert.equal(name, 'kampusx_follow_requests_version');
-      assert.deepEqual(args, {});
+      assert.equal(args, undefined);
       assert.deepEqual(options, { get: true });
       return {
         abortSignal: async (abort) => {
@@ -69,8 +70,8 @@ function harness() {
       return this;
     },
     from(table) {
-      assert.equal(table, 'follows');
-      const q = { filters: [], op: 'select' };
+      assert.ok(['follows', 'profiles'].includes(table));
+      const q = { table, filters: [], op: 'select' };
       queries.push(q);
       const builder = {
         select(column, options) {
@@ -80,6 +81,26 @@ function harness() {
         },
         eq(key, value) {
           q.filters.push([key, value]);
+          return this;
+        },
+        neq(key, value) {
+          q.excluded = [key, value];
+          return this;
+        },
+        ilike(key, value) {
+          q.pattern = [key, value];
+          return this;
+        },
+        in(key, values) {
+          q.ids = [key, values];
+          return this;
+        },
+        order(key) {
+          (q.orders ??= []).push(key);
+          return this;
+        },
+        limit(value) {
+          q.limit = value;
           return this;
         },
         insert(payload) {
@@ -100,6 +121,7 @@ function harness() {
         async abortSignal(abort) {
           q.abort = abort;
           if (pause) await pause;
+          if (q.op === 'select' && !q.options?.head && readResults.length) return readResults.shift();
           return {
             count:
               q.op !== 'select'
@@ -155,6 +177,7 @@ function harness() {
   return {
     service,
     queries,
+    readResults,
     setupReads,
     channels,
     removed,
@@ -408,6 +431,122 @@ test('destroying the follow service aborts outstanding setup checks', async () =
   } finally {
     release();
     await pending;
+  }
+});
+
+const profile = (user_id = B) => ({
+  user_id,
+  username: 'deniz',
+  full_name: 'Deniz Yıldız',
+  avatar_url: null,
+  university: 'Örnek Üniversitesi',
+  studying: 'Bilgisayar Mühendisliği',
+});
+const read = (data) => ({ data, error: null });
+
+test('people search combines partial usernames/names without duplicates and preserves verified follow status', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(
+    read([{ user_id: B }]),
+    read([{ user_id: B }]),
+    read([profile()]),
+    read([{ follower_id: A, following_id: B, status: 'accepted', created_at: '2026-10-19T00:00:00Z' }]),
+  );
+  try {
+    const people = await h.service.searchPeople('  @den  ');
+    assert.equal(people.length, 1);
+    assert.equal(people[0].fullName, 'Deniz Yıldız');
+    assert.equal(people[0].status, 'accepted');
+    const searches = h.queries.filter((q) => q.pattern);
+    assert.deepEqual(
+      searches.map((q) => q.pattern),
+      [
+        ['username', '%den%'],
+        ['full_name', '%den%'],
+      ],
+    );
+    assert.ok(searches.every((q) => q.limit === 20));
+    assert.ok(searches.every((q) => q.excluded[1] === A));
+    assert.deepEqual(h.queries.find((q) => q.ids && q.table === 'profiles').ids, ['user_id', [B]]);
+  } finally {
+    h.destroy();
+  }
+});
+
+test('people search treats wildcards and PostgREST punctuation as literal text', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(read([]), read([]));
+  try {
+    await h.service.searchPeople('a%_\\,()."');
+    for (const query of h.queries.filter((q) => q.pattern))
+      assert.equal(query.pattern[1], '%a\\%\\_\\\\,()."%');
+  } finally {
+    h.destroy();
+  }
+});
+
+test('RLS-hidden profiles stay absent even if blocked between lookup and hydration', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(read([{ user_id: B }]), read([]), read([]), read([]));
+  try {
+    assert.deepEqual(await h.service.searchPeople('deniz'), []);
+  } finally {
+    h.destroy();
+  }
+});
+
+test('people search bounds the merged result set and refuses malformed identities', async () => {
+  const h = harness();
+  await tick();
+  const ids = Array.from({ length: 20 }, (_, i) => `22222222-2222-4222-8222-${String(i).padStart(12, '0')}`);
+  h.readResults.push(
+    read(ids.map((user_id) => ({ user_id }))),
+    read([{ user_id: B }]),
+    read(ids.map(profile)),
+    read([]),
+  );
+  try {
+    assert.equal((await h.service.searchPeople('deniz')).length, 20);
+    h.readResults.push(read([{ user_id: 'invalid-id' }]), read([]));
+    await assert.rejects(h.service.searchPeople('deniz'), { key: 'follows.readError' });
+  } finally {
+    h.destroy();
+  }
+});
+
+test('people search failures expose only a translated key and never return partial identities', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(read([{ user_id: B }]), { data: null, error: { message: 'PRIVATE_ERROR_MARKER' } });
+  try {
+    await assert.rejects(h.service.searchPeople('deniz'), {
+      key: 'follows.readError',
+      message: 'follows.readError',
+    });
+  } finally {
+    h.destroy();
+  }
+});
+
+test('people search ignores late responses after replacement login and honors cancellation', async () => {
+  const h = harness();
+  await tick();
+  const release = h.pause();
+  h.readResults.push(read([{ user_id: B }]), read([]));
+  const controller = new AbortController();
+  const pending = h.service.searchPeople('deniz', controller.signal);
+  const rejection = assert.rejects(pending, { key: 'follows.readError' });
+  controller.abort();
+  h.change(A, false);
+  release();
+  try {
+    await rejection;
+    assert.ok(h.queries.filter((q) => q.pattern).every((q) => q.abort.aborted));
+  } finally {
+    h.destroy();
   }
 });
 

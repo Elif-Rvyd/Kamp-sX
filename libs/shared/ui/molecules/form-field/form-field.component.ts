@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { validationKey } from '@kampusx/shared/util';
 import { InputDirective } from '../../atoms/input/input.directive';
 import { IconComponent } from '../../atoms/icon/icon.component';
+import { IconButtonComponent } from '../../atoms/icon-button/icon-button.component';
 @Component({
   selector: 'kx-form-field',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslocoDirective, InputDirective, IconComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, InputDirective, IconComponent, IconButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './form-field.component.css',
   template: `<div
@@ -17,7 +18,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
     [class.field-readonly]="readonly()"
   >
     <label [for]="fieldId()">{{ t(labelKey()) }}</label>
-    <div class="input-wrap">
+    <div class="input-wrap" [class.has-clear]="clearable() && !readonly() && count() > 0">
       @if (!floating()) {
         <kx-icon [name]="icon()" />
       }
@@ -46,6 +47,18 @@ import { IconComponent } from '../../atoms/icon/icon.component';
           [attr.aria-describedby]="fieldId() + '-message' + (maxLength() ? ' ' + fieldId() + '-counter' : '')"
           [class.input-valid]="control().touched && control().valid"
         />
+      }
+      @if (clearable() && !readonly() && count() > 0) {
+        <button
+          kxIconButton
+          class="field-clear"
+          type="button"
+          [disabled]="control().disabled"
+          [attr.aria-label]="t(clearLabelKey())"
+          (click)="cleared.emit()"
+        >
+          <kx-icon name="close" />
+        </button>
       }
     </div>
     <p
@@ -80,6 +93,9 @@ export class FormFieldComponent {
   readonly multiline = input(false);
   readonly readonly = input(false);
   readonly maxLength = input(0);
+  readonly clearable = input(false);
+  readonly clearLabelKey = input('common.clear');
+  readonly cleared = output<void>();
   private readonly revision = signal(0);
   constructor() {
     effect((onCleanup) => {

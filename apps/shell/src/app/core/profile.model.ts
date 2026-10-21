@@ -8,6 +8,7 @@ export interface Profile {
   coverUrl?: string;
   university: string;
   faculty: string;
+  campus?: string;
   department: string;
   joinedAt: string;
   followingCount: number | null;

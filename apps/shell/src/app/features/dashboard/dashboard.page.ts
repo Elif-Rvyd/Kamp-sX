@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Router } from '@angular/router';
-import { FeedSkeletonComponent, IconComponent, ButtonComponent } from '@kampusx/shared/ui';
+import { IconComponent, ButtonComponent } from '@kampusx/shared/ui';
 import { PostsService, type StoredPost } from '../../core/posts.service';
 import { PostEntryComponent } from '../posts/post-entry.component';
 import type { PostAuthor } from '@kampusx/shared/util';
@@ -25,13 +25,12 @@ import { ProfileService } from '../../core/profile.service';
 import { dashboardProfile } from './dashboard-profile';
 import { DashboardTopBarComponent } from './top-bar/top-bar.component';
 import { DashboardDiscoverTabsComponent } from './discover-tabs/discover-tabs.component';
-import { DISCOVER_FEEDS, SKELETON_CARDS } from './mock-data';
+import { DISCOVER_FEEDS } from './mock-data';
 
 @Component({
   standalone: true,
   imports: [
     TranslocoDirective,
-    FeedSkeletonComponent,
     ButtonComponent,
     PostEntryComponent,
     IconComponent,
@@ -60,13 +59,13 @@ export class DashboardPage {
     void this.router.navigateByUrl('/profile');
   }
   readonly feeds = DISCOVER_FEEDS;
-  readonly skeletons = SKELETON_CARDS;
   readonly active = signal(0);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private swipe: SwipePoint | null = null;
   private readonly swipeClick = new SwipeClickGuard();
 
   constructor() {
+    this.posts.selectScope('explore');
     effect(() => {
       if (this.auth.initialized() && !this.auth.session()) {
         void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
@@ -88,7 +87,9 @@ export class DashboardPage {
   }
 
   select(index: number): void {
-    this.active.set(Math.max(0, Math.min(this.feeds.length - 1, index)));
+    const selected = Math.max(0, Math.min(this.feeds.length - 1, index));
+    this.active.set(selected);
+    this.posts.selectScope((['explore', 'university', 'campus', 'department'] as const)[selected]);
   }
   onPointerDown(event: PointerEvent): void {
     this.swipeClick.reset();

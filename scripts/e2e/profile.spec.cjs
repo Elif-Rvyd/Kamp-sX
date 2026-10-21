@@ -42,8 +42,13 @@ async function openProfile(page, language = 'tr', theme = 'light', url = '/profi
     { language, theme, session },
   );
   await page.route('**/auth/v1/**', (route) => {
-    if (route.request().method() === 'PUT')
+    if (route.request().method() === 'PUT') {
       user.user_metadata = { ...user.user_metadata, ...route.request().postDataJSON().data };
+      Object.assign(social.profile, {
+        full_name: user.user_metadata.full_name,
+        bio: user.user_metadata.bio || '',
+      });
+    }
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) });
   });
   const backend = [];
@@ -86,10 +91,10 @@ for (const language of ['tr', 'en'])
       await expect(
         page.getByRole('button', { name: language === 'tr' ? 'Kaydet' : 'Save', exact: true }),
       ).toBeDisabled();
-      for (const id of ['profile-username', 'profile-faculty'])
+      for (const id of ['profile-username', 'profile-campus'])
         await expect(page.locator('#' + id)).toHaveAttribute('readonly', '');
       for (const id of ['profile-university', 'profile-department'])
-        await expect(page.locator('#' + id)).toBeEditable();
+        await expect(page.locator('#' + id)).toHaveAttribute('readonly', '');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.screenshot({

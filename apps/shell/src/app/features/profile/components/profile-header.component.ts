@@ -43,6 +43,7 @@ import type { Profile } from '../../../core/profile.model';
 })
 export class ProfileHeaderComponent {
   readonly profile = input.required<Profile>();
+  readonly editable = input(true);
   readonly language = input('tr');
   readonly dark = input(false);
   readonly backRequested = output<void>();
@@ -55,11 +56,13 @@ export class ProfileHeaderComponent {
   readonly collapsed = signal(false);
   readonly initials = computed(() => profileInitials(this.profile().fullName));
   readonly joined = computed(() =>
-    new Intl.DateTimeFormat(this.language() === 'tr' ? 'tr-TR' : 'en-US', {
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).format(new Date(this.profile().joinedAt)),
+    Number.isFinite(Date.parse(this.profile().joinedAt))
+      ? new Intl.DateTimeFormat(this.language() === 'tr' ? 'tr-TR' : 'en-US', {
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'UTC',
+        }).format(new Date(this.profile().joinedAt))
+      : '',
   );
   private readonly name = viewChild.required<ElementRef<HTMLElement>>('name');
   constructor() {

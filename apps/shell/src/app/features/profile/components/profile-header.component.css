@@ -103,6 +103,9 @@
   color: var(--color-on-primary);
   border: 2px solid var(--color-surface);
 }
+.large-avatar:not(button) {
+  cursor: default;
+}
 .camera-badge kx-icon {
   transform: scale(0.72);
 }

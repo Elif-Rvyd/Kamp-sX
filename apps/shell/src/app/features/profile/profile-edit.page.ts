@@ -73,22 +73,12 @@ export class ProfileEditPage {
       validators: [Validators.maxLength(160)],
     }),
     username: new FormControl('@' + this.baseline().username, { nonNullable: true }),
-    faculty: new FormControl(this.baseline().faculty, { nonNullable: true }),
+    campus: new FormControl(this.baseline().campus || this.baseline().faculty, { nonNullable: true }),
     university: new FormControl(this.baseline().university, {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.maxLength(150),
-        (c) => (c.value.trim() ? null : { required: true }),
-      ],
     }),
     department: new FormControl(this.baseline().department, {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.maxLength(150),
-        (c) => (c.value.trim() ? null : { required: true }),
-      ],
     }),
   });
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -105,8 +95,6 @@ export class ProfileEditPage {
     () =>
       this.values()?.fullName?.trim() !== this.baseline().fullName ||
       this.values()?.bio?.trim() !== (this.baseline().bio || '') ||
-      this.values()?.university?.trim() !== this.baseline().university ||
-      this.values()?.department?.trim() !== this.baseline().department ||
       this.avatar() !== (this.baseline().avatarUrl || null) ||
       this.cover() !== (this.baseline().coverUrl || null),
   );
@@ -168,8 +156,6 @@ export class ProfileEditPage {
       const next = await this.profiles.updateProfile({
         fullName: this.form.controls.fullName.value,
         bio: this.form.controls.bio.value,
-        university: this.form.controls.university.value,
-        department: this.form.controls.department.value,
         avatarUrl: this.avatar(),
         coverUrl: this.cover(),
       });
@@ -183,7 +169,7 @@ export class ProfileEditPage {
         university: next.university,
         department: next.department,
         username: '@' + next.username,
-        faculty: next.faculty,
+        campus: next.campus || next.faculty,
       });
       this.notices.show('profile.saved');
       if (!(await this.router.navigateByUrl('/profile'))) this.error.set('profile.errors.navigation');

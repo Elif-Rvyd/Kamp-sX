@@ -17,13 +17,22 @@ const user = {
     username: 'student',
     full_name: 'Campus Student',
     university_name: 'Campus University',
+    campus_name: 'Main Campus',
     department_name: 'Computer Science',
   },
   identities: [],
 };
 async function initialize(page, language, theme, signedIn = true) {
   const errors = [];
-  await mockSocial(page);
+  await mockSocial(page, {
+    profile: {
+      username: user.user_metadata.username,
+      full_name: user.user_metadata.full_name,
+      university: user.user_metadata.university_name,
+      campus: user.user_metadata.campus_name,
+      studying: user.user_metadata.department_name,
+    },
+  });
   page.on('pageerror', (error) => errors.push(error.message));
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
   const expires = Math.floor(Date.now() / 1000) + 3600;

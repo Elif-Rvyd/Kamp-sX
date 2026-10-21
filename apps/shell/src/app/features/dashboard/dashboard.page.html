@@ -36,7 +36,7 @@
             <h1>{{ t(feed.headingKey) }}</h1>
             <p class="feed-description">{{ t(feed.descriptionKey) }}</p>
           </div>
-          @if (feed.id === 'explore') { @if (posts.loading()) {
+          @if (active() === index) { @if (posts.loading()) {
           <p role="status">{{t('posts.loading')}}</p>
           } @if (posts.error()) {
           <p class="error-text" role="alert">{{t(posts.error())}}</p>
@@ -47,11 +47,7 @@
             [author]="authorFor(post)"
           />} @if (!posts.loading() && !posts.error() && !posts.feed().length) {
           <p class="feed-description">{{t('posts.empty')}}</p>
-          } } @else {
-          <div class="feed-placeholder-list" aria-hidden="true">
-            @for (card of skeletons; track card) { <kx-feed-skeleton /> }
-          </div>
-          }
+          } }
         </section>
         }
       </div>

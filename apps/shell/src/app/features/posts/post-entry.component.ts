@@ -34,20 +34,22 @@ let instance = 0;
         [author]="displayAuthor()"
         [ownerId]="owner()"
         [language]="language.language()"
+        [postLink]="'/posts/' + value.id"
+        [authorLink]="value.userId === owner() ? '/profile' : '/people/' + value.userId"
         [busy]="actions.busy(value.id)"
         [reactionsReady]="actions.reactionsReady(value.id)"
         (action)="run($event, value)"
       />
       @if (actions.reactionsFailed(value.id)) {
         <div class="entry-error">
-          <p class="error-text" role="alert">{{ t('social.errors.read') }}</p>
-          <button kxButton type="button" emphasis="ghost" (click)="actions.retryReactions(value.id)">
+          <p class="error-text" role="alert">{{ t(error() || 'social.errors.read') }}</p>
+          <button kxButton type="button" emphasis="ghost" (click)="retryReactions(value.id)">
             {{ t('media.retry') }}
           </button>
         </div>
       }
     }
-    @if (error()) {
+    @if (error() && !actions.reactionsFailed(post().id)) {
       <p class="entry-error error-text" role="alert">
         {{ t(error()) }}
         @if (current()?.deletionPending) {
@@ -171,6 +173,10 @@ export class PostEntryComponent {
       const post = this.post();
       untracked(() => this.actions.observe(post));
     });
+  }
+  retryReactions(id: string): void {
+    this.error.set('');
+    this.actions.retryReactions(id);
   }
   async run(action: PostAction, post: SocialPost): Promise<void> {
     if (this.actions.busy(post.id)) return;

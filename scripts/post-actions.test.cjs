@@ -43,6 +43,36 @@ function harness() {
     mapRow: (row) => row,
   };
   const state = {
+    likes: [],
+    bookmarks: [],
+    postRows: [
+      {
+        id: P,
+        user_id: A,
+        parent_id: null,
+        media_url: null,
+        pinned_at: null,
+        archived_at: null,
+        deleted_at: null,
+        content: 'Text',
+        created_at: '2026-10-21T10:00:00Z',
+        replies_count: 0,
+        reposts_count: 0,
+      },
+    ],
+    replySetup: true,
+    ownerSetup: true,
+    accountSetup: true,
+    profile: {
+      user_id: A,
+      username: 'student',
+      campus: 'North',
+      visible_department: false,
+      visible_campus: false,
+      visible_university: false,
+      visible_explore: false,
+      audience_configured: false,
+    },
     download: async () => ({ data: new Blob(['bytes'], { type: 'image/webp' }), error: null }),
     remove: async () => calls.push('storage-remove'),
   };
@@ -62,7 +92,21 @@ function harness() {
     },
     rpc(name, args) {
       calls.push({ rpc: name, args });
-      const result = replies.shift() ?? { data: null, error: null };
+      if (name === 'kampusx_soft_delete_post' && !replies.length) {
+        const row = state.postRows.find((row) => row.id === args.p_post_id && row.user_id === A);
+        if (row) row.deleted_at = new Date().toISOString();
+        return { abortSignal: () => Promise.resolve({ data: !!row, error: null }) };
+      }
+      const result = replies.shift() ?? {
+        data:
+          name === 'kampusx_reply_contract_version' && state.replySetup
+            ? '2026102102'
+            : (name === 'kampusx_owner_actions_version' && state.ownerSetup) ||
+                (name === 'kampusx_account_contract_version' && state.accountSetup)
+              ? '2026102201'
+              : null,
+        error: null,
+      };
       return {
         abortSignal: () => Promise.resolve().then(() => (typeof result === 'function' ? result() : result)),
       };
@@ -71,16 +115,100 @@ function harness() {
       return this;
     },
     from(table) {
-      const q = { table };
+      const q = { table, filters: [] };
       const builder = {};
-      for (const key of ['select', 'eq', 'in', 'insert', 'delete', 'order', 'range'])
+      for (const key of [
+        'select',
+        'eq',
+        'in',
+        'is',
+        'not',
+        'neq',
+        'limit',
+        'update',
+        'insert',
+        'delete',
+        'order',
+        'range',
+        'maybeSingle',
+        'single',
+      ])
         builder[key] = (...args) => {
           q[key] = args;
+          if (['eq', 'in', 'is', 'neq'].includes(key)) q.filters.push([key, ...args]);
           return builder;
         };
-      builder.abortSignal = async () => {
-        calls.push(q);
-        return replies.shift() ?? { data: [], error: null };
+      builder.abortSignal = (requestSignal) => {
+        q.signal = requestSignal;
+        return builder;
+      };
+      builder.then = async (resolve, reject) => {
+        try {
+          calls.push(q);
+          const override = replies.shift();
+          const result = await (typeof override === 'function' ? override() : override);
+          if (result?.error) return resolve(result);
+          if (table === 'likes' || table === 'bookmarks') {
+            const matches = (row) =>
+              q.filters.every(([kind, field, value]) =>
+                kind === 'eq' ? row[field] === value : value.includes(row[field]),
+              );
+            if (q.insert) {
+              const row = q.insert[0];
+              if (!state[table].some((r) => r.user_id === row.user_id && r.post_id === row.post_id))
+                state[table].push(row);
+            }
+            if (q.delete) state[table] = state[table].filter((r) => !matches(r));
+            return resolve(result ?? { data: state[table].filter(matches), error: null });
+          }
+          if (table === 'profiles') {
+            if (q.update) state.profile = { ...state.profile, ...q.update[0], audience_configured: true };
+            return resolve(result ?? { data: state.profile, error: null });
+          }
+          if (table === 'posts') {
+            const matches = (row) =>
+              q.filters.every(([kind, field, value]) =>
+                kind === 'in'
+                  ? value.includes(row[field])
+                  : kind === 'neq'
+                    ? row[field] !== value
+                    : row[field] === value,
+              );
+            if (q.update) {
+              const rows = state.postRows.filter(matches);
+              rows.forEach((row) => Object.assign(row, q.update[0]));
+              return resolve(result ?? { data: null, error: null, count: rows.length });
+            }
+            if (q.insert) {
+              assert.ok(
+                Object.keys(q.insert[0]).every((key) =>
+                  ['user_id', 'content', 'parent_id', 'media_url', 'media_type', 'repost_of_id'].includes(
+                    key,
+                  ),
+                ),
+              );
+              const row = {
+                id: require('node:crypto').randomUUID(),
+                created_at: '2026-10-21T10:00:01Z',
+                replies_count: 0,
+                reposts_count: 0,
+                ...q.insert[0],
+              };
+              state.postRows.push(row);
+              return resolve(result ?? { data: row, error: null, status: 201 });
+            }
+            let rows = state.postRows.filter(matches).map((row) => ({
+              ...row,
+              likes_count: state.likes.filter((r) => r.post_id === row.id).length,
+              replies_count: state.postRows.filter((r) => r.parent_id === row.id).length,
+            }));
+            if (q.range) rows = rows.slice(q.range[0], q.range[1] + 1);
+            return resolve(result ?? { data: q.maybeSingle ? (rows[0] ?? null) : rows, error: null });
+          }
+          resolve(result ?? { data: [], error: null });
+        } catch (error) {
+          reject(error);
+        }
       };
       return builder;
     },
@@ -140,7 +268,10 @@ function harness() {
   }
   const { PostActionsService } = load('post-actions.service');
   const actions = new PostActionsService();
+  const { AccountService } = load('account.service');
+  const account = new AccountService();
   return {
+    account,
     auth,
     state,
     calls,
@@ -167,6 +298,69 @@ const snapshot = (extra = {}) => ({
   liked: false,
   bookmarked: false,
   ...extra,
+});
+test('account visibility writes only four owned audience flags and requires a confirmed server receipt', async () => {
+  const h = harness();
+  const values = {
+    visible_department: true,
+    visible_campus: false,
+    visible_university: false,
+    visible_explore: false,
+  };
+  const result = await h.account.save({
+    ...values,
+    user_id: B,
+    campus: 'forged',
+    is_private: false,
+    role: 'admin',
+  });
+  assert.equal(result.audience_configured, true);
+  const write = h.calls.find((q) => q.table === 'profiles' && q.update);
+  assert.deepEqual(write.update[0], values);
+  assert.ok(write.filters.some((f) => f[1] === 'user_id' && f[2] === A));
+  h.destroy();
+});
+test('missing account migration cannot read or write preferences', async () => {
+  const h = harness();
+  h.state.accountSetup = false;
+  await assert.rejects(h.account.preferences(), (e) => e.key === 'accountStatus.setup');
+  assert.equal(
+    h.calls.some((q) => q.table === 'profiles'),
+    false,
+  );
+  h.destroy();
+});
+test('account preferences reject late responses across a replacement login', async () => {
+  const h = harness();
+  let release;
+  const promise = new Promise((resolve) => (release = resolve));
+  h.replies.push(() => promise);
+  const read = h.account.preferences();
+  h.auth.sessionEpoch.set(2);
+  release({ data: '2026102201', error: null });
+  await assert.rejects(read, (e) => e.key === 'media.errors.session');
+  assert.equal(
+    h.calls.some((q) => q.table === 'profiles'),
+    false,
+  );
+  h.destroy();
+});
+test('account visibility rejects malformed booleans without a profile write', async () => {
+  const h = harness();
+  await assert.rejects(
+    h.account.save({
+      visible_department: 'true',
+      visible_campus: false,
+      visible_university: false,
+      visible_explore: false,
+    }),
+    (e) => e.key === 'accountStatus.saveError',
+  );
+  assert.equal(
+    h.calls.some((q) => q.update),
+    false,
+  );
+  h.destroy();
 });
 test('first session effect does not cancel reaction hydration queued by a newly mounted card', async () => {
   const h = harness();
@@ -199,7 +393,11 @@ test('duplicate in-flight reaction fails rather than announcing an uncommitted s
   await new Promise((r) => setImmediate(r));
   release({ data: snapshot({ bookmarked: true }), error: null });
   await pending;
-  assert.equal(h.calls.filter((c) => c.rpc).length, 1);
+  assert.equal(h.calls.filter((c) => c.table === 'bookmarks' && c.insert).length, 1);
+  assert.equal(
+    h.calls.some((c) => c.rpc === 'kampusx_set_reaction'),
+    false,
+  );
   h.destroy();
 });
 test('re-login during a delayed action cannot patch another session or roll back its state', async () => {
@@ -215,52 +413,263 @@ test('re-login during a delayed action cannot patch another session or roll back
   assert.equal(h.actions.view(h.post).stats.likes, 0);
   h.destroy();
 });
-test('deletion validates server reservation, cleans media and only then finishes database deletion', async () => {
+test('like/unlike uses only own real relation rows and takes all counters from posts', async () => {
   const h = harness();
-  h.replies.push(
-    {
-      data: {
-        post_id: P,
-        user_id: A,
-        media_path: `${A}/post/55555555-5555-4555-8555-555555555555.webp`,
-        missing: false,
-      },
-      error: null,
-    },
-    { data: null, error: null },
+  await h.actions.react(h.post, 'like');
+  assert.equal(h.actions.view(h.post).liked, true);
+  assert.equal(h.actions.view(h.post).stats.likes, 1);
+  await h.actions.react(h.post, 'like');
+  assert.equal(h.actions.view(h.post).liked, false);
+  assert.equal(h.actions.view(h.post).stats.likes, 0);
+  const writes = h.calls.filter((q) => q.insert || q.delete);
+  assert.deepEqual(
+    writes.map((q) => q.table),
+    ['likes', 'likes'],
   );
-  await h.actions.remove(h.post);
-  const sequence = h.calls.filter((c) => c.rpc || c === 'storage-remove').map((c) => c.rpc ?? c);
-  assert.deepEqual(sequence, ['kampusx_begin_post_delete', 'storage-remove', 'kampusx_finish_post_delete']);
-  assert.equal(h.actions.view(h.post), null);
+  assert.deepEqual(writes[0].insert[0], { user_id: A, post_id: P });
+  assert.deepEqual(writes[1].filters, [
+    ['eq', 'user_id', A],
+    ['eq', 'post_id', P],
+  ]);
+  assert.equal(
+    h.calls.some((q) => q.rpc),
+    false,
+  );
   h.destroy();
 });
-test('failed media cleanup never calls final deletion and retains a retryable pending state', async () => {
+test('duplicate like is idempotent and never increments an existing server count twice', async () => {
   const h = harness();
+  h.state.likes.push({ user_id: A, post_id: P });
+  h.replies.push({ data: null, error: { code: '23505' } });
+  await h.actions.react(h.post, 'like');
+  assert.equal(h.state.likes.length, 1);
+  assert.equal(h.actions.view(h.post).stats.likes, 1);
+  h.destroy();
+});
+test('retry after a lost receipt reads the committed state without writing twice', async () => {
+  const h = harness();
+  h.replies.push(
+    { data: null, error: null },
+    { data: [{ post_id: P }], error: null },
+    { data: null, error: { code: '503' } },
+  );
+  await assert.rejects(h.actions.react(h.post, 'like'));
+  assert.equal(h.state.likes.length, 1);
+  assert.equal(h.actions.reactionsReady(P), false);
+  assert.equal(h.actions.reactionsFailed(P), true);
+  h.actions.observe(h.post);
+  h.actions.retryReactions(P);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(h.actions.view(h.post).liked, true);
+  assert.equal(h.actions.view(h.post).stats.likes, 1);
+  assert.equal(h.calls.filter((q) => q.insert).length, 1);
+  h.destroy();
+});
+test('failed initial reads remain disabled until retry and do not fabricate a zero count', async () => {
+  const h = harness();
+  h.replies.push({ data: null, error: { code: '42501' } });
+  h.actions.observe({ ...h.post, stats: { ...h.post.stats, likes: 8 } });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(h.actions.reactionsReady(P), false);
+  assert.equal(h.actions.reactionsFailed(P), true);
+  assert.equal(h.actions.view({ ...h.post, stats: { ...h.post.stats, likes: 8 } }).stats.likes, 8);
+  h.actions.retryReactions(P);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(h.actions.reactionsReady(P), true);
+  h.destroy();
+});
+test('bookmark removal verifies absence and invalidates the saved collection', async () => {
+  const h = harness();
+  await h.actions.react(h.post, 'bookmark');
+  await h.actions.react(h.post, 'bookmark');
+  assert.equal(h.actions.view(h.post).bookmarked, false);
+  assert.equal(h.actions.readRevision(), 2);
+  assert.equal(h.state.bookmarks.length, 0);
+  h.destroy();
+});
+test('RLS-hidden post returns no interactive stale card', async () => {
+  const h = harness();
+  h.replies.push({ data: [], error: null }, { data: [], error: null }, { data: [], error: null });
+  h.actions.observe(h.post);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(h.actions.view(h.post), null);
+  const fresh = { ...h.post };
+  h.actions.observe(fresh);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(h.actions.view(fresh).id, P);
+  assert.equal(h.actions.reactionsReady(P), true);
+  h.destroy();
+});
+test('replies read actual posts by parent_id with independent paging', async () => {
+  const h = harness();
+  const reply = { ...h.state.postRows[0], id: B, parent_id: P, content: 'A reply' };
+  h.state.postRows.push(reply);
+  assert.deepEqual(
+    (await h.actions.comments(P)).map((r) => r.id),
+    [B],
+  );
+  const query = h.calls.find((q) => q.table === 'posts');
+  assert.deepEqual(query.filters, [['eq', 'parent_id', P]]);
+  assert.deepEqual(query.range, [0, 49]);
+  await assert.rejects(h.actions.comments(P, -1));
+  h.destroy();
+});
+test('reply insert uses the six allowed fields and never supplies id or counters', async () => {
+  const h = harness();
+  h.actions.observe(h.post);
+  await new Promise((r) => setTimeout(r, 20));
+  const row = await h.actions.comment(h.post, ' A reply ', null);
+  assert.equal(row.parent_id, P);
+  assert.equal(row.content, 'A reply');
+  const write = h.calls.find((q) => q.table === 'posts' && q.insert);
+  assert.deepEqual(write.insert[0], {
+    user_id: A,
+    content: 'A reply',
+    parent_id: P,
+    media_url: null,
+    media_type: null,
+    repost_of_id: null,
+  });
+  assert.equal(
+    h.calls.some((q) => ['kampusx_add_comment', 'kampusx_post_state'].includes(q.rpc)),
+    false,
+  );
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(h.actions.view(h.post).stats.replies, 1);
+  h.destroy();
+});
+test('missing reply migration, hidden root and unrelated parent cannot insert', async () => {
+  const h = harness();
+  h.state.replySetup = false;
+  await assert.rejects(h.actions.comment(h.post, 'Reply', null), (e) => e.key === 'social.errors.setup');
+  h.state.replySetup = true;
+  h.state.postRows.push({ ...h.state.postRows[0], id: B, parent_id: A });
+  await assert.rejects(h.actions.comment(h.post, 'Reply', B), (e) => e.key === 'social.errors.unavailable');
+  h.state.postRows = [];
+  await assert.rejects(
+    h.actions.comment(h.post, 'Reply', null),
+    (e) => e.key === 'social.errors.unavailable',
+  );
+  assert.equal(
+    h.calls.some((q) => q.insert),
+    false,
+  );
+  h.destroy();
+});
+test('reply rows without mounted cards do not accumulate background reaction snapshots', async () => {
+  const h = harness();
+  await h.actions.comment(h.post, 'Reply', null);
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(
+    h.calls.some((q) => q.table === 'likes' || q.table === 'bookmarks'),
+    false,
+  );
+  h.destroy();
+});
+test('one nested reply is allowed but the next level is rejected before a write', async () => {
+  const h = harness();
+  h.state.postRows.push({ ...h.state.postRows[0], id: B, parent_id: P });
+  const nested = await h.actions.comment(h.post, 'Nested', B);
+  assert.equal(nested.parent_id, B);
+  const row = h.state.postRows.find((r) => r.id === nested.id);
+  const nestedPost = { ...h.post, id: row.id, parentId: B };
+  await assert.rejects(
+    h.actions.comment(nestedPost, 'Too deep', null),
+    (e) => e.key === 'social.errors.replyDepth',
+  );
+  assert.equal(h.calls.filter((q) => q.insert).length, 1);
+  h.destroy();
+});
+test('a lost reply receipt is uncertain, preserves safe errors and never retries automatically', async () => {
+  const h = harness();
+  h.replies.push(
+    { data: '2026102102', error: null },
+    { data: h.state.postRows[0], error: null },
+    { data: null, error: { message: 'PRIVATE_DETAIL' }, status: 503 },
+  );
+  await assert.rejects(
+    h.actions.comment(h.post, 'Reply', null),
+    (e) => e.key === 'social.errors.commentUncertain',
+  );
+  assert.equal(h.calls.filter((q) => q.insert).length, 1);
+  assert.equal(h.actions.busy(P), false);
+  h.destroy();
+});
+test('delayed reply response from a replaced session cannot update local state', async () => {
+  const h = harness();
+  let release;
+  h.replies.push(
+    { data: '2026102102', error: null },
+    { data: h.state.postRows[0], error: null },
+    () => new Promise((r) => (release = r)),
+  );
+  const pending = h.actions.comment(h.post, 'Reply', null);
+  await new Promise((r) => setImmediate(r));
+  h.auth.sessionEpoch.set(2);
+  h.effects.forEach((fn) => fn());
+  assert.equal(h.calls.find((q) => q.table === 'posts' && q.insert).signal.aborted, true);
+  release({ data: null, error: null, status: 201 });
+  await assert.rejects(pending, (e) => e.key === 'media.errors.session');
+  assert.equal(h.actions.view(h.post).stats.replies, 0);
+  h.destroy();
+});
+test('soft delete commits before Storage cleanup and uses only the owned server media URL', async () => {
+  const h = harness();
+  const path = A + '/post/55555555-5555-4555-8555-555555555555.webp';
+  h.state.postRows[0].media_url = 'https://example.supabase.co/storage/v1/object/public/uploads/' + path;
+  await h.actions.remove(h.post);
+  const steps = h.calls.filter((c) => c.rpc || c === 'storage-remove').map((c) => c.rpc ?? c);
+  assert.ok(steps.indexOf('kampusx_soft_delete_post') < steps.indexOf('storage-remove'));
+  assert.ok(h.state.postRows[0].deleted_at);
+  assert.equal(h.actions.view(h.post), null);
+  assert.equal(
+    h.calls.some((c) => c.table === 'posts' && c.delete),
+    false,
+  );
+  h.destroy();
+});
+test('failed cleanup keeps the post soft deleted and never invites another deletion', async () => {
+  const h = harness();
+  h.state.postRows[0].media_url =
+    'https://example.supabase.co/storage/v1/object/public/uploads/' +
+    A +
+    '/post/55555555-5555-4555-8555-555555555555.webp';
   h.state.remove = async () => {
     throw Error('PRIVATE_ERROR');
   };
-  h.replies.push({
-    data: { post_id: P, user_id: A, media_path: A + '/post/object.webp', missing: false },
-    error: null,
-  });
-  await assert.rejects(h.actions.remove(h.post));
-  assert.equal(
-    h.calls.some((c) => c.rpc === 'kampusx_finish_post_delete'),
-    false,
-  );
-  assert.equal(h.actions.view(h.post).deletionPending, true);
+  await h.actions.remove(h.post);
+  assert.equal(h.actions.view(h.post), null);
+  assert.ok(h.state.postRows[0].deleted_at);
   h.destroy();
 });
-test('a foreign reservation or owner cannot reach Storage deletion', async () => {
+test('foreign owner and missing migration cannot reach a delete or Storage', async () => {
   const h = harness();
   await assert.rejects(h.actions.remove({ ...h.post, userId: B }));
   assert.equal(h.calls.length, 0);
-  h.replies.push({ data: { post_id: P, user_id: B, media_path: B + '/post/object.webp' }, error: null });
-  await assert.rejects(h.actions.remove(h.post));
+  h.state.ownerSetup = false;
+  await assert.rejects(h.actions.remove(h.post), (e) => e.key === 'social.errors.ownerSetup');
+  assert.equal(
+    h.calls.some((c) => c.rpc === 'kampusx_soft_delete_post'),
+    false,
+  );
   assert.equal(h.calls.includes('storage-remove'), false);
   h.destroy();
 });
+test('pin and archive write only allowlisted owned fields without RETURNING', async () => {
+  const h = harness();
+  await h.actions.pin(h.post);
+  assert.ok(h.state.postRows[0].pinned_at);
+  await h.actions.archive(h.post, true);
+  assert.ok(h.state.postRows[0].archived_at);
+  assert.equal(h.state.postRows[0].pinned_at, null);
+  for (const q of h.calls.filter((q) => q.update)) {
+    assert.equal(q.select, undefined);
+    assert.ok(q.filters.some((f) => f[1] === 'user_id' && f[2] === A));
+    assert.ok(Object.keys(q.update[0]).every((k) => ['pinned_at', 'archived_at'].includes(k)));
+  }
+  h.destroy();
+});
+
 test('blocking hides the author across post surfaces and refreshes server state', async () => {
   const h = harness();
   h.replies.push({ data: null, error: null });

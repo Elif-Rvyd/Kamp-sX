@@ -39,3 +39,12 @@
   background: var(--color-surface-alt);
   color: var(--color-muted);
 }
+.input-wrap.has-clear .kx-input {
+  padding-inline-end: 56px;
+}
+.field-clear {
+  position: absolute;
+  inset-inline-end: 4px;
+  top: 50%;
+  translate: 0 -50%;
+}

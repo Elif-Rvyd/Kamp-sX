@@ -15,6 +15,7 @@ const signal = (value) => {
 };
 function harness() {
   class AuthService {}
+  class AccountService {}
   class SupabaseService {}
   class DestroyRef {}
   const DOCUMENT = Symbol('document');
@@ -92,6 +93,7 @@ function harness() {
     },
   };
   const deps = new Map([
+    [AccountService, {}],
     [AuthService, auth],
     [SupabaseService, { client }],
     [DestroyRef, destroyRef],
@@ -142,6 +144,7 @@ function harness() {
       if (specifier === '@angular/core') return angular;
       if (specifier === '@angular/common') return { DOCUMENT };
       if (specifier === './auth.service') return { AuthService };
+      if (specifier === './account.service') return { AccountService };
       if (specifier === './supabase.service') return { SupabaseService };
       if (specifier === '@kampusx/shared/util')
         return {

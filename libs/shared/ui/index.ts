@@ -27,3 +27,4 @@ export * from './organisms/confirm-dialog/confirm-dialog.component';
 export * from './organisms/social-post-card/social-post-card.component';
 export * from './molecules/action-menu/action-menu.component';
 export { FollowPersonComponent } from './molecules/follow-person/follow-person.component';
+export { SwitchComponent } from './atoms/switch/switch.component';

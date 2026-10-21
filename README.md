@@ -19,6 +19,7 @@ Başarılı girişten sonra oturum korumalı ana ekran açılır. Profil çekmec
 - Giriş sonrası dashboard, profil çekmecesi ve Keşfet / Üniversite / Kampüs / Bölüm sekmeleri. Keşfet gerçek gönderileri gösterir; akademik kapsam filtreleri geliştirme aşamasındadır.
 - Profil, gönderi/yanıt/retweet sekmeleri ve fotoğraf, isim, bio düzenleme ekranı. Profil/kapak fotoğrafları Supabase Storage ve veritabanında saklanır; isim ve bio düzenlemeleri henüz oturum içi görseldir.
 - Gerçek metin, fotoğraf ve video paylaşımı; Keşfet ve profil akışında kalıcı gönderiler.
+- Beğenme/beğeniyi geri alma, gönderileri kaydetme ve Kaydedilenler listesi. Beğeni sayıları veritabanındaki sayaçlardan gelir.
 - Kayıt sırasında üniversite ve bölüm bilgileri.
 - Anlık Türkçe ve İngilizce dil değişimi.
 - Açık ve koyu tema.
@@ -29,7 +30,7 @@ Tasarım dili, üniversite hayatının enerjisini editoryal tipografi, güçlü 
 
 ### Ürün vizyonu
 
-Platformun geliştirme hedefleri; bölüm, üniversite ve genel keşfet akışları, beğeni, yorum, yeniden paylaşım ve alıntılama özellikleridir. Birebir mesajlaşma ve yöneticilerin üyelik isteklerini onayladığı uygulama içi topluluklar da bu kapsamda yer alır.
+Platformun geliştirme hedefleri; bölüm ve üniversite akışları, yorum, yeniden paylaşım ve alıntılama özellikleridir. Birebir mesajlaşma ve yöneticilerin üyelik isteklerini onayladığı uygulama içi topluluklar da bu kapsamda yer alır.
 
 ### Teknoloji
 
@@ -52,6 +53,7 @@ Successful sign-in opens the session-protected home screen. The profile drawer d
 - A dashboard after sign-in, a profile drawer and Explore / University / Campus / Department tabs. Explore shows persisted posts; academic scope filters are under development.
 - A profile with post/reply/repost tabs and photo, name and bio editing. Profile/cover photos persist in Supabase Storage and the database; name and bio edits remain local display changes.
 - Real text, photo and video publishing with persisted Explore and profile feeds.
+- Like/unlike, bookmarks and a saved-post list. Like counts come from database-managed counters.
 - University and department details during registration.
 - Instant Turkish and English language switching.
 - Light and dark themes.
@@ -62,7 +64,7 @@ The visual language combines the energy of campus life with editorial typography
 
 ### Product vision
 
-Development goals include department, university and general discovery feeds; likes, comments, reposts and quote posts. Direct messaging and in-app communities with administrator-approved membership requests are also part of the product vision.
+Development goals include department and university feeds, comments, reposts and quote posts. Direct messaging and in-app communities with administrator-approved membership requests are also part of the product vision.
 
 ### Technology
 

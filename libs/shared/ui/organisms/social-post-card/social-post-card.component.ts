@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
+import { RouterLink } from '@angular/router';
 import { LocalizedNumberPipe, profileInitials, type PostAuthor, type SocialPost } from '@kampusx/shared/util';
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
@@ -9,7 +10,14 @@ export type PostAction =
 @Component({
   selector: 'kx-social-post-card',
   standalone: true,
-  imports: [TranslocoDirective, LocalizedNumberPipe, AvatarComponent, IconComponent, ActionMenuComponent],
+  imports: [
+    RouterLink,
+    TranslocoDirective,
+    LocalizedNumberPipe,
+    AvatarComponent,
+    IconComponent,
+    ActionMenuComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './social-post-card.component.css',
   template: `<article class="social-post" *transloco="let t" [attr.data-kind]="post().kind">
@@ -27,15 +35,16 @@ export type PostAction =
       </p>
     }
     <div class="post-header">
-      <kx-avatar [initials]="initials()" [src]="author().avatarUrl" />
+      <a [routerLink]="authorLink()" [attr.aria-label]="t('social.openProfile', { name: author().fullName })">
+        <kx-avatar [initials]="initials()" [src]="author().avatarUrl" />
+      </a>
       <div class="post-author">
-        <strong>{{ author().fullName }}</strong>
+        <a [routerLink]="authorLink()"
+          ><strong>{{ author().fullName }}</strong></a
+        >
         <p>
           @if (author().username) {
             <span>{{ '@' + author().username }}</span>
-          }
-          @if (post().createdAt) {
-            <time [attr.datetime]="post().createdAt">{{ date() }}</time>
           }
         </p>
       </div>
@@ -45,7 +54,9 @@ export type PostAction =
         (selected)="menuSelected($event)"
       />
     </div>
-    <p class="post-text">{{ post().text }}</p>
+    <a class="post-text" [routerLink]="postLink()" [attr.aria-label]="post().text || t('social.openPost')">{{
+      post().text
+    }}</a>
     @if (post().mediaUrl && post().mediaType === 'video') {
       <video
         class="post-media"
@@ -64,6 +75,11 @@ export type PostAction =
         height="360"
         loading="lazy"
       />
+    }
+    @if (post().createdAt) {
+      <a class="post-date" [routerLink]="postLink()">
+        <time [attr.datetime]="post().createdAt">{{ date() }}</time>
+      </a>
     }
     <div class="post-actions">
       @for (action of actions; track action.id) {
@@ -108,7 +124,7 @@ export class SocialPostCardComponent {
       ? this.post().deletionPending
         ? [{ id: 'delete', labelKey: 'social.menu.retryDelete', icon: 'delete', danger: true }]
         : [
-            ...(!this.post().archivedAt
+            ...(!this.post().archivedAt && !this.post().parentId
               ? [
                   {
                     id: 'pin',
@@ -147,11 +163,16 @@ export class SocialPostCardComponent {
     if (!this.busy() && this.menuItems().some((item) => item.id === id)) this.action.emit(id as PostAction);
   }
   readonly initials = computed(() => profileInitials(this.author().fullName));
+  readonly postLink = input<string | null>(null);
+  readonly authorLink = input<string | null>(null);
   readonly date = computed(() =>
     this.post().createdAt
       ? new Intl.DateTimeFormat(this.language() === 'tr' ? 'tr-TR' : 'en-US', {
           day: 'numeric',
           month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
           timeZone: 'UTC',
         }).format(new Date(this.post().createdAt))
       : '',

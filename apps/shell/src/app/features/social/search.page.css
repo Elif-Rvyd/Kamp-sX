@@ -1,0 +1,21 @@
+.search-form {
+  padding-bottom: 0;
+}
+.search-results {
+  min-height: 200px;
+  border-top: 1px solid var(--color-border);
+}
+.results-title {
+  padding: 20px 20px 12px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.search-results .empty {
+  padding-block: 32px;
+}
+.search-results h3 {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

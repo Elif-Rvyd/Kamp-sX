@@ -60,6 +60,10 @@ async function openSocial(
           body: JSON.stringify({ code: 'unexpected_failure', msg: 'Update rejected' }),
         });
       user.user_metadata = { ...user.user_metadata, ...payload.data };
+      Object.assign(social.profile, {
+        full_name: user.user_metadata.full_name,
+        bio: user.user_metadata.bio || '',
+      });
     }
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) });
   });

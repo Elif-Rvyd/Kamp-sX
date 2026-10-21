@@ -35,7 +35,7 @@ export class AppComponent {
   private readonly document = inject(DOCUMENT);
   private readonly path = signal(this.document.location.pathname);
   readonly dashboardLayout = computed(() =>
-    /^\/(dashboard|profile(?:\/(edit|followers|following|requests))?|compose|search|settings(?:\/(archive|bookmarks|blocked))?|posts\/[^/]+)\/?$/.test(
+    /^\/(dashboard|profile(?:\/(edit|followers|following|requests))?|compose|search|settings(?:\/(archive|bookmarks|blocked|account-status))?|posts\/[^/]+|people\/[^/]+)\/?$/.test(
       this.path(),
     ),
   );

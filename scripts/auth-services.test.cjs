@@ -398,13 +398,22 @@ test('destroyed services ignore a pending initialization snapshot', async () => 
 
 test('registration normalizes display metadata without accepting roles', async () => {
   const { service, calls } = harness();
-  await service.signUp(' student@itu.edu.tr ', 'password', ' @student ');
+  await service.signUp(' student@itu.edu.tr ', 'password', ' @student ', {
+    university: 'Uni',
+    campus: 'North',
+    department: 'Computing',
+  });
   assert.deepEqual(calls.signUp, [
     {
       email: 'student@itu.edu.tr',
       password: 'password',
       options: {
-        data: { username: 'student' },
+        data: {
+          username: 'student',
+          university_name: 'Uni',
+          campus_name: 'North',
+          department_name: 'Computing',
+        },
         emailRedirectTo: 'http://localhost:4300/auth/login',
       },
     },
@@ -427,7 +436,7 @@ test('registration sends only the declared academic display metadata', async () 
   await service.signUp('student@itu.edu.tr', 'password', 'student', {
     university: ' Example University ',
     department: ' Computer Science ',
-    faculty: ' Engineering ',
+    campus: ' North ',
     fullName: ' Campus Student ',
     bio: ' Hello ',
     role: 'admin',
@@ -436,10 +445,21 @@ test('registration sends only the declared academic display metadata', async () 
     username: 'student',
     university_name: 'Example University',
     department_name: 'Computer Science',
-    faculty_name: 'Engineering',
+    campus_name: 'North',
     full_name: 'Campus Student',
     bio: 'Hello',
   });
+});
+test('registration refuses missing, blank and overlong academic fields before Auth', async () => {
+  const h = harness();
+  const valid = { university: 'Uni', campus: 'North', department: 'Computing' };
+  for (const field of ['university', 'campus', 'department'])
+    for (const value of [undefined, ' ', 'x'.repeat(151)])
+      assert.ok(
+        (await h.service.signUp('student@itu.edu.tr', 'password', 'student', { ...valid, [field]: value }))
+          .error,
+      );
+  assert.equal(h.calls.signUp.length, 0);
 });
 
 test('safe auth mappings distinguish useful failures without exposing arbitrary messages', async () => {
@@ -521,7 +541,7 @@ test('server verification rejects a token identifying another user', async () =>
   assert.equal(await service.hasVerifiedSession(), false);
 });
 
-test('academic updates persist only allowlisted display metadata and retain the session epoch', async () => {
+test('academic updates are locked even for an authenticated owner', async () => {
   const metadata = { university_name: 'New university', department_name: 'New department' };
   const h = harness({
     updateUser: async (attributes) => {
@@ -532,7 +552,7 @@ test('academic updates persist only allowlisted display metadata and retain the 
   await h.service.ready;
   h.emit('SIGNED_IN', session);
   const epoch = h.service.sessionEpoch();
-  assert.equal(
+  assert.ok(
     (
       await h.service.updateAcademic({
         university: ' New university ',
@@ -540,9 +560,8 @@ test('academic updates persist only allowlisted display metadata and retain the 
         role: 'admin',
       })
     ).error,
-    null,
   );
-  assert.deepEqual(h.service.session().user.user_metadata, metadata);
+  assert.equal(h.calls.updateUser.length, 0);
   assert.equal(h.service.sessionEpoch(), epoch);
 });
 
@@ -566,8 +585,6 @@ test('profile display updates persist name and bio while stripping identity and 
   const metadata = {
     full_name: 'Campus Student',
     bio: 'Hello',
-    university_name: 'University',
-    department_name: 'Department',
   };
   const h = harness({
     updateUser: async (attributes) => {
@@ -607,14 +624,12 @@ test('malformed or overlong profile display details never reach Auth writes', as
     { ...valid, fullName: ' ' },
     { ...valid, fullName: 'x'.repeat(51) },
     { ...valid, bio: 'x'.repeat(161) },
-    { ...valid, university: '' },
-    { ...valid, department: 123 },
   ])
     assert.ok((await h.service.updateProfileDetails(value)).error);
   assert.equal(h.calls.updateUser.length, 0);
 });
 
-test('a delayed academic response cannot replace a new account session', async () => {
+test('a delayed display-name response cannot replace a new account session', async () => {
   const started = deferred(),
     response = deferred();
   const h = harness({
@@ -625,7 +640,7 @@ test('a delayed academic response cannot replace a new account session', async (
   });
   await h.service.ready;
   h.emit('SIGNED_IN', session);
-  const pending = h.service.updateAcademic({ university: 'New university', department: 'New department' });
+  const pending = h.service.updateProfileDetails({ fullName: 'New name', bio: 'Bio' });
   await started.promise;
   const replacement = { ...session, user: { ...user, id: 'other-user' } };
   h.emit('SIGNED_IN', replacement);

@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.generated';
+import { AccountService, type AccountDatabase } from './account.service';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { MediaError, MediaService } from './media.service';
@@ -15,7 +16,8 @@ const POST_RECEIPT_COLUMNS = 'id,user_id,content,media_url,media_type,created_at
 export type PublicationStage = 'preparing' | 'uploading' | 'saving';
 @Injectable({ providedIn: 'root' })
 export class PostsService {
-  private readonly client = inject(SupabaseService).client as SupabaseClient<Database> | null;
+  private readonly client = inject(SupabaseService).client as SupabaseClient<AccountDatabase> | null;
+  private readonly account = inject(AccountService);
   private readonly auth = inject(AuthService);
   private readonly media = inject(MediaService);
   readonly feed = signal<readonly StoredPost[]>([]);
@@ -23,6 +25,13 @@ export class PostsService {
   readonly ownCount = signal(0);
   readonly loading = signal(false);
   readonly error = signal('');
+  readonly scope = signal<'explore' | 'university' | 'campus' | 'department'>('explore');
+  selectScope(scope: 'explore' | 'university' | 'campus' | 'department'): void {
+    if (this.scope() === scope) return;
+    this.scope.set(scope);
+    this.feed.set([]);
+    void this.load();
+  }
   private owner: string | undefined;
   private epoch = -1;
   private revision = 0;
@@ -55,16 +64,7 @@ export class PostsService {
     this.error.set('');
     try {
       const [feed, mine] = await Promise.all([
-        this.client
-          .schema('public')
-          .from('posts')
-          .select(POST_COLUMNS)
-          .is('archived_at', null)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .order('id', { ascending: false })
-          .limit(30)
-          .abortSignal(AbortSignal.timeout(20000)),
+        this.readFeed(owner),
         this.client
           .schema('public')
           .from('posts')
@@ -84,16 +84,54 @@ export class PostsService {
       this.feed.set((feed.data ?? []).map((row) => this.mapRow(row)));
       this.mine.set((mine.data ?? []).map((row) => this.mapRow(row)));
       this.ownCount.set(mine.count ?? mine.data?.length ?? 0);
-    } catch {
+    } catch (error) {
       if (
         revision === this.revision &&
         this.auth.session()?.user.id === owner &&
         this.auth.sessionEpoch() === epoch
       )
-        this.error.set('media.errors.postsRead');
+        this.error.set(error instanceof MediaError ? error.key : 'media.errors.postsRead');
     } finally {
       if (revision === this.revision) this.loading.set(false);
     }
+  }
+  private async readFeed(owner: string) {
+    const scope = this.scope();
+    const signal = AbortSignal.timeout(20000);
+    if (scope === 'explore')
+      return this.client!.schema('public')
+        .from('posts')
+        .select(POST_COLUMNS)
+        .is('archived_at', null)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(30)
+        .abortSignal(signal);
+    if (!(await this.account.installed(signal))) throw new MediaError('accountStatus.setup');
+    const academic = await this.account.profile(owner, signal);
+    if (
+      !academic?.university?.trim() ||
+      (scope !== 'university' && !academic.campus.trim()) ||
+      (scope === 'department' && !academic.studying?.trim())
+    )
+      throw new MediaError('posts.academicMissing');
+    const literal = (value: string) => value.trim().replace(/[\\%_]/g, '\\$&');
+    let query = this.client!.schema('public')
+      .from('posts')
+      .select(
+        'id,user_id,content,media_url,media_type,created_at,archived_at,deleted_at,pinned_at,likes_count,replies_count,reposts_count,parent_id,repost_of_id,profiles!inner(university,campus,studying)',
+      )
+      .is('archived_at', null)
+      .is('deleted_at', null)
+      .ilike('profiles.university', literal(academic.university));
+    if (scope !== 'university') query = query.ilike('profiles.campus', literal(academic.campus));
+    if (scope === 'department') query = query.ilike('profiles.studying', literal(academic.studying!));
+    return query
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(30)
+      .abortSignal(signal);
   }
   async publish(content: string, file?: File, onStage?: (stage: PublicationStage) => void): Promise<void> {
     const epoch = this.auth.sessionEpoch();
@@ -165,6 +203,7 @@ export class PostsService {
     return {
       id: String(row['id']),
       userId: String(row['user_id']),
+      parentId: typeof row['parent_id'] === 'string' ? row['parent_id'] : undefined,
       kind: row['parent_id'] ? 'reply' : row['repost_of_id'] ? 'retweet' : 'post',
       text: typeof row['content'] === 'string' ? row['content'] : '',
       createdAt:
