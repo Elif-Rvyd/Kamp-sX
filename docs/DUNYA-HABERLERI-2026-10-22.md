@@ -44,8 +44,9 @@ Haber kaynağına ulaşılamazsa kutu hata gösterir; ana gönderi akışı kull
 
 - 225 birim testi geçti; onu haber ayrıştırma, oturum, URL/DTD güvenliği, dil önbelleği,
   eşzamanlılık ve eski veri sınırını kapsar.
-- Yeni bölüm önerisi testleri tam akademik kimlik filtrelerini, mevcut takip/istek ve RLS'de
-  gizlenen kişilerin dışarıda kalmasını, eksik akademik bilgide genel dizin okunmamasını denetler.
+- Karışık öneri testleri okul/bölüm filtresinin kaldırılmasını, farklı adayların seçilmesini,
+  mevcut takip/istek ve RLS'de gizlenen kişilerin dışarıda kalmasını, oturum değişimi ve iptalde
+  sonuçların kullanılmamasını denetler.
 - Dört sağ arama testi eski yanıtların iptalini, çıkışta temizlenmeyi, IME/kısmi hataları,
   mevcut arama rotasını ve gizlilik değişiminde sonuçların yeniden okunmasını denetler.
 - Angular typecheck, 706 TR/EN anahtarı ve Deno tip kontrolü geçti.
@@ -68,15 +69,24 @@ Haber kaynağına ulaşılamazsa kutu hata gösterir; ana gönderi akışı kull
 ## Sağ sütun kapsamı
 
 Yalnız dashboard'ın sağ sütunu örneğe göre düzenlendi: üstte tek satır arama, altında haberler ve
-ayrı bölüm önerileri. Tema token'ları, sol navigasyon, giriş/tanıtım ve diğer sayfaların tasarımı
+ayrı kişi önerileri. Tema token'ları, sol navigasyon, giriş/tanıtım ve diğer sayfaların tasarımı
 korundu. FormField ve FollowPerson'a yalnız bu sütunun kullandığı varyantlar eklendi.
 
 Arama mevcut `FollowsService.searchPeople` ve `PostActionsService.search` servislerini kullanır;
 300ms sonra kullanıcı/gönderi önizlemeleri gelir, tıklama gerçek profil/gönderi rotasını açar.
-Bölüm önerileri kayıtlı university_id + department_id ile aynı bölümdeki en fazla 30 görünür adayı
-okur, takip/istek durumunu mevcut servisle yükler ve en fazla üç yeni hesabı önerir. Eksik akademik
-kimlikte genel kullanıcı dizini sorgulanmaz. Bu sınırlı aday listesi tüm bölümün eksiksiz önerisi
-iddiasında bulunmaz. Engeller/gizlilik mevcut RLS'den geçer; takip mevcut işlemle yapılır.
+22 Ekim'deki son kullanıcı kararıyla öneriler yalnız bölüme bağlı değildir. En fazla 30 görünür
+hesap okul/bölüm filtresi olmadan okunur; mevcut takip/istek durumları yüklenir, kendi hesabın,
+yinelenen kimlikler ve takip/istek gönderilmiş hesaplar çıkarılır. Kalanlardan rastgele en fazla
+üç kişi gösterilir; Önerileri yenile düğmesi yeni bir seçim yapar. Kayıtlı akademik kimliklerin
+eksik olması önerileri durdurmaz. Bu sınırlı havuz tüm kullanıcılar üzerinde eşit olasılıklı
+örnekleme iddiasında bulunmaz. Engeller/gizlilik mevcut RLS'den geçer; takip mevcut işlemle yapılır.
 
 Mevcut sosyal backend, tablolar ve RLS değiştirilmedi; SQL çalıştırılması gerekmiyor.
 Kaynak: [Euronews resmî RSS/widget sayfası](https://www.euronews.com/widgets).
+
+## Karışık öneriler güncellemesinin doğrulaması
+
+230 birim testi, Angular tip kontrolü, 707 eşleşen TR/EN anahtarı, biçim kontrolü ve üretim
+derlemesi geçti. Statik UI denetimi sıfır bulgu verdi. Önceki otomatik tarayıcı erişim engeli
+nedeniyle yeni görsel/oturumlu tarayıcı testi çalıştırılmadı. Sunucu politikaları korunur;
+görünür ve henüz takip/istek gönderilmemiş aday yoksa boş durum gösterilmeye devam eder.

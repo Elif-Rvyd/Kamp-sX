@@ -867,9 +867,10 @@
   "dashboardSidebar": {
     "title": "Search, news and suggestions",
     "recommendations": "Who to follow",
-    "departmentPeople": "Students in your department",
+    "mixedPeople": "Discover students from different departments and universities.",
+    "refreshPeople": "Refresh suggestions",
     "peopleError": "Suggestions could not be loaded. Please try again.",
-    "peopleEmpty": "There are no eligible suggestions in your department right now.",
+    "peopleEmpty": "There are no new accounts to suggest right now.",
     "mediaPost": "Post with media",
     "searchEmpty": "No matching people or posts were found.",
     "allResults": "Show all results"

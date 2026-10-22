@@ -164,16 +164,18 @@ refresh runs every five minutes only while the panel and document are visible. L
 production origins are explicitly allowed; optional preview origins require NEWS_ALLOWED_ORIGINS.
 
 Only the dashboard right rail receives the X-like arrangement: shared FormField in sidebar-search
-variant, news card, then department suggestions. Sidebar search debounces 300ms and delegates to
+variant, news card, then mixed follow suggestions. Sidebar search debounces 300ms and delegates to
 the existing people/post search services, showing up to three results of each kind and linking to
 the existing full search route. Native links open the selected profile/post. IME, Escape, clearing,
 independent failures, stale cancellation and account/privacy invalidation are explicit.
 
-Department suggestions read the current public profile's registered university/department IDs and
-query at most 30 visible peers with both exact IDs. Existing caller RLS owns visibility and blocking.
-Hydration excludes accepted/pending outgoing follows and displays at most three remaining accounts;
-missing IDs or no candidates show an honest empty state. FollowPerson's suggestion variant calls the
-existing FollowsService. No migration, policy, Auth metadata, new RPC or server write is introduced.
+Follow suggestions read at most 30 visible profiles across universities and departments. Existing
+caller RLS owns visibility and blocking; no own academic identity read or school filter is required.
+Hydration excludes the owner, duplicates, accepted/pending outgoing follows and profiles hidden
+between reads. The component displays a random sample of at most three eligible accounts, with a
+Refresh suggestions button that is disabled while reading or following. No eligible accounts show
+an honest empty state. FollowPerson's suggestion variant calls the existing FollowsService.
+No migration, policy, Auth metadata, new RPC or server write is introduced.
 The small-screen suggestion panel starts collapsed, with request/media listeners cleaned up on exit.
 
 ## Help Center support mail

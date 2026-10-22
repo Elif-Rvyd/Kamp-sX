@@ -36,7 +36,7 @@ import { PostActionsService } from '../../../core/post-actions.service';
     </h2>
     @if (expanded()) {
       <div id="recommendations-content" [attr.aria-busy]="loading()">
-        <p class="recommendations-description">{{ t('dashboardSidebar.departmentPeople') }}</p>
+        <p class="recommendations-description">{{ t('dashboardSidebar.mixedPeople') }}</p>
         @if (loading()) {
           <p class="recommendations-status" role="status">{{ t('social.search.peopleLoading') }}</p>
         }
@@ -71,6 +71,18 @@ import { PostActionsService } from '../../../core/post-actions.service';
         }
         @if (!loading() && !error() && !people().length) {
           <p class="recommendations-status" role="status">{{ t('dashboardSidebar.peopleEmpty') }}</p>
+        }
+        @if (!error()) {
+          <button
+            kxButton
+            type="button"
+            emphasis="ghost"
+            class="recommendations-refresh"
+            [disabled]="loading() || !!busy()"
+            (click)="refresh()"
+          >
+            {{ t('dashboardSidebar.refreshPeople') }}
+          </button>
         }
       </div>
     }
@@ -133,7 +145,7 @@ export class RecommendationsComponent {
     this.loading.set(true);
     this.error.set(false);
     try {
-      const people = await this.follows.departmentSuggestions(request.signal);
+      const people = await this.follows.followSuggestions(request.signal);
       if (current()) this.people.set(people);
     } catch {
       if (current()) this.error.set(true);

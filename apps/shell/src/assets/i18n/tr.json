@@ -867,9 +867,10 @@
   "dashboardSidebar": {
     "title": "Arama, haberler ve öneriler",
     "recommendations": "Takip edebileceğin kişiler",
-    "departmentPeople": "Bölümündeki öğrenciler",
+    "mixedPeople": "Farklı bölüm ve üniversitelerden öğrencileri keşfet.",
+    "refreshPeople": "Önerileri yenile",
     "peopleError": "Öneriler şu anda yüklenemiyor. Yeniden deneyebilirsin.",
-    "peopleEmpty": "Bölümünde şu anda önerilebilecek bir hesap bulunmuyor.",
+    "peopleEmpty": "Şu anda önerilebilecek yeni bir hesap bulunmuyor.",
     "mediaPost": "Medya içeren gönderi",
     "searchEmpty": "Eşleşen kullanıcı veya gönderi bulunamadı.",
     "allResults": "Tüm sonuçları göster"

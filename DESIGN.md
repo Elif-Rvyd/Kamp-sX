@@ -267,11 +267,14 @@ The card initially shows four source-attributed headlines, expandable to eight, 
 publication times, a last-checked timestamp and native external links. No fake trend counts or
 article images are added. Existing welcome/auth layouts and the persistent left rail are unchanged.
 The right column alone follows the supplied X reference: compact search first, then independent news
-and department follow-suggestion cards, separated from the feed by a border and gutter. FormField's
+and mixed follow-suggestion cards, separated from the feed by a border and gutter. FormField's
 sidebar-search variant retains its real accessible label/counter while displaying one rounded input;
 all other fields keep their default appearance. FollowPerson's suggestion variant reuses the existing
 actions and puts the follow button beside identity only when its container has enough space. No
 premium/subscription, fake trend or popularity content from the reference is copied.
+Follow suggestions sample up to three eligible accounts from a bounded pool of 30 visible profiles,
+without university or department filters. Refresh reshuffles the eligible pool; current RLS and
+accepted/pending follow exclusions still apply. Missing academic IDs do not block suggestions.
 
 ## Do's and Don'ts
 

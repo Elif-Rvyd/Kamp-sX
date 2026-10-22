@@ -13,6 +13,7 @@ function signal(value) {
   return read;
 }
 function harness() {
+  let random = Math.random;
   class AuthService {}
   class SupabaseService {}
   class MediaService {}
@@ -153,25 +154,28 @@ function harness() {
       },
     },
   ).outputText;
-  new Function('exports', 'require', js)(exports, (specifier) =>
-    specifier === '@angular/core'
-      ? {
-          Injectable: () => (x) => x,
-          inject: (t) => dependencies.get(t),
-          DestroyRef,
-          signal,
-          effect: (fn) => {
-            effects.push(fn);
-            fn();
-          },
-        }
-      : specifier === './auth.service'
-        ? { AuthService }
-        : specifier === './supabase.service'
-          ? { SupabaseService }
-          : specifier === './media.service'
-            ? { MediaService }
-            : require(specifier),
+  new Function('exports', 'require', 'Math', js)(
+    exports,
+    (specifier) =>
+      specifier === '@angular/core'
+        ? {
+            Injectable: () => (x) => x,
+            inject: (t) => dependencies.get(t),
+            DestroyRef,
+            signal,
+            effect: (fn) => {
+              effects.push(fn);
+              fn();
+            },
+          }
+        : specifier === './auth.service'
+          ? { AuthService }
+          : specifier === './supabase.service'
+            ? { SupabaseService }
+            : specifier === './media.service'
+              ? { MediaService }
+              : require(specifier),
+    Object.assign(Object.create(Math), { random: () => random() }),
   );
   const service = new exports.FollowsService();
   return {
@@ -181,6 +185,7 @@ function harness() {
     setupReads,
     channels,
     removed,
+    setRandom: (fn) => (random = fn),
     setCounts: (value) => (counts = value),
     fail: (value) => (failure = value),
     verify: (value) => (verified = value),
@@ -444,7 +449,7 @@ const profile = (user_id = B) => ({
 });
 const read = (data) => ({ data, error: null });
 
-test('department suggestions use exact academic IDs and exclude outgoing requests, accepted follows and RLS-hidden peers', async () => {
+test('mixed suggestions exclude the owner, duplicates, outgoing requests, accepted follows and RLS-hidden peers', async () => {
   const h = harness();
   await tick();
   const ids = [
@@ -453,8 +458,7 @@ test('department suggestions use exact academic IDs and exclude outgoing request
     '55555555-5555-4555-8555-555555555555',
   ];
   h.readResults.push(
-    read([{ university_id: A, department_id: B }]),
-    read([B, ...ids].map((user_id) => ({ user_id }))),
+    read([A, B, ...ids, ids[1]].map((user_id) => ({ user_id }))),
     read([B, ids[0], ids[1]].map(profile)),
     read([
       { follower_id: A, following_id: B, status: 'accepted', created_at: '2026-10-22T00:00:00Z' },
@@ -462,37 +466,94 @@ test('department suggestions use exact academic IDs and exclude outgoing request
     ]),
   );
   try {
-    const people = await h.service.departmentSuggestions();
+    const people = await h.service.followSuggestions();
     assert.deepEqual(
       people.map((p) => p.userId),
       [ids[1]],
     );
-    const candidates = h.queries.find(
-      (q) => q.column === 'user_id' && q.filters.some(([key]) => key === 'department_id'),
-    );
-    assert.deepEqual(candidates.filters, [
-      ['university_id', A],
-      ['department_id', B],
-    ]);
+    const candidates = h.queries.find((q) => q.column === 'user_id' && q.excluded);
+    assert.deepEqual(candidates.filters, []);
     assert.deepEqual(candidates.excluded, ['user_id', A]);
     assert.equal(candidates.limit, 30);
+    assert.deepEqual(h.queries.find((q) => q.ids && q.table === 'profiles').ids[1], [B, ...ids]);
+    assert.ok(!h.queries.some((q) => q.filters.some(([key]) => /university|department/.test(key))));
     assert.ok(h.queries.every((q) => q.op === 'select'));
   } finally {
     h.destroy();
   }
 });
 
-test('missing academic IDs prevent suggestion directory reads and a denied own profile fails closed', async () => {
+test('mixed suggestions sample different universities and departments without reading own academic IDs', async () => {
+  const ids = Array.from(
+    { length: 5 },
+    (_, i) => `${i + 2}`.repeat(8) + '-1111-4111-8111-' + `${i + 2}`.repeat(12),
+  );
+  const rows = ids.map((user_id, i) => ({
+    ...profile(user_id),
+    university: `University ${i}`,
+    studying: `Department ${i}`,
+  }));
+  const samples = [];
+  for (const random of [() => 0, () => 0.999]) {
+    const h = harness();
+    await tick();
+    h.setRandom(random);
+    h.readResults.push(read(ids.map((user_id) => ({ user_id }))), read(rows), read([]));
+    try {
+      const people = await h.service.followSuggestions();
+      samples.push(people.map((person) => person.userId));
+      assert.equal(people.length, 3);
+      assert.equal(new Set(people.map((person) => person.university)).size, 3);
+      assert.equal(new Set(people.map((person) => person.department)).size, 3);
+      assert.ok(people.every((person) => ids.includes(person.userId) && person.status === 'none'));
+      assert.ok(h.queries.every((q) => !q.column?.includes('department_id')));
+    } finally {
+      h.destroy();
+    }
+  }
+  assert.notDeepEqual(samples[0], samples[1]);
+});
+
+test('mixed suggestions show an honest empty result when every visible candidate is already followed', async () => {
   const h = harness();
   await tick();
-  h.readResults.push(read([{ university_id: A, department_id: null }]));
+  h.readResults.push(
+    read([{ user_id: B }]),
+    read([profile()]),
+    read([{ follower_id: A, following_id: B, status: 'accepted', created_at: '2026-10-22T00:00:00Z' }]),
+  );
+  try {
+    assert.deepEqual(await h.service.followSuggestions(), []);
+  } finally {
+    h.destroy();
+  }
+});
+
+test('denied or aborted suggestion reads fail closed without a directory fallback', async () => {
+  const h = harness();
+  await tick();
   try {
     const before = h.queries.length;
-    assert.deepEqual(await h.service.departmentSuggestions(), []);
-    assert.equal(h.queries.length, before + 1);
+    await assert.rejects(h.service.followSuggestions(AbortSignal.abort()), { key: 'follows.readError' });
+    assert.equal(h.queries.length, before);
     h.readResults.push({ data: null, error: { message: 'PRIVATE' } });
-    await assert.rejects(h.service.departmentSuggestions(), { key: 'follows.readError' });
-    await assert.rejects(h.service.departmentSuggestions(AbortSignal.abort()), { key: 'follows.readError' });
+    await assert.rejects(h.service.followSuggestions(), { key: 'follows.readError' });
+    assert.equal(h.queries.length, before + 1);
+  } finally {
+    h.destroy();
+  }
+});
+
+test('mixed suggestions cannot finish after the account changes during a read', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(read([{ user_id: B }]));
+  const release = h.pause();
+  const pending = h.service.followSuggestions();
+  try {
+    h.change(B, false);
+    release();
+    await assert.rejects(pending, { key: 'follows.readError' });
   } finally {
     h.destroy();
   }

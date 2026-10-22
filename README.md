@@ -67,7 +67,7 @@ Successful sign-in opens the session-protected home screen. The profile drawer d
 - Five exclusive audience levels, with accepted followers and block precedence at every level.
 - Replies, repost/undo and quotes; archive, up to three featured original posts and soft deletion.
 - Realtime direct messages and sharing accessible posts in conversations; unique-account view counts.
-- A dashboard right rail with instant search, attributed Euronews headlines and department follow suggestions using existing theme/social services.
+- A dashboard right rail with instant search, attributed Euronews headlines and mixed follow suggestions across universities/departments using existing theme/social services.
 - A Help Center form that sends support email through Resend on the server with verified account details. Live sending requires server credentials and a verified sender.
 - Instant Turkish and English language switching.
 - Light and dark themes.
