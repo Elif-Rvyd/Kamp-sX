@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.generated';
 import { AccountService, type AccountDatabase } from './account.service';
@@ -20,6 +20,7 @@ export class PostsService {
   private readonly account = inject(AccountService);
   private readonly auth = inject(AuthService);
   private readonly media = inject(MediaService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly feed = signal<readonly StoredPost[]>([]);
   readonly mine = signal<readonly StoredPost[]>([]);
   readonly ownCount = signal(0);
@@ -35,18 +36,22 @@ export class PostsService {
   private owner: string | undefined;
   private epoch = -1;
   private revision = 0;
+  private request?: AbortController;
   invalidateRead(): void {
+    this.request?.abort();
+    this.request = undefined;
     this.revision++;
     this.loading.set(false);
   }
   constructor() {
+    this.destroyRef.onDestroy(() => this.invalidateRead());
     effect(() => {
       const id = this.auth.session()?.user.id;
       const epoch = this.auth.sessionEpoch();
       if (id === this.owner && epoch === this.epoch) return;
       this.owner = id;
       this.epoch = epoch;
-      this.revision++;
+      this.invalidateRead();
       this.feed.set([]);
       this.mine.set([]);
       this.ownCount.set(0);
@@ -59,12 +64,16 @@ export class PostsService {
     const epoch = this.auth.sessionEpoch();
     const owner = this.auth.session()?.user.id,
       revision = ++this.revision;
-    if (!owner || !this.client) return;
+    this.request?.abort();
+    this.request = undefined;
+    if (!owner || !this.client || this.destroyRef.destroyed) return;
+    const request = (this.request = new AbortController());
+    const signal = AbortSignal.any([request.signal, AbortSignal.timeout(20000)]);
     this.loading.set(true);
     this.error.set('');
     try {
       const [feed, mine] = await Promise.all([
-        this.readFeed(owner),
+        this.readFeed(owner, signal),
         this.client
           .schema('public')
           .from('posts')
@@ -76,11 +85,11 @@ export class PostsService {
           .order('created_at', { ascending: false })
           .order('id', { ascending: false })
           .limit(30)
-          .abortSignal(AbortSignal.timeout(20000)),
+          .abortSignal(signal),
       ]);
       this.media.assertOwner(owner, epoch);
-      if (revision !== this.revision) return;
-      if (feed.error || mine.error) throw new MediaError('media.errors.postsRead');
+      if (revision !== this.revision || this.destroyRef.destroyed) return;
+      if (signal.aborted || feed.error || mine.error) throw new MediaError('media.errors.postsRead');
       this.feed.set((feed.data ?? []).map((row) => this.mapRow(row)));
       this.mine.set((mine.data ?? []).map((row) => this.mapRow(row)));
       this.ownCount.set(mine.count ?? mine.data?.length ?? 0);
@@ -88,16 +97,17 @@ export class PostsService {
       if (
         revision === this.revision &&
         this.auth.session()?.user.id === owner &&
-        this.auth.sessionEpoch() === epoch
+        this.auth.sessionEpoch() === epoch &&
+        !this.destroyRef.destroyed
       )
         this.error.set(error instanceof MediaError ? error.key : 'media.errors.postsRead');
     } finally {
       if (revision === this.revision) this.loading.set(false);
+      if (this.request === request) this.request = undefined;
     }
   }
-  private async readFeed(owner: string) {
+  private async readFeed(owner: string, signal: AbortSignal) {
     const scope = this.scope();
-    const signal = AbortSignal.timeout(20000);
     if (scope === 'explore')
       return this.client!.schema('public')
         .from('posts')
@@ -183,8 +193,7 @@ export class PostsService {
       result.data.media_type !== (upload?.type ?? null)
     )
       throw new MediaError('media.errors.uncertain');
-    this.revision++;
-    this.loading.set(false);
+    this.invalidateRead();
     const post = this.mapRow(result.data);
     this.feed.update((rows) => [post, ...rows.filter((row) => row.id !== post.id)].slice(0, 30));
     this.mine.update((rows) => [post, ...rows.filter((row) => row.id !== post.id)].slice(0, 30));

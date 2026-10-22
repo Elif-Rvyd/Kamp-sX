@@ -178,6 +178,16 @@ an honest empty state. FollowPerson's suggestion variant calls the existing Foll
 No migration, policy, Auth metadata, new RPC or server write is introduced.
 The small-screen suggestion panel starts collapsed, with request/media listeners cleaned up on exit.
 
+## Request scheduling and navigation responsiveness
+
+AuthService coalesces only simultaneous verification calls for the same session revision.
+Completed verification results are never cached; every subsequent check still reads Supabase Auth.
+Account/session replacement or destruction invalidates old verification results. Server RLS remains
+the authorization boundary. PostsService aborts both its feed and owned-post reads when a newer
+load starts, privacy invalidates the read, the account changes or the service is destroyed. The
+academic setup/profile/feed sequence shares that cancellation signal. Obsolete completions cannot
+change current rows, loading or error state. UI tokens, animation, data grants and routes are preserved.
+
 ## Help Center support mail
 
 Source: the user's support-form request, explicit Resend choice, confirmed SQL 33 and docs/DESTEK-EPOSTA-KURULUMU.md. `/help` is an authenticated social route, linked from the persistent sidebar. It uses SocialPageFrame, FormField, Button, ConfirmDialog and LegalDialog. Tokens remain owned by tokens.css. The separate support notice explains the new Resend/Gmail data flow without changing the texts or versions already acknowledged at registration.

@@ -28,7 +28,8 @@ function harness() {
     sessionEpoch: signal(1),
     hasVerifiedSession: async () => state.verified,
   };
-  const destroyRef = { destroyed: false };
+  const cleanups = [];
+  const destroyRef = { destroyed: false, onDestroy: (fn) => cleanups.push(fn) };
   const base = 'https://example.supabase.co/storage/v1/object/public/uploads/';
   const bucket = {
     getPublicUrl: (key) => ({ data: { publicUrl: base + key } }),
@@ -174,6 +175,10 @@ function harness() {
     destroyRef,
     effects,
     base,
+    destroy: () => {
+      destroyRef.destroyed = true;
+      cleanups.forEach((fn) => fn());
+    },
   };
 }
 const png = () =>
@@ -564,4 +569,76 @@ test('an uploaded File is not reused across separate logins', async () => {
   h.auth.sessionEpoch.set(2);
   await h.media.upload(file, 'avatar', OWNER);
   assert.equal(h.calls.filter((call) => call.kind === 'upload').length, 2);
+});
+
+test('a newer feed load aborts both obsolete requests and late responses cannot replace its result', async () => {
+  const h = harness();
+  let finishFeed, finishMine;
+  h.results.push(
+    new Promise((resolve) => (finishFeed = resolve)),
+    new Promise((resolve) => (finishMine = resolve)),
+  );
+  const first = h.posts.load();
+  await new Promise((resolve) => setImmediate(resolve));
+  const oldCalls = h.calls.filter((call) => call.kind === 'database');
+  assert.equal(oldCalls.length, 2);
+  const response = (id) => ({ data: [{ id, user_id: OWNER, content: id }], error: null, count: 1 });
+  h.results.push(response('latest'), response('latest'));
+  await h.posts.load();
+  assert.ok(oldCalls.every((call) => call.abortSignal[0].aborted));
+  assert.ok(h.calls.slice(2).every((call) => !call.abortSignal[0].aborted));
+  assert.equal(h.posts.feed()[0].id, 'latest');
+  finishFeed(response('old'));
+  finishMine(response('old'));
+  await first;
+  assert.equal(h.posts.feed()[0].id, 'latest');
+  assert.equal(h.posts.loading(), false);
+  assert.equal(h.posts.error(), '');
+  h.destroy();
+});
+
+test('feed invalidation and destruction cancel reads without presenting obsolete data', async () => {
+  for (const stop of ['invalidate', 'destroy']) {
+    const h = harness();
+    let finishFeed, finishMine;
+    h.results.push(
+      new Promise((resolve) => (finishFeed = resolve)),
+      new Promise((resolve) => (finishMine = resolve)),
+    );
+    const pending = h.posts.load();
+    await new Promise((resolve) => setImmediate(resolve));
+    if (stop === 'destroy') h.destroy();
+    else h.posts.invalidateRead();
+    assert.ok(h.calls.every((call) => call.abortSignal[0].aborted));
+    const response = { data: [{ id: 'old', user_id: OWNER, content: 'old' }], error: null };
+    finishFeed(response);
+    finishMine(response);
+    await pending;
+    assert.deepEqual(h.posts.feed(), []);
+    assert.equal(h.posts.loading(), false);
+    assert.equal(h.posts.error(), '');
+    if (stop !== 'destroy') h.destroy();
+  }
+});
+
+test('logout immediately aborts feed requests and keeps account-owned rows cleared', async () => {
+  const h = harness();
+  let finishFeed, finishMine;
+  h.results.push(
+    new Promise((resolve) => (finishFeed = resolve)),
+    new Promise((resolve) => (finishMine = resolve)),
+  );
+  const pending = h.posts.load();
+  await new Promise((resolve) => setImmediate(resolve));
+  h.auth.session.set(null);
+  h.auth.sessionEpoch.set(2);
+  h.effects.forEach((fn) => fn());
+  assert.ok(h.calls.every((call) => call.abortSignal[0].aborted));
+  const response = { data: [{ id: 'old', user_id: OWNER, content: 'old' }], error: null };
+  finishFeed(response);
+  finishMine(response);
+  await pending;
+  assert.deepEqual(h.posts.feed(), []);
+  assert.deepEqual(h.posts.mine(), []);
+  h.destroy();
 });

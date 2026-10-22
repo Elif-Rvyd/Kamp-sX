@@ -19,6 +19,7 @@ export class AuthService {
   readonly initializationError = signal<AuthError | null>(null);
   readonly ready: Promise<void>;
   private revision = 0;
+  private verification?: { revision: number; userId: string; result: Promise<boolean> };
 
   constructor() {
     if (!this.supabase) {
@@ -260,14 +261,27 @@ export class AuthService {
     }
   }
 
-  /** Navigation only: data authorization remains in RLS/the server. */
+  /** Share concurrent checks only; every later check still verifies with Auth. */
   async hasVerifiedSession(): Promise<boolean> {
     await this.ready;
-    if (!this.supabase || !this.session() || this.initializationError()) return false;
+    if (this.destroyRef.destroyed || !this.supabase || !this.session() || this.initializationError())
+      return false;
     const revision = this.revision;
     const userId = this.session()!.user.id;
+    if (this.verification?.revision === revision && this.verification.userId === userId)
+      return this.verification.result;
+    const pending = { revision, userId, result: this.verifySession(userId, revision) };
+    this.verification = pending;
     try {
-      const { data, error } = await this.supabase.auth.getUser();
+      return await pending.result;
+    } finally {
+      if (this.verification === pending) this.verification = undefined;
+    }
+  }
+
+  private async verifySession(userId: string, revision: number): Promise<boolean> {
+    try {
+      const { data, error } = await this.supabase!.auth.getUser();
       return (
         !this.destroyRef.destroyed &&
         !error &&

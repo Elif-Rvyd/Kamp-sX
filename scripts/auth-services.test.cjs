@@ -161,6 +161,90 @@ test('auth initialization restores a session and exposes readonly state', async 
   assert.equal(typeof service.session.set, 'undefined');
 });
 
+test('concurrent session checks share one in-flight Auth read but later checks are always fresh', async () => {
+  const pending = deferred();
+  let requests = 0;
+  const h = harness({
+    getSession: async () => ({ data: { session }, error: null }),
+    getUser: () => {
+      requests++;
+      return pending.promise;
+    },
+  });
+  await h.service.ready;
+  const checks = Array.from({ length: 10 }, () => h.service.hasVerifiedSession());
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(requests, 1);
+  pending.resolve({ data: { user }, error: null });
+  assert.deepEqual(await Promise.all(checks), Array(10).fill(true));
+  h.auth.getUser = async () => {
+    requests++;
+    return { data: { user: null }, error: new AuthError('Revoked', 401, 'session_not_found') };
+  };
+  assert.equal(await h.service.hasVerifiedSession(), false);
+  assert.equal(requests, 2);
+  h.destroy();
+});
+
+test('replacement sessions never share an old verification and its completion cannot clear the new read', async () => {
+  const oldRead = deferred(),
+    nextRead = deferred();
+  let requests = 0;
+  const h = harness({
+    getSession: async () => ({ data: { session }, error: null }),
+    getUser: () => (++requests === 1 ? oldRead.promise : nextRead.promise),
+  });
+  await h.service.ready;
+  const oldCheck = h.service.hasVerifiedSession();
+  await new Promise((resolve) => setImmediate(resolve));
+  h.emit('SIGNED_IN', { ...session, access_token: 'replacement-token' });
+  const newCheck = h.service.hasVerifiedSession();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(requests, 2);
+  oldRead.resolve({ data: { user }, error: null });
+  assert.equal(await oldCheck, false);
+  const sharedNewCheck = h.service.hasVerifiedSession();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(requests, 2);
+  nextRead.resolve({ data: { user }, error: null });
+  assert.deepEqual(await Promise.all([newCheck, sharedNewCheck]), [true, true]);
+  h.destroy();
+});
+
+test('failed in-flight verification is cleared so a recovered Auth service can be checked again', async () => {
+  const h = harness({
+    getSession: async () => ({ data: { session }, error: null }),
+    getUser: async () => {
+      throw new TypeError('Network unavailable');
+    },
+  });
+  await h.service.ready;
+  assert.equal(await h.service.hasVerifiedSession(), false);
+  h.auth.getUser = async () => ({ data: { user }, error: null });
+  assert.equal(await h.service.hasVerifiedSession(), true);
+  h.destroy();
+});
+
+test('destroying Auth denies a pending verification and prevents further network checks', async () => {
+  const read = deferred();
+  let requests = 0;
+  const h = harness({
+    getSession: async () => ({ data: { session }, error: null }),
+    getUser: () => {
+      requests++;
+      return read.promise;
+    },
+  });
+  await h.service.ready;
+  const pending = h.service.hasVerifiedSession();
+  await new Promise((resolve) => setImmediate(resolve));
+  h.destroy();
+  read.resolve({ data: { user }, error: null });
+  assert.equal(await pending, false);
+  assert.equal(await h.service.hasVerifiedSession(), false);
+  assert.equal(requests, 1);
+});
+
 test('a newer auth event wins over a stale initialization snapshot', async () => {
   const snapshot = deferred();
   const started = deferred();
