@@ -13,7 +13,7 @@ SQL 33 kullanıcı tarafından `support_contract_version = 2026102201` sonucuyla
 - Edge handler'ın gerçek Request/Response/stream davranışı ve Deno tip kontrolü; e-posta sağlayıcısı testlerde taklit edildi.
 - Derlenmiş üretim uygulamasında CSP, metin olarak içerik gösterimi, yetkisiz ağ/script/resim istekleri, güvenli medya URL'leri ve oturumsuz erişim.
 - Güncel npm duyuruları ve Git'e girebilecek kaynaklarda bilinen gizli anahtar biçimleri.
-- Canlıda yalnızca anonim HEAD/GET/OPTIONS kontrolleri. Üretime test kullanıcısı, sosyal gönderi veya mesaj eklenmedi; yük testi, parola denemesi veya gerçek destek e-postası gönderilmedi.
+- İlk denetimde canlıda yalnızca anonim HEAD/GET/OPTIONS kontrolleri yapıldı. Üretime test kullanıcısı, sosyal gönderi veya mesaj eklenmedi; yük testi veya parola denemesi yapılmadı. Sonraki gerçek destek gönderiminin doğrulaması aşağıda ayrıca kaydedildi.
 
 Grafik indeksinin 10 Ekim sürümü güncel dosyaları kapsamıyordu. Kapsama kontrolünden sonra ilgili kaynaklar doğrudan okundu. Bu rapor belirtilen testlerin sonucudur; bütün sisteme ilişkin bağımsız pentest veya kusursuz güvenlik garantisi değildir.
 
@@ -55,7 +55,7 @@ Gizli anahtar taramasında bir eski negatif test örneği biçim olarak anahtara
 
 ## Kalan sınırlamalar
 
-1. **E-posta hesabı kurulumu:** Resend ayarlarının hazır olduğu ve gerçek Gmail teslimi henüz doğrulanmadı. Kurulum tamamlanmadan form gönderimi etkinleşmez. API kabul cevabı da tek başına Gmail teslim garantisi değildir; bounce/teslim takibi için doğrulanmış webhook gerekir.
+1. **E-posta teslimi ve üretim göndericisi:** Dört sunucu ayarı mevcut; bağlantı düzeltmesinden sonra gerçek bir başvuru Resend tarafından kabul edildi. Gmail gelen kutusuna teslim henüz kullanıcı tarafından doğrulanmadı. API kabul cevabı tek başına teslim garantisi değildir; bounce/teslim takibi için doğrulanmış webhook gerekir. `onboarding@resend.dev` kullanılırsa yalnızca Resend hesabının e-postasına deneme gönderimi yapılabilir; normal üretim göndericisi için alan adı doğrulaması gerekir.
 2. **Public medya bağlantıları:** Kullanıcının önceki açık kararıyla `uploads` public kalır. RLS uygulama satırlarını korur; bağlantıyı önceden bilen kişi medya dosyasını açabilir. Genel güvenlik isteğiyle bucket gizliliği sessizce tersine çevrilmedi.
 3. **Ölçüm sınırı:** Gerçek çok bağlantılı yük testi, bağımsız dış pentest ve her canlı rol kombinasyonuyla yazma testi yapılmadı. Hesap ele geçirmeye karşı MFA/oturum politikaları ve kayıt CAPTCHA ayarları bu işte değiştirilmedi.
 4. **Paket boyutu:** Üretim derlemesi geçti; başlangıç 820,46 kB, tahmini aktarım 196,88 kB. Mevcut 700 kB uyarı sınırı aşılıyor, 1 MB hata sınırının altında. Sınırlar yükseltilmedi.
@@ -75,6 +75,18 @@ Gizli anahtar taramasında bir eski negatif test örneği biçim olarak anahtara
 Yerel SQL testleri mevcut `.nx/sql-verification` PGlite çalışma alanını kullanır; bunlar canlı veritabanına bağlanmaz. HTTP negatif kontrolleri e-posta oluşturmaz. Test komutları, rollback dosyası ve sunucu ayarları commit'e dahildir; gerçek anahtarlar dahil değildir.
 
 Arayüzde mevcut renk, tema ve tipografi token'ları korundu. Yardım Merkezi, kullanıcının isteğiyle devre dışı menü öğesinden gerçek rotaya dönüştürüldü; mevcut sayfa çerçevesi, form alanları ve onay pencereleri kullanıldı. Tanıtım ve giriş ekranları yeniden tasarlanmadı.
+
+## Canlı gönderim bağlantısı düzeltmesi — 22 Ekim 2026
+
+Kullanıcı, ayarları ekledikten sonra ilk gönderimde belirsiz sonuç gördü. Salt okunur canlı incelemede dispatch tablosunda kayıt olmadığı, RPC izinlerinin doğru olduğu ve `service_role` rolüyle durum fonksiyonunun çalıştığı doğrulandı. Hata Edge sunucusunun Data API bağlantısındaydı; istek e-posta sağlayıcısına ulaşmamıştı. Anahtar değerleri okunmadı veya loglanmadı.
+
+Eski bağlantı yalnızca legacy anahtar değişkenlerine dayanıyordu. Bağlantı, ortamın adlandırılmış yeni API anahtarlarını ve doğru sunucu başlıklarını kullanacak şekilde güncellendi; legacy uyumluluğu korundu. Yeni secret anahtarı yalnızca `apikey` başlığında, kullanıcı oturumu yalnızca kullanıcı çağrılarında kullanılır. Hazırlık kontrolü artık sunucu rolünün durum RPC'sine erişimini de doğrular; sürüm işaretinin okunması tek başına hazır sayılmaz.
+
+Yeni sürüm yayınlandıktan sonra aynı başvuru kimliği ve değişmeyen açıklama kullanıldı. Resend kabul cevabı alındı, arayüz başarı gösterdi; salt okunur kayıt kontrolü `state = sent`, `attempts = 1` sonucunu verdi. Yeni başvuru oluşturulmadı. E-posta içeriği veya hesap e-postası bu rapora alınmadı. Bu, sağlayıcının kabulünü doğrular; Gmail gelen kutusu kontrolünün yerini tutmaz.
+
+Düzeltmenin doğrulaması: 14 Edge güvenlik testi + 4 taşıma testi (18/18), 12 yerel SQL kontrolü, Deno tip kontrolü ve gizli anahtar taraması geçti. İstemci ve SQL değişmedi; önceki tam tarayıcı koşusu bu sunucu düzeltmesinden önceydi ve gereksiz yere tekrarlanmadı.
+
+Teknik kaynaklar: [Supabase yeni anahtarlara geçiş](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys), [Resend deneme göndericisi kısıtı](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain).
 
 ## Geri alma
 

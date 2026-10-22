@@ -15,7 +15,9 @@ Destek formu `/help` rotasında, mevcut oturum içi çerçevede açılır. Kulla
 | `SUPPORT_TO`              | İstediğin Gmail destek alıcısı                                                                     |
 | `SUPPORT_ALLOWED_ORIGINS` | Yayımlanmış uygulamanın tam HTTPS origin'i; birden fazlaysa virgülle ayır, yol ve sonda `/` ekleme |
 
-Yerel `http://127.0.0.1:4200` ve `http://localhost:4200` origin'leri geliştirme için tanımlıdır. Production ve preview adresleri ayrı ayrı açıkça tanımlanır; joker origin veya keyfi Vercel alt alanına izin verilmez. `SUPABASE_URL`, `SUPABASE_ANON_KEY` ve `SUPABASE_SERVICE_ROLE_KEY` Edge ortamının yerleşik sunucu ayarlarıdır; istemciye aktarılmazlar.
+Yerel `http://127.0.0.1:4200` ve `http://localhost:4200` origin'leri geliştirme için tanımlıdır. Production ve preview adresleri ayrı ayrı açıkça tanımlanır; joker origin veya keyfi Vercel alt alanına izin verilmez. `SUPABASE_URL` ve Supabase API anahtarları Edge ortamının yerleşik sunucu ayarlarıdır; istemciye sunucu anahtarı aktarılmaz.
+
+Fonksiyon, `SUPABASE_PUBLISHABLE_KEYS` ve `SUPABASE_SECRET_KEYS` sözlüklerindeki `default` anahtarlarını öncelikli kullanır; bulunmazsa eski `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` değişkenleriyle uyumludur. Yeni `sb_secret_` anahtarı yalnızca sunucu çağrısının `apikey` başlığına yazılır; kullanıcı JWT'siyle karıştırılmaz ve JWT gibi Authorization'a konulmaz. Bozuk anahtar sözlüğü gönderimi kapatır. Bu yerleşik anahtarları ayrıca kopyalayıp Secrets'a eklemek gerekmez.
 
 ## Yayın
 
@@ -27,7 +29,7 @@ npx supabase functions deploy support-email --project-ref djhezivksrvcyqxzpiau -
 
 `supabase/config.toml` içindeki `verify_jwt = true` korunur; JWT kontrolünü kapatan bayrak kullanılmaz. Handler ayrıca Auth sunucusundan güncel kullanıcıyı doğrular. Tarayıcı oturum JWT'sini Authorization başlığıyla yollar; sunucu anahtarları frontend derlemesine girmez.
 
-GET isteği yalnızca doğrulanmış hesabın kimliğini ve gönderim hazırlığını döner. Anahtar, gönderici, alıcı veya veritabanı koruması eksikse gönderim açılmaz. Kurulum eksikliği başarı mesajına çevrilmez. Resend'in e-postayı kabul etmesi, Gmail'in teslim ettiğinin garantisi değildir; kesin teslim/bounce takibi için ileride doğrulanmış webhook gerekir.
+GET isteği yalnızca doğrulanmış hesabın kimliğini ve gönderim hazırlığını döner. Hazırlık kontrolü hem sözleşme sürümünü hem sunucu kimliğinin salt okunur durum RPC'sine erişimini sınar; yalnızca sürüm işaretinin okunması yeterli değildir. Bu kontrol başvuru oluşturmaz veya e-posta göndermez. Anahtar, gönderici, alıcı veya veritabanı erişimi eksikse gönderim açılmaz. Kurulum eksikliği başarı mesajına çevrilmez. Resend'in e-postayı kabul etmesi, Gmail'in teslim ettiğinin garantisi değildir; kesin teslim/bounce takibi için ileride doğrulanmış webhook gerekir.
 
 ## Spam ve yinelenen gönderim
 

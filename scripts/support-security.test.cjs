@@ -36,6 +36,7 @@ function harness(overrides = {}) {
     mailStatus: 200,
     pauseMail: false,
     finishMail: undefined,
+    serverStatus: 200,
   };
   const handler = exportsValue.createSupportHandler({
     env,
@@ -58,8 +59,17 @@ function harness(overrides = {}) {
         return json(state.version);
       }
       if (url.includes('/rest/v1/rpc/kx_support_')) {
-        assert.equal(headers.get('Authorization'), 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY);
+        const serverKey = env.SUPABASE_SECRET_KEYS
+          ? JSON.parse(env.SUPABASE_SECRET_KEYS).default
+          : env.SUPABASE_SERVICE_ROLE_KEY;
+        assert.equal(headers.get('apikey'), serverKey);
+        assert.equal(
+          headers.get('Authorization'),
+          serverKey.startsWith('sb_secret_') ? null : 'Bearer ' + serverKey,
+        );
         assert.equal(body.p_actor, A);
+        if (state.serverStatus !== 200)
+          return json({ code: '42501', message: 'PRIVATE_DATABASE_DETAILS' }, state.serverStatus);
         if (url.endsWith('/kx_support_reserve')) return json(state.reservation);
         if (url.endsWith('/kx_support_finish')) {
           if (state.failFinish) throw Error('Server private details');
@@ -264,10 +274,55 @@ test('status checks bind the actor to verified Auth and never resend or accept a
   const result = await h.request(undefined, { method: 'GET', query: '?request_id=' + ID });
   assert.equal((await result.json()).status, 'unknown');
   assert.equal(h.state.mail.length, 0);
-  const call = h.state.calls.find((call) => call.url.endsWith('/kx_support_status'));
+  const call = h.state.calls.find(
+    (call) => call.url.endsWith('/kx_support_status') && call.body.p_request === ID,
+  );
+  assert.ok(call);
   assert.equal(call.body.p_actor, A);
   assert.equal(
     (await h.request(undefined, { method: 'GET', query: '?request_id=' + ID + '&actor=' + B })).status,
     400,
   );
+});
+
+test('modern server keys stay in apikey and never replace the caller JWT or become an Authorization JWT', async () => {
+  const h = harness({
+    SUPABASE_PUBLISHABLE_KEYS: JSON.stringify({ default: 'sb_publishable_TEST' }),
+    SUPABASE_SECRET_KEYS: JSON.stringify({ default: 'sb_secret_TEST' }),
+  });
+  assert.equal((await h.request()).status, 200);
+  assert.equal(h.state.mail.length, 1);
+  const userCalls = h.state.calls.filter(
+    (call) =>
+      call.url.endsWith('/auth/v1/user') ||
+      call.url.includes('/profiles?') ||
+      call.url.endsWith('/kx_support_contract_version'),
+  );
+  for (const call of userCalls) {
+    assert.equal(call.headers.get('Authorization'), 'Bearer valid-test-session');
+    assert.equal(call.headers.get('apikey'), 'sb_publishable_TEST');
+  }
+});
+
+test('a readable version marker with a rejected server credential never advertises readiness or sends mail', async () => {
+  for (const status of [401, 403, 404, 500]) {
+    const h = harness();
+    h.state.serverStatus = status;
+    const data = await (await h.request(undefined, { method: 'GET' })).json();
+    assert.equal(data.ready, false);
+    assert.equal(data.identity.username, 'student');
+    assert.equal((await h.request()).status, 503);
+    assert.equal(h.state.mail.length, 0);
+    assert.ok(!h.state.calls.some((call) => call.url.endsWith('/kx_support_reserve')));
+  }
+});
+
+test('malformed modern credentials fail closed without leaking keys or reverting to a legacy server identity', async () => {
+  for (const value of ['{broken', JSON.stringify({ default: 'not-a-server-key' })]) {
+    const h = harness({ SUPABASE_SECRET_KEYS: value });
+    const health = await (await h.request(undefined, { method: 'GET' })).json();
+    assert.equal(health.ready, false);
+    assert.equal((await h.request()).status, 503);
+    assert.equal(h.state.mail.length, 0);
+  }
 });

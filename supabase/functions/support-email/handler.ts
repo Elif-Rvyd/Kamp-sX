@@ -3,6 +3,8 @@ export interface SupportEnvironment {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  SUPABASE_PUBLISHABLE_KEYS?: string;
+  SUPABASE_SECRET_KEYS?: string;
   RESEND_API_KEY?: string;
   SUPPORT_FROM?: string;
   SUPPORT_TO?: string;
@@ -25,8 +27,23 @@ const mailbox = (value: unknown): value is string =>
   /^[^\s<>@\x00-\x1f\x7f]+@[^\s<>@\x00-\x1f\x7f]+\.[^\s<>@\x00-\x1f\x7f]+$/.test(value);
 const VERSION = '2026102201';
 const BODY_LIMIT = 20_000;
+const STATUS_PROBE_ID = '00000000-0000-4000-8000-000000000000';
+
+function runtimeKey(named: string | undefined, legacy: string | undefined, prefix: string): string {
+  if (!named) return legacy ?? '';
+  try {
+    const keys: unknown = JSON.parse(named);
+    if (!object(keys)) return '';
+    if (keys.default === undefined) return legacy ?? '';
+    return typeof keys.default === 'string' && keys.default.startsWith(prefix) ? keys.default : '';
+  } catch {
+    return '';
+  }
+}
 
 export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 5000 }: Dependencies) {
+  const publicKey = runtimeKey(env.SUPABASE_PUBLISHABLE_KEYS, env.SUPABASE_ANON_KEY, 'sb_publishable_');
+  const serverKey = runtimeKey(env.SUPABASE_SECRET_KEYS, env.SUPABASE_SERVICE_ROLE_KEY, 'sb_secret_');
   const origins = new Set(['http://127.0.0.1:4200', 'http://localhost:4200']);
   for (const candidate of (env.SUPPORT_ALLOWED_ORIGINS ?? '').split(',')) {
     try {
@@ -45,20 +62,20 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
   }
   const configured = () =>
     !!base &&
-    !!env.SUPABASE_ANON_KEY &&
-    !!env.SUPABASE_SERVICE_ROLE_KEY &&
+    !!publicKey &&
+    !!serverKey &&
     !!env.RESEND_API_KEY &&
     mailbox(env.SUPPORT_FROM) &&
     mailbox(env.SUPPORT_TO);
 
-  async function rpc(name: string, args: ObjectValue, token: string): Promise<unknown> {
+  async function rpc(name: string, args: ObjectValue, token: string, privileged = false): Promise<unknown> {
     const result = await fetcher(base + '/rest/v1/rpc/' + name, {
       method: 'POST',
       redirect: 'error',
       signal: AbortSignal.timeout(7000),
       headers: {
-        apikey: env.SUPABASE_ANON_KEY ?? '',
-        Authorization: 'Bearer ' + token,
+        apikey: privileged ? serverKey : publicKey,
+        ...(!privileged || !serverKey.startsWith('sb_secret_') ? { Authorization: 'Bearer ' + token } : {}),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(args),
@@ -66,7 +83,7 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
     if (!result.ok) throw Error('support_database_unavailable');
     return result.json();
   }
-  const serverRpc = (name: string, args: ObjectValue) => rpc(name, args, env.SUPABASE_SERVICE_ROLE_KEY ?? '');
+  const serverRpc = (name: string, args: ObjectValue) => rpc(name, args, serverKey, true);
   async function body(request: Request): Promise<unknown> {
     const length = request.headers.get('Content-Length');
     if (length && (!/^\d+$/.test(length) || Number(length) > BODY_LIMIT)) throw Error('body_too_large');
@@ -126,7 +143,7 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
     if (!['GET', 'POST'].includes(request.method))
       return response(405, { code: 'method_not_allowed' }, { Allow: 'GET, POST, OPTIONS' });
-    if (!base || !env.SUPABASE_ANON_KEY) return response(503, { code: 'unavailable' });
+    if (!base || !publicKey) return response(503, { code: 'unavailable' });
     const authorization = request.headers.get('Authorization') ?? '';
     if (!/^Bearer [A-Za-z0-9._-]+$/.test(authorization) || authorization.length > 8192)
       return response(401, { code: 'unauthorized' });
@@ -136,7 +153,7 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
       const authResult = await fetcher(base + '/auth/v1/user', {
         redirect: 'error',
         signal: AbortSignal.timeout(7000),
-        headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: authorization },
+        headers: { apikey: publicKey, Authorization: authorization },
       });
       if (!authResult.ok) return response(401, { code: 'unauthorized' });
       const user: unknown = await authResult.json();
@@ -154,7 +171,7 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
       const profileResult = await fetcher(base + '/rest/v1/profiles?select=username&user_id=eq.' + actor, {
         redirect: 'error',
         signal: AbortSignal.timeout(7000),
-        headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: authorization },
+        headers: { apikey: publicKey, Authorization: authorization },
       });
       if (!profileResult.ok) return response(503, { code: 'identity_unavailable' });
       const profiles: unknown = await profileResult.json();
@@ -180,7 +197,15 @@ export function createSupportHandler({ env, fetch: fetcher, bodyReadTimeoutMs = 
       return response(400, { code: 'invalid_request' });
     let ready = false;
     try {
-      ready = configured() && (await rpc('kx_support_contract_version', {}, token)) === VERSION;
+      if (configured() && (await rpc('kx_support_contract_version', {}, token)) === VERSION) {
+        // A version marker alone does not prove that the server credential can call dispatch RPCs.
+        // Probe only this authenticated actor's status; this cannot reserve or send an email.
+        const probe = await serverRpc('kx_support_status', { p_actor: actor, p_request: STATUS_PROBE_ID });
+        ready =
+          object(probe) &&
+          typeof probe.status === 'string' &&
+          ['sent', 'pending', 'retryable', 'rejected', 'unknown', 'expired'].includes(probe.status);
+      }
     } catch {
       /* No sends until the DB guard is installed. */
     }

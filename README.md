@@ -38,7 +38,7 @@ Akademik akışlar, yorum, repost/alıntı ve birebir mesajlaşma uygulanmışt�
 
 22 Ekim kayıt/paylaşım sürümü, kurulum ve test ayrıntıları: [güncelleme raporu](docs/SOSYAL-YAYIN-2026-10-22.md). Katalog 208 üniversite ve 14.405 program içerir; kampüs kapsamı 112 üniversitede 292 kampüsle sınırlıdır. Kampüsü bulunmayan üniversitelerde liste tamamlanana kadar yeni kayıt tamamlanamaz.
 
-Yardım Merkezi için [Resend kurulumu](docs/DESTEK-EPOSTA-KURULUMU.md) ve [güvenlik/test raporu](docs/GUVENLIK-VE-DESTEK-2026-10-22.md) bulunur. Destek SQL'i ve Edge Function yayındadır; Resend ayarları ve gerçek posta teslimi henüz doğrulanmamıştır.
+Yardım Merkezi için [Resend kurulumu](docs/DESTEK-EPOSTA-KURULUMU.md) ve [güvenlik/test raporu](docs/GUVENLIK-VE-DESTEK-2026-10-22.md) bulunur. Destek SQL'i ve Edge Function yayındadır; dört sunucu ayarı mevcut ve gerçek bir başvuru Resend tarafından kabul edilmiştir. Gmail gelen kutusuna teslim ayrıca kontrol edilmelidir. Deneme göndericisinin alıcı kısıtları kurulum belgesinde açıklanır.
 
 ### Teknoloji
 
@@ -80,7 +80,7 @@ Academic feeds, comments, reposts, quotes and direct messaging are implemented. 
 
 See the [22 October release report](docs/SOSYAL-YAYIN-2026-10-22.md) for deployment and validation. The catalog contains 208 universities and 14,405 programs; campus coverage is partial at 292 campuses across 112 universities. Registration cannot complete for universities without a campus until their catalog entries are added.
 
-See the [Resend setup](docs/DESTEK-EPOSTA-KURULUMU.md) and [security/test report](docs/GUVENLIK-VE-DESTEK-2026-10-22.md) for the Help Center. Its SQL guard and Edge Function are deployed; Resend configuration and actual email delivery have not yet been verified.
+See the [Resend setup](docs/DESTEK-EPOSTA-KURULUMU.md) and [security/test report](docs/GUVENLIK-VE-DESTEK-2026-10-22.md) for the Help Center. Its SQL guard and Edge Function are deployed; all four server settings exist and Resend accepted one real request. Gmail inbox delivery requires a separate check. The setup guide explains test-sender recipient restrictions.
 
 ### Technology
 
