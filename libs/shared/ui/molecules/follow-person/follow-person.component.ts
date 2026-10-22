@@ -21,7 +21,12 @@ export interface FollowPersonView {
   standalone: true,
   imports: [RouterLink, TranslocoDirective, AvatarComponent, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<article class="person" *transloco="let t" [attr.aria-busy]="busy()">
+  template: `<article
+    class="person"
+    *transloco="let t"
+    [class.suggestion]="variant() === 'suggestion'"
+    [attr.aria-busy]="busy()"
+  >
     <a
       [routerLink]="'/people/' + person().userId"
       [attr.aria-label]="t('social.openProfile', { name: person().fullName || person().username })"
@@ -137,6 +142,26 @@ export interface FollowPersonView {
       font-size: 12px;
       min-height: 44px;
     }
+    .person.suggestion {
+      grid-template-columns: 44px minmax(0, 1fr);
+      padding: 16px 20px;
+      min-height: 104px;
+    }
+    .suggestion .identity p {
+      display: none;
+    }
+    .suggestion .actions {
+      grid-column: 2;
+    }
+    @container (min-width: 340px) {
+      .person.suggestion {
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        align-items: center;
+      }
+      .suggestion .actions {
+        grid-column: 3;
+      }
+    }
     @media (min-width: 900px) {
       .person {
         grid-template-columns: 44px minmax(0, 1fr) auto;
@@ -148,6 +173,7 @@ export interface FollowPersonView {
   `,
 })
 export class FollowPersonComponent {
+  readonly variant = input<'default' | 'suggestion'>('default');
   readonly person = input.required<FollowPersonView>();
   readonly incoming = input(false);
   readonly removable = input(false);

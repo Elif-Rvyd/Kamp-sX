@@ -1,0 +1,93 @@
+<section class="world-news" *transloco="let t" aria-labelledby="world-news-title">
+  <div class="news-header">
+    <h2 id="world-news-title">
+      <button
+        type="button"
+        class="news-toggle"
+        (click)="toggle()"
+        [attr.aria-expanded]="expanded()"
+        aria-controls="world-news-content"
+      >
+        <kx-icon name="public" />{{ t('worldNews.title')
+        }}<kx-icon [name]="expanded() ? 'expand_less' : 'expand_more'" />
+      </button>
+    </h2>
+    @if (expanded()) {
+      <button
+        kxButton
+        type="button"
+        class="news-refresh"
+        emphasis="ghost"
+        [busy]="loading()"
+        [disabled]="loading()"
+        [attr.aria-label]="t('worldNews.refresh')"
+        [attr.title]="t('worldNews.refresh')"
+        (click)="refresh()"
+      >
+        <kx-icon name="refresh" />
+      </button>
+    }
+  </div>
+  @if (expanded()) {
+    <div id="world-news-content" [attr.aria-busy]="loading()">
+      <p class="news-intro">{{ t('worldNews.intro') }}</p>
+      @if (loading() && !feed()) {
+        <p class="news-status" role="status">{{ t('worldNews.loading') }}</p>
+      }
+      @if (error() || feed()?.stale) {
+        <div class="news-notice" role="status">
+          <p>{{ t(feed()?.items?.length ? 'worldNews.stale' : 'worldNews.error') }}</p>
+          @if (diagnostic()) {
+            <p class="news-diagnostic">{{ t('worldNews.diagnostic', { code: diagnostic() }) }}</p>
+          }
+          <button kxButton type="button" emphasis="ghost" [disabled]="loading()" (click)="refresh()">
+            {{ t('media.retry') }}
+          </button>
+        </div>
+      }
+      @if (feed(); as news) {
+        @if (news.items.length) {
+          <ol class="news-list">
+            @for (item of visibleItems(); track item.url) {
+              <li>
+                <a [href]="item.url" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"
+                  ><span class="news-meta">{{ item.source }}<kx-icon name="north_east" /></span
+                  ><span class="news-title">{{ item.title }}</span
+                  ><time [attr.datetime]="item.publishedAt">{{ date(item.publishedAt) }}</time
+                  ><span class="sr-only">{{ t('worldNews.newTab') }}</span></a
+                >
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="news-status" role="status">{{ t('worldNews.empty') }}</p>
+        }
+        @if (news.items.length > 4) {
+          <button
+            kxButton
+            type="button"
+            class="news-more"
+            emphasis="ghost"
+            [attr.aria-expanded]="more()"
+            (click)="more.set(!more())"
+          >
+            {{ t(more() ? 'worldNews.less' : 'worldNews.more') }}
+          </button>
+        }
+        <p class="news-updated">
+          {{ t('worldNews.updated') }}
+          <time [attr.datetime]="news.updatedAt">{{ date(news.updatedAt) }}</time>
+        </p>
+      }
+      <a
+        class="news-source"
+        [href]="language.language() === 'tr' ? 'https://tr.euronews.com/' : 'https://www.euronews.com/'"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        >{{ t('worldNews.source') }}<span class="sr-only"> {{ t('worldNews.newTab') }}</span
+        ><kx-icon name="north_east"
+      /></a>
+    </div>
+  }
+</section>

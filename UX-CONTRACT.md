@@ -142,6 +142,40 @@ The user's seven-item release request and supplied SQL 28 diagnostics define the
 
 The inbox now calls kx_inbox_v2; normal messages retain the existing conversation_id/content-only INSERT. Sharing uses a separate RPC and cannot widen direct INSERT privileges. Realtime payloads remain invalidations; shared originals are re-read after refreshed inbox data, session replacement and social visibility changes. Drafts and recipients are not persisted in browser storage.
 
+## Dashboard world news
+
+Source: the user's request for an X-like world-news box. WorldNewsComponent owns the dashboard-only
+disclosure/list; WorldNewsApiService validates the typed response. Button, Icon, locale/theme services
+and existing runtime tokens are canonical. At 1024px the blue-tinted rectangular rail opens beside
+the feed, scaling from 360 to 460px; below that width it is a collapsed disclosure above the feed.
+the toggle exposes aria-expanded/aria-controls, keyboard actions remain native and feed selection
+does not change. Four items expand to eight without inventing popularity. Links open Euronews's
+article route in a new tab with noopener/noreferrer and explicit accessible new-tab feedback.
+
+The world-news Edge Function verifies a current non-anonymous Auth user and fetches only two fixed
+Euronews public news RSS endpoints for TR/EN. Google returned upstream HTTP 503 from the live Edge
+runtime; after changing source, the user confirmed actual headlines in the application. The function
+uses no database or service-role credential, forwards no account details to Euronews, excludes
+images/article bodies, rejects DTD/entities and validates every
+URL/date/title. A five-minute per-language cache coalesces in-flight reads; outages may return a clearly
+labeled previous update for at most one hour. No news is persisted. Empty/error/loading/refresh states
+remain distinct. Session/locale replacement and component destruction abort stale work. Automatic
+refresh runs every five minutes only while the panel and document are visible. Local/canonical
+production origins are explicitly allowed; optional preview origins require NEWS_ALLOWED_ORIGINS.
+
+Only the dashboard right rail receives the X-like arrangement: shared FormField in sidebar-search
+variant, news card, then department suggestions. Sidebar search debounces 300ms and delegates to
+the existing people/post search services, showing up to three results of each kind and linking to
+the existing full search route. Native links open the selected profile/post. IME, Escape, clearing,
+independent failures, stale cancellation and account/privacy invalidation are explicit.
+
+Department suggestions read the current public profile's registered university/department IDs and
+query at most 30 visible peers with both exact IDs. Existing caller RLS owns visibility and blocking.
+Hydration excludes accepted/pending outgoing follows and displays at most three remaining accounts;
+missing IDs or no candidates show an honest empty state. FollowPerson's suggestion variant calls the
+existing FollowsService. No migration, policy, Auth metadata, new RPC or server write is introduced.
+The small-screen suggestion panel starts collapsed, with request/media listeners cleaned up on exit.
+
 ## Help Center support mail
 
 Source: the user's support-form request, explicit Resend choice, confirmed SQL 33 and docs/DESTEK-EPOSTA-KURULUMU.md. `/help` is an authenticated social route, linked from the persistent sidebar. It uses SocialPageFrame, FormField, Button, ConfirmDialog and LegalDialog. Tokens remain owned by tokens.css. The separate support notice explains the new Resend/Gmail data flow without changing the texts or versions already acknowledged at registration.

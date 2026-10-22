@@ -1,0 +1,54 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.recommendations {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  overflow: hidden;
+  container-type: inline-size;
+}
+h2 {
+  margin: 0;
+  padding: 16px 20px 8px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+.recommendations-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.recommendations-toggle kx-icon {
+  color: var(--color-muted);
+  font-size: 18px;
+}
+.recommendations-description,
+.recommendations-status {
+  padding: 0 20px 16px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.recommendations-status button {
+  display: block;
+  margin-top: 8px;
+}
+@media (max-width: 1023px) {
+  h2 {
+    font-size: 17px;
+    padding: 8px 16px;
+  }
+}

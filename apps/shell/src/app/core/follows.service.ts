@@ -294,6 +294,52 @@ export class FollowsService {
     return this.hydrate(ids, owner, epoch, abort);
   }
 
+  async departmentSuggestions(signal?: AbortSignal): Promise<FollowPerson[]> {
+    const owner = this.auth.session()?.user.id,
+      epoch = this.auth.sessionEpoch();
+    if (!owner || !this.client || !this.owns(owner, epoch)) throw new FollowError('follows.readError');
+    const abort = signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000);
+    const own = await this.client
+      .schema('public')
+      .from('profiles')
+      .select('university_id,department_id')
+      .eq('user_id', owner)
+      .limit(1)
+      .abortSignal(abort);
+    if (own.error || !own.data || abort.aborted || !this.owns(owner, epoch))
+      throw new FollowError('follows.readError');
+    const academic = own.data[0];
+    if (
+      !academic?.university_id ||
+      !academic.department_id ||
+      !UUID.test(academic.university_id) ||
+      !UUID.test(academic.department_id)
+    )
+      return [];
+    // Existing caller RLS decides visibility. No directory RPC, metadata or privileged key is used.
+    const candidates = await this.client
+      .schema('public')
+      .from('profiles')
+      .select('user_id')
+      .eq('university_id', academic.university_id)
+      .eq('department_id', academic.department_id)
+      .neq('user_id', owner)
+      .order('created_at', { ascending: false })
+      .order('user_id')
+      .limit(30)
+      .abortSignal(abort);
+    if (candidates.error || !candidates.data || abort.aborted || !this.owns(owner, epoch))
+      throw new FollowError('follows.readError');
+    const people = await this.hydrate(
+      candidates.data.map((row) => row.user_id),
+      owner,
+      epoch,
+      abort,
+    );
+    if (abort.aborted || !this.owns(owner, epoch)) throw new FollowError('follows.readError');
+    return people.filter((person) => person.userId !== owner && person.status === 'none').slice(0, 3);
+  }
+
   private validRelation(row: FollowRow): boolean {
     return (
       UUID.test(row.follower_id) &&

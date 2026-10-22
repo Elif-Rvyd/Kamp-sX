@@ -12,6 +12,11 @@
       />
       <kx-dashboard-discover-tabs [active]="active()" (selected)="select($event)" />
     </div>
+    <aside class="dashboard-sidebar" [attr.aria-label]="t('dashboardSidebar.title')">
+      <kx-dashboard-search />
+      <kx-world-news />
+      <kx-dashboard-recommendations />
+    </aside>
     <div
       #viewport
       class="discover-viewport"

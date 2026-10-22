@@ -16,8 +16,9 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
     *transloco="let t"
     [class.field-floating]="floating()"
     [class.field-readonly]="readonly()"
+    [class.field-sidebar-search]="variant() === 'sidebar-search'"
   >
-    <label [for]="fieldId()">{{ t(labelKey()) }}</label>
+    <label [for]="fieldId()" [class.sr-only]="variant() === 'sidebar-search'">{{ t(labelKey()) }}</label>
     <div class="input-wrap" [class.has-clear]="clearable() && !readonly() && count() > 0">
       @if (!floating()) {
         <kx-icon [name]="icon()" />
@@ -63,6 +64,7 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
     </div>
     <p
       class="field-message"
+      [class.sr-only]="variant() === 'sidebar-search' && !errorKey() && !hintKey()"
       [class.error-text]="!!errorKey()"
       [id]="fieldId() + '-message'"
       aria-live="polite"
@@ -72,6 +74,7 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
     @if (maxLength()) {
       <p
         class="field-counter"
+        [class.sr-only]="variant() === 'sidebar-search'"
         [id]="fieldId() + '-counter'"
         [attr.aria-label]="t('common.characterCount', { count: count(), max: maxLength() })"
       >
@@ -81,6 +84,7 @@ import { IconButtonComponent } from '../../atoms/icon-button/icon-button.compone
   </div>`,
 })
 export class FormFieldComponent {
+  readonly variant = input<'default' | 'sidebar-search'>('default');
   readonly fieldId = input.required<string>();
   readonly labelKey = input.required<string>();
   readonly placeholderKey = input.required<string>();

@@ -24,6 +24,7 @@ Başarılı girişten sonra oturum korumalı ana ekran açılır. Profil çekmec
 - Tek seçimli beş görünürlük seviyesi; her seviyede onaylı takipçiler ve öncelikli engelleme.
 - Yanıt, repost/geri alma ve alıntı; arşiv, en fazla üç orijinal gönderiyi öne çıkarma ve soft delete.
 - Birebir canlı mesajlaşma ve erişilebilir gönderileri sohbet içinde paylaşma; tekil hesap görüntülenme sayacı.
+- Dashboard’ın sağında yazdıkça arama, kaynak/tarihli Euronews haberleri ve bölümden takip önerileri; mevcut tema ve sosyal servislerle.
 - Yardım Merkezi formu; doğrulanmış hesap bilgileriyle Resend üzerinden sunucu tarafında destek e-postası gönderimi. Canlı gönderim için sunucu anahtarı ve doğrulanmış gönderici ayarları gerekir.
 - Anlık Türkçe ve İngilizce dil değişimi.
 - Açık ve koyu tema.
@@ -66,6 +67,7 @@ Successful sign-in opens the session-protected home screen. The profile drawer d
 - Five exclusive audience levels, with accepted followers and block precedence at every level.
 - Replies, repost/undo and quotes; archive, up to three featured original posts and soft deletion.
 - Realtime direct messages and sharing accessible posts in conversations; unique-account view counts.
+- A dashboard right rail with instant search, attributed Euronews headlines and department follow suggestions using existing theme/social services.
 - A Help Center form that sends support email through Resend on the server with verified account details. Live sending requires server credentials and a verified sender.
 - Instant Turkish and English language switching.
 - Light and dark themes.

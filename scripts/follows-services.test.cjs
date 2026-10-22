@@ -444,6 +444,60 @@ const profile = (user_id = B) => ({
 });
 const read = (data) => ({ data, error: null });
 
+test('department suggestions use exact academic IDs and exclude outgoing requests, accepted follows and RLS-hidden peers', async () => {
+  const h = harness();
+  await tick();
+  const ids = [
+    '33333333-3333-4333-8333-333333333333',
+    '44444444-4444-4444-8444-444444444444',
+    '55555555-5555-4555-8555-555555555555',
+  ];
+  h.readResults.push(
+    read([{ university_id: A, department_id: B }]),
+    read([B, ...ids].map((user_id) => ({ user_id }))),
+    read([B, ids[0], ids[1]].map(profile)),
+    read([
+      { follower_id: A, following_id: B, status: 'accepted', created_at: '2026-10-22T00:00:00Z' },
+      { follower_id: A, following_id: ids[0], status: 'pending', created_at: '2026-10-22T00:00:00Z' },
+    ]),
+  );
+  try {
+    const people = await h.service.departmentSuggestions();
+    assert.deepEqual(
+      people.map((p) => p.userId),
+      [ids[1]],
+    );
+    const candidates = h.queries.find(
+      (q) => q.column === 'user_id' && q.filters.some(([key]) => key === 'department_id'),
+    );
+    assert.deepEqual(candidates.filters, [
+      ['university_id', A],
+      ['department_id', B],
+    ]);
+    assert.deepEqual(candidates.excluded, ['user_id', A]);
+    assert.equal(candidates.limit, 30);
+    assert.ok(h.queries.every((q) => q.op === 'select'));
+  } finally {
+    h.destroy();
+  }
+});
+
+test('missing academic IDs prevent suggestion directory reads and a denied own profile fails closed', async () => {
+  const h = harness();
+  await tick();
+  h.readResults.push(read([{ university_id: A, department_id: null }]));
+  try {
+    const before = h.queries.length;
+    assert.deepEqual(await h.service.departmentSuggestions(), []);
+    assert.equal(h.queries.length, before + 1);
+    h.readResults.push({ data: null, error: { message: 'PRIVATE' } });
+    await assert.rejects(h.service.departmentSuggestions(), { key: 'follows.readError' });
+    await assert.rejects(h.service.departmentSuggestions(AbortSignal.abort()), { key: 'follows.readError' });
+  } finally {
+    h.destroy();
+  }
+});
+
 test('people search combines partial usernames/names without duplicates and preserves verified follow status', async () => {
   const h = harness();
   await tick();

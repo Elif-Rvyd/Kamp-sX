@@ -48,3 +48,11 @@
   top: 50%;
   translate: 0 -50%;
 }
+.field-sidebar-search .kx-input {
+  height: 52px;
+  border-radius: var(--radius-panel);
+  font-size: 13px;
+}
+.field-sidebar-search .input-wrap > .kx-icon {
+  top: 17px;
+}

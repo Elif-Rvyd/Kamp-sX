@@ -5,6 +5,17 @@ const PNG = Buffer.from(
   'base64',
 );
 async function mockSocial(page, options = {}) {
+  const news = { failed: false, stale: false, items: [], requests: [], ...(options.news ?? {}) };
+  await page.route('**/functions/v1/world-news**', async (route) => {
+    const locale = new URL(route.request().url()).searchParams.get('lang');
+    news.requests.push(locale);
+    return route.fulfill({
+      status: news.failed ? 503 : 200,
+      json: news.failed
+        ? { code: 'news_unavailable' }
+        : { items: news.items, stale: news.stale, locale, updatedAt: new Date().toISOString() },
+    });
+  });
   const state = {
     profile: {
       user_id: OWNER,
@@ -507,7 +518,8 @@ async function mockSocial(page, options = {}) {
           (p.user_id === OWNER ||
             !state.blocks.some((b) => b.blocked_id === p.user_id || b.blocker_id === p.user_id)) &&
           [...url.searchParams].every(([key, filter]) => {
-            if (!['user_id', 'username', 'full_name'].includes(key)) return true;
+            if (!['user_id', 'username', 'full_name', 'university_id', 'department_id'].includes(key))
+              return true;
             if (filter.startsWith('ilike.')) {
               const literal = filter.slice(7, -1).replace(/\\([\\%_])/g, '$1');
               return String(p[key] ?? '')
@@ -733,6 +745,7 @@ async function mockSocial(page, options = {}) {
       }),
     });
   });
+  state.news = news;
   return state;
 }
 module.exports = { mockSocial, OWNER };

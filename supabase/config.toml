@@ -4,3 +4,8 @@ project_id = "kampusx"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/support-email/index.ts"
+
+[functions.world-news]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/world-news/index.ts"

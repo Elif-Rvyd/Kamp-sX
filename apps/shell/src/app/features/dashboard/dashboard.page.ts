@@ -26,6 +26,9 @@ import { dashboardProfile } from './dashboard-profile';
 import { DashboardTopBarComponent } from './top-bar/top-bar.component';
 import { DashboardDiscoverTabsComponent } from './discover-tabs/discover-tabs.component';
 import { DISCOVER_FEEDS } from './mock-data';
+import { WorldNewsComponent } from './world-news/world-news.component';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
+import { SidebarSearchComponent } from './sidebar-search/sidebar-search.component';
 
 @Component({
   standalone: true,
@@ -36,6 +39,9 @@ import { DISCOVER_FEEDS } from './mock-data';
     IconComponent,
     DashboardTopBarComponent,
     DashboardDiscoverTabsComponent,
+    WorldNewsComponent,
+    RecommendationsComponent,
+    SidebarSearchComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.page.html',

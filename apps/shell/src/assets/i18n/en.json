@@ -863,5 +863,30 @@
     },
     "privacyTitle": "How support request data is used",
     "privacyBody": "Help Center notice — 22 October 2026\n\nYour account email, username and the description you enter are processed to investigate the issue and reply to you. Selecting Send requests that these details be emailed to support.\n\nThe message is sent through Resend to the operator’s configured Google/Gmail support mailbox. These providers process the email content and necessary technical records; processing may take place abroad depending on their infrastructure. Messages are not end-to-end encrypted.\n\nThe application’s private security record contains no description, email address or username. It stores request/account identifiers, a content hash, timestamps, attempt count and delivery state to prevent spam and duplicate dispatch. These records are removed when the account is deleted. Email copies at Resend and in the support mailbox follow those providers’ separate processes.\n\nDo not include passwords, verification codes, health information, private messages or unnecessary personal data about others. The existing Privacy Policy applies to privacy rights and requests. Data controller: Elif Rüveyda Ulama (elify.dev); privacy requests: elifrvyd@protonmail.com."
+  },
+  "dashboardSidebar": {
+    "title": "Search, news and suggestions",
+    "recommendations": "Who to follow",
+    "departmentPeople": "Students in your department",
+    "peopleError": "Suggestions could not be loaded. Please try again.",
+    "peopleEmpty": "There are no eligible suggestions in your department right now.",
+    "mediaPost": "Post with media",
+    "searchEmpty": "No matching people or posts were found.",
+    "allResults": "Show all results"
+  },
+  "worldNews": {
+    "diagnostic": "Diagnostic code: {{code}}",
+    "title": "What’s happening worldwide?",
+    "intro": "The latest world headlines",
+    "refresh": "Refresh headlines",
+    "loading": "Loading world news…",
+    "error": "Headlines are unavailable right now. Please try again.",
+    "stale": "Headlines could not be refreshed. Showing the last available update.",
+    "empty": "There are no recent headlines to show right now.",
+    "updated": "Last checked:",
+    "source": "Source: Euronews",
+    "newTab": "Opens in a new tab",
+    "more": "Show more",
+    "less": "Show less"
   }
 }

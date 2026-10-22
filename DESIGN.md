@@ -257,6 +257,22 @@ Post dates appear below text/media, independently of the username. Native links 
 Account visibility reuses SocialPageFrame, Button and ConfirmDialog with a native five-option radio group. Explicit Save writes one audience level. Followers are retained at every level; Everyone includes all authenticated users. Department uses university + department IDs without campus; Campus uses university + campus IDs. Legacy is_private/visibility fields are neither queried for privacy nor written. Missing academic IDs disable their choices. Failed/uncertain saves preserve the draft and require a fresh read; navigation guards unsaved changes. Blocking overrides all audiences. Public Storage URLs remain outside row privacy.
 The current implementation and confirmed SQL 19/20/22/23 status are tracked in docs/HESAP-VE-GONDERI-GUNCELLEMELERI-2026-10-22.md. Supabase public types are generated from the actual live schema, not a proposed extension.
 
+Dashboard world news reuses the existing typography, surface/border/primary tokens, Button and Icon.
+At 1024px and wider, a responsive 360–460px right rail sits beside the feed within the full-width dashboard;
+its long expanded list has its own bounded native scroll. On narrower screens, the same component
+becomes a collapsed disclosure below the sticky feed controls. Opening it preserves feed selection.
+The news card uses the panel radius, a restrained primary-blue tint/border/static glow and
+larger 15px headline text, following the user's X reference without changing global tokens.
+The card initially shows four source-attributed headlines, expandable to eight, with full wrapping,
+publication times, a last-checked timestamp and native external links. No fake trend counts or
+article images are added. Existing welcome/auth layouts and the persistent left rail are unchanged.
+The right column alone follows the supplied X reference: compact search first, then independent news
+and department follow-suggestion cards, separated from the feed by a border and gutter. FormField's
+sidebar-search variant retains its real accessible label/counter while displaying one rounded input;
+all other fields keep their default appearance. FollowPerson's suggestion variant reuses the existing
+actions and puts the follow button beside identity only when its container has enough space. No
+premium/subscription, fake trend or popularity content from the reference is copied.
+
 ## Do's and Don'ts
 
 Messaging uses the existing authenticated navigation shell and SocialPageFrame. InboxItem owns the

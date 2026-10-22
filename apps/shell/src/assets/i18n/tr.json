@@ -863,5 +863,30 @@
     },
     "privacyTitle": "Başvuru bilgilerinin kullanımı",
     "privacyBody": "Yardım Merkezi bilgilendirmesi — 22 Ekim 2026\n\nProblemini incelemek ve sana yanıt verebilmek için hesabındaki e-posta adresi, kullanıcı adı ve bu forma yazdığın açıklama işlenir. Gönder düğmesine basmak bu bilgilerin destek ekibine e-postayla iletilmesini ister.\n\nİleti Resend aracılığıyla işletmecinin yapılandırdığı Google/Gmail destek posta kutusuna gönderilir. Bu sağlayıcılar e-postanın içeriğini ve gerekli teknik kayıtları işler; hizmetin bulunduğu yere göre yurt dışında işleme söz konusu olabilir. Mesajlar uçtan uca şifreli değildir.\n\nUygulamanın özel güvenlik kaydında açıklama, e-posta veya kullanıcı adı tutulmaz; başvuru ve hesap kimlikleri, içerik özeti, zaman, deneme sayısı ve gönderim durumu bulunur. Bu kayıtlar spam ve yinelenen gönderimi önlemek için kullanılır ve hesap silinince kaldırılır. E-postanın Resend ve destek posta kutusundaki kopyaları ayrı sağlayıcı süreçlerine tabidir.\n\nAçıklamana parola, doğrulama kodu, sağlık bilgisi, özel mesaj içeriği veya başkasına ait gereksiz kişisel veri ekleme. Gizlilik ve hak başvuruları için mevcut Gizlilik Politikası geçerlidir. Veri sorumlusu Elif Rüveyda Ulama (elify.dev); kişisel veri başvurusu: elifrvyd@protonmail.com."
+  },
+  "dashboardSidebar": {
+    "title": "Arama, haberler ve öneriler",
+    "recommendations": "Takip edebileceğin kişiler",
+    "departmentPeople": "Bölümündeki öğrenciler",
+    "peopleError": "Öneriler şu anda yüklenemiyor. Yeniden deneyebilirsin.",
+    "peopleEmpty": "Bölümünde şu anda önerilebilecek bir hesap bulunmuyor.",
+    "mediaPost": "Medya içeren gönderi",
+    "searchEmpty": "Eşleşen kullanıcı veya gönderi bulunamadı.",
+    "allResults": "Tüm sonuçları göster"
+  },
+  "worldNews": {
+    "diagnostic": "Tanılama kodu: {{code}}",
+    "title": "Dünyada neler oluyor?",
+    "intro": "Dünyadan son haberler",
+    "refresh": "Haberleri yenile",
+    "loading": "Dünya haberleri yükleniyor…",
+    "error": "Haberlere şu anda ulaşılamıyor. Yeniden deneyebilirsin.",
+    "stale": "Haberler yenilenemedi. Son alınan başlıklar gösteriliyor.",
+    "empty": "Şu anda gösterilecek güncel haber bulunmuyor.",
+    "updated": "Son kontrol:",
+    "source": "Kaynak: Euronews",
+    "newTab": "Yeni sekmede açılır",
+    "more": "Daha fazla göster",
+    "less": "Daha az göster"
   }
 }
