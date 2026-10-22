@@ -44,7 +44,6 @@ export const DISCOVER_FEEDS: readonly DiscoverFeed[] = [
 
 export const PROFILE_MENU = [
   { id: 'profile', key: 'profile.drawer.profile', icon: 'person' },
-  { id: 'history', key: 'profile.drawer.history', icon: 'history' },
   { id: 'community', key: 'profile.drawer.community', icon: 'groups' },
   { id: 'settings', key: 'profile.drawer.settings', icon: 'settings' },
   { id: 'help', key: 'profile.drawer.help', icon: 'help_outline' },

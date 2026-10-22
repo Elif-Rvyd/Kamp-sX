@@ -61,15 +61,7 @@ export class ProfileRepository {
       this.media.assertOwner(owner, epoch);
       if (result.error) throw new MediaError('media.errors.profileSave');
       if (!result.data) {
-        const inserted = await this.client
-          .schema('public')
-          .from('profiles')
-          .insert({ user_id: owner, ...payload })
-          .select('user_id')
-          .abortSignal(AbortSignal.timeout(20000))
-          .single();
-        if (inserted.error || inserted.data?.user_id !== owner)
-          throw new MediaError('media.errors.profileSave');
+        throw new MediaError('media.errors.profileSave');
       }
       if (result.data && result.data.user_id !== owner) throw new MediaError('media.errors.profileSave');
       this.media.assertOwner(owner, epoch);

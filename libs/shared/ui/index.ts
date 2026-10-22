@@ -26,5 +26,13 @@ export * from './molecules/toast/toast.component';
 export * from './organisms/confirm-dialog/confirm-dialog.component';
 export * from './organisms/social-post-card/social-post-card.component';
 export * from './molecules/action-menu/action-menu.component';
+export * from './molecules/report-reason/report-reason.component';
 export { FollowPersonComponent } from './molecules/follow-person/follow-person.component';
 export { SwitchComponent } from './atoms/switch/switch.component';
+
+export * from './molecules/academic-picker/academic-picker.component';
+
+export * from './molecules/embedded-post/embedded-post.component';
+export * from './molecules/message-bubble/message-bubble.component';
+export * from './molecules/inbox-item/inbox-item.component';
+export * from './molecules/action-sheet/action-sheet.component';

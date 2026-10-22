@@ -84,7 +84,14 @@ export class AuthService {
     email: string,
     password: string,
     username: string,
-    academic?: { university: string; department: string; campus: string; fullName?: string; bio?: string },
+    academic?: {
+      university: string;
+      department: string;
+      campus: string;
+      fullName?: string;
+      bio?: string;
+      consent?: boolean;
+    },
   ) {
     if (!this.supabase)
       return { data: { user: null, session: null }, error: this.failure('auth_not_configured') };
@@ -94,6 +101,8 @@ export class AuthService {
       )
     )
       return { data: { user: null, session: null }, error: this.failure('invalid_academic_details') };
+    if (academic?.consent !== true)
+      return { data: { user: null, session: null }, error: this.failure('legal_acceptance_required') };
     try {
       return await this.supabase.auth.signUp({
         email: email.trim(),
@@ -101,6 +110,10 @@ export class AuthService {
         options: {
           data: {
             username: username.trim().replace(/^@/, ''),
+            terms_accepted: true,
+            privacy_acknowledged: true,
+            terms_version: '2026-10-22',
+            privacy_version: '2026-10-22',
             ...(academic
               ? {
                   university_name: academic.university.trim(),
@@ -268,7 +281,16 @@ export class AuthService {
   }
 
   errorKey(error: unknown): string {
-    const value = error as { code?: string; status?: number; name?: string } | null;
+    const value = error as { code?: string; status?: number; name?: string; message?: string } | null;
+    if (value?.code === 'legal_acceptance_required' || value?.message?.includes('legal_acceptance_required'))
+      return 'auth.errors.consent';
+    if (value?.message?.includes('academic_catalog_selection_required')) return 'academic.invalidSelection';
+    if (
+      value?.code === 'academic_fields_required' ||
+      value?.code === 'invalid_academic_details' ||
+      value?.message?.includes('academic_fields_required')
+    )
+      return 'auth.errors.academicRequired';
     if (value?.code === 'auth_not_configured') return 'auth.errors.config';
     if (value?.code === 'recovery_required' || value?.code === 'otp_expired')
       return 'auth.errors.recoveryInvalid';

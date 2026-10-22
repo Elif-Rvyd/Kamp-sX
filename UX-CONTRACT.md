@@ -4,6 +4,7 @@ Business source: the user's 21 October live schema contract, tracked in
 [Social client step one](docs/SOSYAL-ISTEMCI-ADIM-1-2026-10-21.md).
 The supplied live catalog and [reply step two](docs/SOSYAL-ISTEMCI-ADIM-2-2026-10-21.md)
 add the precise column grants and reply deployment contract. The user confirmed SQL 19/20 on 21 October and SQL 22/23 on 22 October. On 22 October the user also confirmed SQL 21's four-table privilege cleanup and SQL 24's three Storage DELETE policies; local tests do not prove all other live privileges.
+The latest authoritative client contract is the user’s 22 October lookup/ID and five-level audience specification, summarized in docs/ISTEMCI-SOZLESMESI-2026-10-22.md. It supersedes the older union/legacy visibility notes. SQL 25 username availability was executed by the user and confirmed as true.
 The older [Post actions and media privacy ADR](docs/adr/001-post-actions-and-media-privacy.md)
 describes staged legacy capabilities; it must not override the current production contract.
 The existing welcome/auth design, runtime CSS variables and TR/EN dictionaries remain canonical.
@@ -86,16 +87,67 @@ actions. Session/epoch teardown invalidates reads/writes; public Storage behavio
   rendering path; the private download/blob cache was reverted by the user on 18 October 2026.
   Blocking hides application rows/interactions; a known public media URL remains accessible.
   Local edit previews stay local. No simulated auth/session is introduced.
-- Legacy profile privacy stays intact until the user explicitly saves audience preferences. Thereafter matching selected audiences can directly see the profile/posts, with blocks still taking precedence. Search remains an authenticated RLS-controlled directory.
-  Billing/payment/moderation-admin workflows are outside the requested scope.
+- Audience selection derives only from visible_* fields. is_private/visibility are legacy columns and are never queried for privacy or written by the client. Followers = all false; otherwise exactly one flag is true. Accepted followers retain access at every level; RLS alone enforces row visibility and block precedence.
 
 ## Confirmed 22 October behavior
 
 - Shared SocialPostCard puts the localized timestamp after content/media. Identity, post text and date are native links; action buttons and video controls remain independent. Search opens real readonly peer profiles and threads.
 - Registration requires university, campus and department. Campus replaces the separate faculty field. Public academic values are immutable to clients; Auth metadata changes cannot bypass the SQL guard. Profile editing sends only name/bio/photo changes.
-- AccountService owns audience reads/saves using generated public types. Account status uses the shared Switch, confirms actual server values before a success toast, blocks uncertain resubmission until a read, guards dirty navigation and cancels session-bound requests.
-- Visible audiences are a union. Explore is global, then university, campus and department are progressively narrower; all off is owner only. Before the first preference save, legacy rules apply. The SQL helper also governs target visibility for replies/reposts, preserving block and archive behavior.
-- Pin/archive use owned UPDATE filters and the three granted state fields. The database serializes pins and caps active pins at three; replies cannot be pinned. Archiving or deleting clears the pin. SQL 22 provides an owner-only soft-delete RPC, because hiding a new deleted row can conflict with SELECT checks even without RETURNING. Deleted rows never become readable to work around this.
+- AccountService owns audience reads/saves using generated public types. Account status uses one native radio group with five choices, confirms actual server values before a success toast, blocks uncertain resubmission until a read, guards dirty navigation and cancels session-bound requests.
+- Audiences are exclusive. Everyone is global; University matches university_id, Campus matches university_id + campus_id, and Department matches university_id + department_id without requiring campus. All off selects Followers. A missing campus_id/department_id disables that choice. The SQL helper also governs target visibility for replies/reposts, preserving block and archive behavior.
+- Pin/archive use owned UPDATE filters and the three granted state fields. The database serializes pins and caps active pins at three; replies/reposts/quotes cannot be pinned. Archiving or deleting clears the pin. SQL 22 provides an owner-only soft-delete RPC, because hiding a new deleted row can conflict with SELECT checks even without RETURNING. Deleted rows never become readable to work around this.
 - After confirmed soft deletion, only canonical owned post media is cleaned; shared live references are retained. Failed cleanup is safely logged without a second delete invitation. No hard delete or deleted-post entry in Archive exists.
 - Reports and blocked people use actual reports/blocks tables. A blocked identity may have no display name under RLS; the list shows an honest fallback and supports unblocking.
+- Public profiles expose the shared ActionMenu in the top-right toolbar, with confirmed block and
+  user-report actions. User reports use reported_user_id with post_id null; PostActionsService owns
+  both post/profile moderation. The shared ReportReason molecule owns the five reason choices.
+  No user-report uniqueness constraint is invented. Late confirmations cannot target a replacement
+  profile/session. Blocking invalidates visible search/profile/post reads and returns to search.
+- ProfilePostList separates active pinned root posts under Featured posts without duplicating them
+  in the regular list. Its view follows confirmed shared action state; SQL 22 retains the three-pin
+  limit. The sidebar has no History item.
 - SQL 22/23 were executed by the user; the agent only read live schema metadata to generate types. No production test accounts/posts were created. Public uploads still permit access through an already known URL, and registered academic groups do not establish verified student identity.
+
+## Latest registration and repost behavior
+
+Messaging: /messages is the inbox and /messages/:id the conversation. Profile eligibility comes from
+the readonly kx_can_message RPC; only an explicit Message click calls kx_start_conversation. The
+server accepts either accepted-follow direction, rejects blocked pairs and owns sender/time fields.
+The composer sends only conversation_id/content, preserves rejected drafts and disables sending
+after a permission rejection. Ambiguous delivery blocks resubmission until the user checks the
+conversation and confirms discarding the draft. Read status is saved only for the visible active
+conversation. Message deletion confirms, updates only deleted_at and displays the database-scrubbed
+tombstone. History remains readable after unfollow; a blocked conversation disappears through RLS.
+INSERT/UPDATE events are invalidations, never rendered payloads. Reconnect refetches; screen exit,
+logout and account replacement remove subscriptions and ignore late requests. Drafts are memory-only.
+
+AcademicPicker is a pure shared native select with canonical input styling, operating-system keyboard/type-ahead support and loading/retry/empty states. Free text is unavailable. AcademicService pages approved lookup SELECTs, scoped by the selected university ID. Signup sends selected names, never IDs. University changes clear dependent selects and cancel their stale reads. Missing campus coverage produces an honest empty state. SQL 30 validates approved academic relationships, literal terms/privacy acceptance and current document versions, and stores an immutable server-time receipt. Username availability is debounced, canceled and rechecked before signup; errors preserve the draft and prevent unchecked signup. A confirmed Auth session reads the actually assigned public profile username before offering Continue; email-confirmation signups show it on the first authenticated profile.
+
+Profile name/bio updates send only full_name/bio to the owner public.profiles row. The receipt is checked; metadata refresh cannot overwrite canonical display values. Missing profiles are never recreated by a client media update. Joined date comes from profiles.created_at.
+
+Repost uses the existing posts row with content='', repost_of_id and null parent/media. Duplicate plain reposts reconcile; undo uses the existing owned soft-delete RPC. Quotes require 1–2000 characters and use the same six insert columns. Confirmed membership is hydrated alongside likes/bookmarks/counters. Uncertain quote receipts block another repost/quote for that source during the session. No client counters, fabricated IDs or permanent DELETE are sent. EmbeddedPost renders one readonly original preview; unavailable originals render a localized placeholder. All writes remain subject to existing RLS.
+
+## 22 October release additions
+
+The user's seven-item release request and supplied SQL 28 diagnostics define the current behavior. The user confirmed SQL 29, SQL 32 (release version 2026102204), SQL 30 (registration version 2026102203) and SQL 31 (catalog version 2026102203). SQL 31 is a self-contained atomic block after removing a failed temporary-table dependency. A read-only anonymous API check also confirmed the approved catalog counts and six Ahi Evran campuses. The release report records exact coverage and production verification limits.
+
+| Flow               | Canonical owners                                    | Success                                                             | Failure/recovery                                                                       |
+| ------------------ | --------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Academic selection | AcademicPicker, AcademicService, RegisterForm       | Approved university and dependent campus/program; mandatory consent | Empty catalog is explicit; retry preserves unrelated fields; stale reads are aborted   |
+| Repost / quote     | ActionSheet, ModalDrawer, PostEntry, ConfirmDialog  | Existing posts.repost_of_id and server counters                     | Quote draft preserved; uncertain receipt blocks duplicate write                        |
+| Share in a message | SharePost, ModalDrawer, MessagingApiService         | kx_share_post stores only shared_post_id                            | Ineligible recipients disabled; uncertain receipt offers conversation check            |
+| Shared message     | MessageBubble, SharedMessagePost, EmbeddedPost      | Original reloaded through current RLS                               | Deleted/archived/hidden source shows unavailable placeholder; no copied source content |
+| Post views         | PostViewDirective, PostViewsService, SocialPostCard | Server-deduplicated authenticated account count, author excluded    | Unknown displays em dash; retry reads without resetting to zero                        |
+| Legal documents    | LegalDialog, Footer, RegisterForm                   | Distinct TR/EN terms/privacy/cookies; native focus and Escape       | No fabricated company, age requirement, postal address or legal certification          |
+
+The inbox now calls kx_inbox_v2; normal messages retain the existing conversation_id/content-only INSERT. Sharing uses a separate RPC and cannot widen direct INSERT privileges. Realtime payloads remain invalidations; shared originals are re-read after refreshed inbox data, session replacement and social visibility changes. Drafts and recipients are not persisted in browser storage.
+
+## Help Center support mail
+
+Source: the user's support-form request, explicit Resend choice, confirmed SQL 33 and docs/DESTEK-EPOSTA-KURULUMU.md. `/help` is an authenticated social route, linked from the persistent sidebar. It uses SocialPageFrame, FormField, Button, ConfirmDialog and LegalDialog. Tokens remain owned by tokens.css. The separate support notice explains the new Resend/Gmail data flow without changing the texts or versions already acknowledged at registration.
+
+GET verifies the current Auth user and the owned profile username. The two identity controls are readonly. POST includes only request_id/description; the Edge handler re-verifies identity and uses server-only sender/recipient settings. Plain-text email, exact origin policy, request-size/deadline limits, durable SQL rate limits and service-only dispatch RPCs constrain abuse. Provider credentials and service_role never enter browser configuration.
+
+Loading, missing setup, rate rejection, success and uncertain delivery have distinct TR/EN feedback. A successful provider receipt clears the draft and shows its reference, without claiming inbox delivery. Ambiguous writes lock the description and offer status-only recovery; explicit safe retry retains the same immutable ID/body. Session replacement aborts work and ignores late responses. Dirty navigation uses the canonical discard dialog; real unload gets a narrow beforeunload guard. No draft is persisted. Cancellation cannot recall an email already accepted by the server.
+
+The legal text distinguishes accepting terms from acknowledging the privacy notice. Its operator/contact come from the user. KVKK primary references: https://www.kvkk.gov.tr/Icerik/2033/Aydinlatma-Yukumlulugu- and https://www.kvkk.gov.tr/Icerik/6765/AYDINLATMA-YUKUMLULUGUNUN-YERINE-GETIRILMESI-HAKKINDA-KAMUOYU-DUYURUSU. Public media URL access and lack of end-to-end encryption are stated truthfully; operator review of retention and transfer arrangements remains necessary before claiming legal compliance.

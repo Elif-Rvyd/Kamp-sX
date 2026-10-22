@@ -24,17 +24,46 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         <kx-icon name="close" />
       </button>
     </div>
-    <h2 [id]="dialogId + '-title'">{{ t('legal.title') }}</h2>
-    <p [id]="dialogId + '-description'">{{ t(textKey()) }}</p>
+    <h2 [id]="dialogId + '-title'">{{ t(titleKey()) }}</h2>
+    <p [id]="dialogId + '-description'" class="legal-body">{{ t(textKey()) }}</p>
     <button kxButton type="button" (click)="close()">{{ t('common.close') }}</button>
   </dialog>`,
+  styles: `
+    .legal-body {
+      white-space: pre-line;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+    .legal-dialog {
+      max-height: 85dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    h2 {
+      margin-block: 16px;
+    }
+    .legal-body + button {
+      margin-top: 20px;
+    }
+  `,
 })
 export class LegalDialogComponent {
   private static instance = 0;
   readonly dialogId = `legal-${LegalDialogComponent.instance++}`;
   readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   readonly textKey = signal('legal.text');
-  open(key: string) {
+  readonly titleKey = signal('legal.title');
+  open(key: string, titleKey?: string) {
+    this.titleKey.set(
+      titleKey ??
+        (key === 'legal.terms'
+          ? 'legal.termsTitle'
+          : key === 'legal.privacy'
+            ? 'legal.privacyTitle'
+            : key === 'legal.cookies'
+              ? 'legal.cookiesTitle'
+              : 'legal.title'),
+    );
     this.textKey.set(key);
     this.dialog().nativeElement.showModal();
   }

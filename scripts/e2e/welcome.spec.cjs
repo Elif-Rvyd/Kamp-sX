@@ -78,9 +78,9 @@ test('register validates university address and consent; Google stays local', as
   await page.locator('#register-email').fill('student@gmail.com');
   await page.locator('#register-username').fill('@deniz');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-campus').fill('Faculty of Engineering');
-  await page.locator('#register-university').fill('İstanbul Teknik Üniversitesi');
-  await page.locator('#register-department').fill('Bilgisayar Mühendisliği');
+  await page.locator('#register-university').selectOption({ label: 'İstanbul Teknik Üniversitesi' });
+  await page.locator('#register-campus').selectOption({ label: 'Ayazağa Kampüsü' });
+  await page.locator('#register-department').selectOption({ label: 'Bilgisayar Mühendisliği' });
   await page.locator('#register-password').fill('LongPassword123!');
   await panel.getByRole('button', { name: 'KampüsX’e katıl', exact: true }).click();
   await expect(page.locator('#register-email')).toBeFocused();

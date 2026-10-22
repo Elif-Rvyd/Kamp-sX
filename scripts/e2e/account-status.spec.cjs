@@ -4,25 +4,24 @@ const { openSocial } = require('./social-fixture.cjs');
 const B = '22222222-2222-4222-8222-222222222222';
 for (const language of ['tr', 'en'])
   for (const theme of ['light', 'dark'])
-    test(`account switches persist with keyboard and stay accessible ${language}/${theme}`, async ({
+    test(`account radio levels persist with keyboard and stay accessible ${language}/${theme}`, async ({
       page,
     }, info) => {
       const state = await openSocial(page, language, theme, '/settings/account-status', 320);
-      const department = page.getByRole('switch', {
-        name: language === 'tr' ? 'Bölüm' : 'Department',
-        exact: true,
+      const department = page.getByRole('radio', {
+        name: language === 'tr' ? /^Bölüm/ : /^Department/,
       });
       await expect(page.locator('kx-header,kx-footer')).toHaveCount(0);
-      await expect(page.getByRole('switch')).toHaveCount(4);
-      await expect(department).toHaveAttribute('aria-checked', 'false');
+      await expect(page.getByRole('radio')).toHaveCount(5);
+      await expect(department).not.toBeChecked();
       await department.focus();
       await page.keyboard.press('Space');
-      await expect(department).toHaveAttribute('aria-checked', 'true');
+      await expect(department).toBeChecked();
       await page.getByRole('button', { name: language === 'tr' ? 'Kaydet' : 'Save', exact: true }).click();
       await expect.poll(() => state.profile.visible_department).toBe(true);
       await expect(page.locator('kx-toast')).toBeVisible();
       await page.reload();
-      await expect(department).toHaveAttribute('aria-checked', 'true');
+      await expect(department).toBeChecked();
       const writes = state.requests.filter((r) => r.table === 'profiles' && r.method === 'PATCH');
       expect(writes).toHaveLength(1);
       expect(Object.keys(writes[0].payload).sort()).toEqual([
@@ -41,18 +40,18 @@ test('unsaved audience changes are guarded; failed saves require a fresh read wi
 }) => {
   const options = { failAccountSave: true };
   const state = await openSocial(page, 'en', 'dark', '/settings/account-status', 390, options);
-  const department = page.getByRole('switch', { name: 'Department', exact: true });
+  const department = page.getByRole('radio', { name: /^Department/ });
   await department.click();
   await page.locator('.sidebar-brand').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(department).toHaveAttribute('aria-checked', 'true');
+  await expect(department).toBeChecked();
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('could not be confirmed');
-  await expect(department).toHaveAttribute('aria-checked', 'true');
+  await expect(department).toBeChecked();
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await page.getByRole('button', { name: 'Try again', exact: true }).click();
-  await expect(department).toHaveAttribute('aria-checked', 'false');
+  await expect(department).not.toBeChecked();
   expect(state.requests.filter((r) => r.table === 'profiles' && r.method === 'PATCH')).toHaveLength(1);
 });
 test('missing account migration fails closed without pretending that preferences were saved', async ({
@@ -62,7 +61,7 @@ test('missing account migration fails closed without pretending that preferences
     accountSetupMissing: true,
   });
   await expect(page.getByRole('alert')).toContainText('not enabled');
-  await expect(page.getByRole('switch')).toHaveCount(0);
+  await expect(page.getByRole('radio')).toHaveCount(0);
   expect(state.requests.some((r) => r.table === 'profiles' && r.method === 'PATCH')).toBe(false);
 });
 test('search identities and post text open the real profile and thread; date is below content', async ({
@@ -118,12 +117,46 @@ test('university, campus and department tabs load filtered real rows', async ({ 
   const tabs = page.getByRole('tab');
   await tabs.nth(2).click();
   await expect
-    .poll(() => state.requests.some((r) => r.table === 'posts' && r.filters?.['profiles.campus']))
+    .poll(() => state.requests.some((r) => r.table === 'posts' && r.filters?.['profiles.campus_id']))
     .toBe(true);
   await expect(page.locator('kx-feed-skeleton')).toHaveCount(0);
   await expect(page.locator('[role=tabpanel]:not([inert]) kx-social-post-card')).toHaveCount(6);
   await tabs.nth(3).click();
   await expect
-    .poll(() => state.requests.some((r) => r.table === 'posts' && r.filters?.['profiles.studying']))
+    .poll(() => state.requests.some((r) => r.table === 'posts' && r.filters?.['profiles.department_id']))
     .toBe(true);
+});
+
+test('missing IDs disable only department/campus and choosing Followers writes all false', async ({
+  page,
+}) => {
+  const state = await openSocial(page, 'en', 'dark', '/settings/account-status', 390, {
+    profile: { campus_id: null, department_id: null, visible_explore: true, audience_configured: true },
+  });
+  await expect(page.getByRole('radio', { name: /^Department/ })).toBeDisabled();
+  await expect(page.getByRole('radio', { name: /^Campus/ })).toBeDisabled();
+  await page.getByRole('radio', { name: /^Followers/ }).check();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect.poll(() => state.profile.visible_explore).toBe(false);
+  expect(
+    ['department', 'campus', 'university', 'explore'].every((k) => state.profile['visible_' + k] === false),
+  ).toBe(true);
+});
+test('profile text persists in profiles across reload without modifying Auth metadata', async ({ page }) => {
+  const state = await openSocial(page, 'en', 'light', '/profile');
+  await page.getByRole('button', { name: 'Edit Profile', exact: true }).click();
+  await page.locator('#profile-name').fill('Canonical Student');
+  await page.locator('#profile-bio').fill('Persisted biography');
+  for (const key of ['university', 'campus', 'department', 'username'])
+    await expect(page.locator('#profile-' + key)).toHaveAttribute('readonly', '');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Canonical Student', exact: true })).toBeVisible();
+  await expect(page.locator('.profile-bio')).toHaveText('Persisted biography');
+  expect(state.authRequests).toHaveLength(0);
+  const write = state.requests.find(
+    (r) => r.table === 'profiles' && r.method === 'PATCH' && r.payload.full_name,
+  );
+  expect(write.payload).toEqual({ full_name: 'Canonical Student', bio: 'Persisted biography' });
 });

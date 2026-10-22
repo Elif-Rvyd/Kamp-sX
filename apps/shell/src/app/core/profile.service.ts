@@ -41,12 +41,6 @@ export class ProfileService {
       const id = this.auth.session()?.user.id;
       const epoch = this.auth.sessionEpoch();
       if (id === this.ownerId && epoch === this.ownerEpoch) {
-        const identity = this.seed();
-        this.state.update((value) => ({
-          ...value,
-          fullName: identity.fullName,
-          bio: identity.bio,
-        }));
         return;
       }
       this.readVersion++;
@@ -77,7 +71,7 @@ export class ProfileService {
       faculty: value('faculty_name') || (user ? '' : 'Teknik Bilimler Meslek Yüksekokulu'),
       campus: value('campus_name') || value('faculty_name'),
       department: value('department_name') || value('department') || (user ? '' : 'Bilgisayar Programcılığı'),
-      joinedAt: user?.created_at || '',
+      joinedAt: '',
       followingCount: null,
       followersCount: null,
       postCount: 0,
@@ -120,9 +114,12 @@ export class ProfileService {
     this.assertOwner(current.id, 'profile.errors.save', epoch);
     const detailsChanged = fullName !== current.fullName || bio !== (current.bio || '');
     if (detailsChanged) {
-      const { error } = await this.auth.updateProfileDetails({ fullName, bio });
+      try {
+        await this.account.saveDetails({ fullName, bio });
+      } catch {
+        throw new ProfileError('profile.errors.detailsSave');
+      }
       this.assertOwner(current.id, 'profile.errors.save', epoch);
-      if (error) throw new ProfileError('profile.errors.detailsSave');
       this.state.update((value) => ({
         ...value,
         fullName,

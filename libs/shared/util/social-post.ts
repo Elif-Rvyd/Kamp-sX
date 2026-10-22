@@ -6,6 +6,8 @@ export interface SocialPost {
   text: string;
   createdAt: string;
   parentId?: string;
+  repostOfId?: string;
+  ownRepostId?: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   liked?: boolean;

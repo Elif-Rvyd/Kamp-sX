@@ -14,16 +14,20 @@
       <strong [title]="profile().fullName">{{ profile().fullName }}</strong
       ><span>{{ t('profile.postCount', { count: profile().postCount }) }}</span>
     </div>
-    <button
-      kxIconButton
-      type="button"
-      [surface]="true"
-      aria-disabled="true"
-      [attr.aria-label]="t('dashboard.nav.search')"
-      [title]="t('dashboard.visualOnly')"
-    >
-      <kx-icon name="search" />
-    </button>
+    @if (!editable()) {
+      <ng-content select="[profileMenu]" />
+    } @else {
+      <button
+        kxIconButton
+        type="button"
+        [surface]="true"
+        aria-disabled="true"
+        [attr.aria-label]="t('dashboard.nav.search')"
+        [title]="t('dashboard.visualOnly')"
+      >
+        <kx-icon name="search" />
+      </button>
+    }
   </header>
   <div class="profile-cover">
     @if (profile().coverUrl) {

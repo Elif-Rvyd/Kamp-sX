@@ -1,0 +1,966 @@
+[
+  {
+    "university": "Kırşehir Ahi Evran Üniversitesi",
+    "source": "https://www.ahievran.edu.tr/index.php/iletisim",
+    "campuses": [
+      "Bağbaşı Yerleşkesi",
+      "Cacabey Yerleşkesi",
+      "Aşıkpaşa Yerleşkesi",
+      "Kaman Yerleşkesi",
+      "Mucur Yerleşkesi",
+      "Çiçekdağı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Teknik Üniversitesi",
+    "source": "https://mezun.itu.edu.tr/kampuslerimiz",
+    "campuses": [
+      "Ayazağa Kampüsü",
+      "Gümüşsuyu Prof. Dr. Necmettin Erbakan Yerleşkesi",
+      "Maçka Kampüsü",
+      "Taşkışla Kampüsü",
+      "Tuzla Kampüsü"
+    ]
+  },
+  {
+    "university": "Hacettepe Üniversitesi",
+    "source": "https://oidb.hacettepe.edu.tr/tr/menu/iletisim_ve_ulasim-13",
+    "campuses": [
+      "Sıhhiye Yerleşkesi",
+      "Beytepe Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ankara Üniversitesi",
+    "source": "https://hastane.ankara.edu.tr/ankara-universiteliler-icin/",
+    "campuses": [
+      "Cebeci Yerleşkesi",
+      "Tandoğan Yerleşkesi",
+      "Dışkapı Yerleşkesi",
+      "Gölbaşı Yerleşkesi",
+      "İbni Sina Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Üniversitesi",
+    "source": "https://www.istanbul.edu.tr/tr/content/universitemiz/tanitim",
+    "campuses": [
+      "Beyazıt Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Boğaziçi Üniversitesi",
+    "source": "https://bogazici.edu.tr/tr/sitemap",
+    "campuses": [
+      "Anadolu Hisarı Kampüsü",
+      "Güney Kampüs",
+      "Kuzey Kampüs",
+      "Hisar Kampüsü",
+      "Kandilli Kampüsü",
+      "Kilyos Sarıtepe Kampüsü"
+    ]
+  },
+  {
+    "university": "Yıldız Teknik Üniversitesi",
+    "source": "https://www.yildiz.edu.tr/universite/universitemiz/kampusler",
+    "campuses": [
+      "Davutpaşa Kampüsü",
+      "Yıldız Kampüsü"
+    ]
+  },
+  {
+    "university": "Marmara Üniversitesi",
+    "source": "https://aday.marmara.edu.tr/yerleskelerimiz",
+    "campuses": [
+      "Göztepe Yerleşkesi",
+      "Recep Tayyip Erdoğan Külliyesi - Maltepe Yerleşkesi",
+      "Recep Tayyip Erdoğan Külliyesi - Sağlık Yerleşkesi",
+      "Mehmet Genç Külliyesi - Dragos Yerleşkesi",
+      "Acıbadem Yerleşkesi",
+      "Anadolu Hisarı Yerleşkesi",
+      "Bağlarbaşı Yerleşkesi",
+      "Kartal Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ege Üniversitesi",
+    "source": "https://egetercih.ege.edu.tr/ulasim.php",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Gaziemir Yerleşkesi",
+      "Karşıyaka Yerleşkesi",
+      "Aliağa Yerleşkesi",
+      "Bayındır Yerleşkesi",
+      "Bergama Yerleşkesi",
+      "Çeşme Yerleşkesi",
+      "Ödemiş Yerleşkesi",
+      "Tire Kutsan Yerleşkesi",
+      "Urla Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Anadolu Üniversitesi",
+    "source": "https://yitdb.anadolu.edu.tr/",
+    "campuses": [
+      "Yunus Emre Kampüsü"
+    ]
+  },
+  {
+    "university": "Selçuk Üniversitesi",
+    "source": "https://sagis.selcuk.edu.tr/",
+    "campuses": [
+      "Alaeddin Keykubat Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Sakarya Üniversitesi",
+    "source": "https://kalite.sakarya.edu.tr/sites/kalite.sakarya.edu.tr/file/SAU_2025-2027_Stratejik_Plan_Guncellenmis_Versiyon.pdf",
+    "campuses": [
+      "Esentepe Merkez Kampüs",
+      "Hendek Yerleşkesi",
+      "Mithatpaşa Yerleşkesi",
+      "Korucuk Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Bursa Uludağ Üniversitesi",
+    "source": "https://www.uludag.edu.tr/dis/merkezi-yabanci-dil-sinav-buuds-bilgilendirmesi-83953",
+    "campuses": [
+      "Görükle Kampüsü",
+      "Ali Osman Sönmez Kampüsü"
+    ]
+  },
+  {
+    "university": "Erciyes Üniversitesi",
+    "source": "https://www.erciyes.edu.tr/tr/bagimsiz/3/tum-birimler-adres-listesi",
+    "campuses": [
+      "Merkez Yerleşke"
+    ]
+  },
+  {
+    "university": "Akdeniz Üniversitesi",
+    "source": "https://oidb.akdeniz.edu.tr/tr/yeni_ogrenci_kilavuzu-19221",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Elmalı Yerleşkesi",
+      "Manavgat Yerleşkesi",
+      "Serik Yerleşkesi",
+      "Kumluca Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ondokuz Mayıs Üniversitesi",
+    "source": "https://cevsam.omu.edu.tr/tr/faaliyetlerimiz/ulasim",
+    "campuses": [
+      "Kurupelit Yerleşkesi",
+      "Güzel Sanatlar Kampüsü"
+    ]
+  },
+  {
+    "university": "Çukurova Üniversitesi",
+    "source": "https://balcali.cu.edu.tr/",
+    "campuses": [
+      "Balcalı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Karadeniz Teknik Üniversitesi",
+    "source": "https://www.ktu.edu.tr/yapiisleri/haber/ktu-kanuni-yerleskesi-3-nolu-futbol-sahasi-yenileniyor",
+    "campuses": [
+      "Kanuni Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Dicle Üniversitesi",
+    "source": "https://www.dicle.edu.tr/tr/birimler/uluslararasi-tam-zamanli-ogrenciler/sayfalar/universitemiz-7578",
+    "campuses": [
+      "Merkez Kampüs"
+    ]
+  },
+  {
+    "university": "Harran Üniversitesi",
+    "source": "https://www.harran.edu.tr/idari/ofisler/surdurulebilirlik-ofisi/menuler/surdurulebilir-kampus/tesis-ve-altyapilar",
+    "campuses": [
+      "Sağlık Yerleşkesi",
+      "Osmanbey Yerleşkesi",
+      "Eyyübiye Yerleşkesi",
+      "Şair Nabi Yerleşkesi",
+      "Sarayönü Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Eskişehir Teknik Üniversitesi",
+    "source": "https://eskisehir.edu.tr/tr/Icerik/Detay/yerleskelerimiz",
+    "campuses": [
+      "İki Eylül Kampüsü",
+      "Borabey Kampüsü",
+      "Porsuk Kampüsü"
+    ]
+  },
+  {
+    "university": "Eskişehir Osmangazi Üniversitesi",
+    "source": "https://bologna.ogu.edu.tr/",
+    "campuses": [
+      "Meşelik Yerleşkesi",
+      "Bademlik Yerleşkesi",
+      "Çamlık Yerleşkesi",
+      "Ali Numan Kıraç Yerleşkesi",
+      "Organize Sanayi Bölgesi Yerleşkesi",
+      "Sivrihisar Yerleşkesi",
+      "Çifteler Yerleşkesi",
+      "Mahmudiye Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İhsan Doğramacı Bilkent Üniversitesi",
+    "source": "https://w3.bilkent.edu.tr/www/saglik-merkezi/",
+    "campuses": [
+      "Merkez Kampüs",
+      "Doğu Kampüs"
+    ]
+  },
+  {
+    "university": "Mersin Üniversitesi",
+    "source": "https://oidb.mersin.edu.tr/tr/universitemiz/kampusler/",
+    "campuses": [
+      "Çiftlikköy Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Muğla Sıtkı Koçman Üniversitesi",
+    "source": "https://danismanlik.mu.edu.tr/tr/yerleske-harita-hizmetleri-5426",
+    "campuses": [
+      "Merkez Yerleşke"
+    ]
+  },
+  {
+    "university": "Trakya Üniversitesi",
+    "source": "https://yenikayit.trakya.edu.tr/",
+    "campuses": [
+      "Balkan Yerleşkesi",
+      "Ayşekadın Yerleşkesi",
+      "İsmail Hakkı Tonguç Yerleşkesi",
+      "Karaağaç Yerleşkesi",
+      "Prof. Dr. Ahmet Karadeniz Yerleşkesi",
+      "Selimiye Yerleşkesi",
+      "Hersekzade Ahmet Paşa Yerleşkesi",
+      "Paşayiğit Yerleşkesi",
+      "Mimar Muslihiddin Yerleşkesi",
+      "Sokullu Mehmet Paşa Yerleşkesi",
+      "Gazi Evrenos Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Balıkesir Üniversitesi",
+    "source": "https://baunwebapi.balikesir.edu.tr/uploads/1735900721486.pdf",
+    "campuses": [
+      "Çağış Yerleşkesi",
+      "Necati Eğitim Yerleşkesi",
+      "Ayvalık Yerleşkesi",
+      "Bigadiç Yerleşkesi",
+      "Burhaniye MYO Yerleşkesi",
+      "Dursunbey Yerleşkesi",
+      "Edremit MYO Yerleşkesi",
+      "Altınoluk MYO Yerleşkesi",
+      "Havran Yerleşkesi",
+      "İvrindi Yerleşkesi",
+      "Kepsut Yerleşkesi",
+      "Savaştepe Yerleşkesi",
+      "Sındırgı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Kocaeli Üniversitesi",
+    "source": "https://api.kocaeli.edu.tr/api/FileOperation/OpenFile?filePath=1000%2FDocument%2FFiles%2F2025%2F07%2F20250731_8390d_2025-yili-kurumsal-mali-durum-ve-beklentiler-raporu-fee.pdf",
+    "campuses": [
+      "Umuttepe Yerleşkesi",
+      "Anıtpark Yerleşkesi",
+      "Arslanbey Yerleşkesi",
+      "Marshall Boya (Hereke) Yerleşkesi",
+      "Dereköy-Karamürsel Yerleşkesi",
+      "Derbent Yerleşkesi",
+      "Şehit Ömer Halisdemir-Kullar Yerleşkesi",
+      "Değirmendere Ali Özbay Yerleşkesi",
+      "Kandıra Yerleşkesi",
+      "Körfez Yerleşkesi",
+      "Yuvacık Yerleşkesi",
+      "Uzunçiftlik Nuh Çimento Yerleşkesi",
+      "Yahya Kaptan Yerleşkesi",
+      "Teknopark-Yeniköy Yerleşkesi",
+      "Gölcük Yerleşkesi",
+      "Ford Otosan İhsaniye Otomotiv Yerleşkesi",
+      "Kartepe Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Düzce Üniversitesi",
+    "source": "https://duzce.edu.tr/sayfa/17c9/kampuslerimiz",
+    "campuses": [
+      "Konuralp Kampüsü",
+      "Üskübü Yerleşkesi",
+      "Düzce Yerleşkesi",
+      "Akçakoca Yerleşkesi",
+      "Cumayeri Yerleşkesi",
+      "Çilimli Yerleşkesi",
+      "Gölyaka Yerleşkesi",
+      "Gümüşova Yerleşkesi",
+      "Kaynaşlı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Koç Üniversitesi",
+    "source": "https://insaat.ku.edu.tr/wp-content/uploads/2024/12/tum-kampusler-toplam-alan-bilgisi-2.pdf",
+    "campuses": [
+      "Rumelifeneri Kampüsü",
+      "İstinye Kampüsü"
+    ]
+  },
+  {
+    "university": "İstanbul Bilgi Üniversitesi",
+    "source": "https://defjam.bilgi.edu.tr/tr/yasam/ulasim/shuttle/",
+    "campuses": [
+      "santralistanbul Kampüsü",
+      "Dolapdere Kampüsü",
+      "Kuştepe Kampüsü"
+    ]
+  },
+  {
+    "university": "İstanbul Medipol Üniversitesi",
+    "source": "https://www.medipol.edu.tr/universite/yerleskelerimiz",
+    "campuses": [
+      "Kavacık Güney Yerleşkesi",
+      "Kavacık Kuzey Yerleşkesi",
+      "Haliç Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Okan Üniversitesi",
+    "source": "https://www.okan.edu.tr/sayfa/7496/kampus-tuzla/",
+    "campuses": [
+      "Tuzla Kampüsü"
+    ]
+  },
+  {
+    "university": "İstanbul Aydın Üniversitesi",
+    "source": "https://ebs.aydin.edu.tr/tr/index.iau?Page=iletisimBilgileri",
+    "campuses": [
+      "Florya Kampüsü",
+      "Bahçelievler Kampüsü",
+      "Kadıköy Kampüsü"
+    ]
+  },
+  {
+    "university": "İzmir Yüksek Teknoloji Enstitüsü",
+    "source": "https://iyte.edu.tr/iletisim/",
+    "campuses": [
+      "Gülbahçe Kampüsü"
+    ]
+  },
+  {
+    "university": "İzmir Ekonomi Üniversitesi",
+    "source": "https://ieu.edu.tr/aday/tr/kampuste-yasam",
+    "campuses": [
+      "Balçova Kampüsü"
+    ]
+  },
+  {
+    "university": "Yaşar Üniversitesi",
+    "source": "https://aday.yasar.edu.tr/ogrenci-yurdu/",
+    "campuses": [
+      "Selçuk Yaşar Kampüsü"
+    ]
+  },
+  {
+    "university": "Galatasaray Üniversitesi",
+    "source": "https://ydb.gsu.edu.tr/tr/genel-bilgiler/ulasim-ve-iletisim",
+    "campuses": [
+      "Ortaköy Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Başkent Üniversitesi",
+    "source": "https://ulasim.baskent.edu.tr/kw/menu_icerik.php?birim=5067&menu_id=9",
+    "campuses": [
+      "Bağlıca Kampüsü"
+    ]
+  },
+  {
+    "university": "Ankara Yıldırım Beyazıt Üniversitesi",
+    "source": "https://aybu.edu.tr/gensek/en/sayfa/11421",
+    "campuses": [
+      "Esenboğa Yerleşkesi",
+      "Bilkent Yerleşkesi",
+      "Etlik 15 Temmuz Yerleşkesi",
+      "Etlik Milli İrade Yerleşkesi",
+      "Tuz Gölü Yerleşkesi",
+      "Çubuk Yerleşkesi",
+      "Cinnah Yerleşkesi",
+      "Ovacık Yerleşkesi"
+    ]
+  },
+  {
+    "university": "TOBB Ekonomi ve Teknoloji Üniversitesi",
+    "source": "https://www.etu.edu.tr/files/dosyalar/2026/02/27/4227157c6d80150db329f5d5c921aed7.pdf",
+    "campuses": [
+      "Söğütözü Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ankara Hacı Bayram Veli Üniversitesi",
+    "source": "https://aday.hacibayram.edu.tr/",
+    "campuses": [
+      "Itri Yerleşkesi",
+      "Gölbaşı Yerleşkesi",
+      "Polatlı Yerleşkesi",
+      "Beşevler Yerleşkesi",
+      "Kuzey Ankara Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ankara Sosyal Bilimler Üniversitesi",
+    "source": "https://adayogrenci.asbu.edu.tr/tr/node/173",
+    "campuses": [
+      "Ulus Merkez Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Kültür Üniversitesi",
+    "source": "https://aday.iku.edu.tr/yerleskeler",
+    "campuses": [
+      "Ataköy Yerleşkesi",
+      "Küçükçekmece Yerleşkesi",
+      "Basın Ekspres Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Gelişim Üniversitesi",
+    "source": "https://gsf.gelisim.edu.tr/tr/akademik-bolum-gorsel-iletisim-tasarimi-icerik-iletisim-gorsel-iletisim-tasarimi-bolumu",
+    "campuses": [
+      "Avcılar Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Tokat Gaziosmanpaşa Üniversitesi",
+    "source": "https://guvenlik.gop.edu.tr/Icerik.aspx?d=tr-TR&m=yerleskeler&mk=45463",
+    "campuses": [
+      "Taşlıçiftlik Yerleşkesi",
+      "Ali Şevki Erek Yerleşkesi",
+      "Erbaa Yerleşkesi",
+      "Niksar Yerleşkesi",
+      "Turhal Yerleşkesi",
+      "Zile Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Fırat Üniversitesi",
+    "source": "https://www.firat.edu.tr/tr/administration?commission_id=13",
+    "campuses": [
+      "Rektörlük Kampüsü"
+    ]
+  },
+  {
+    "university": "Van Yüzüncü Yıl Üniversitesi",
+    "source": "https://adayogrenci.yyu.edu.tr/sayfa.php?slug=hakkimizda",
+    "campuses": [
+      "Zeve Kampüsü"
+    ]
+  },
+  {
+    "university": "Hitit Üniversitesi",
+    "source": "https://hitit.edu.tr/tr/yapi/kampusler-yol-durumu-haritalari",
+    "campuses": [
+      "Kuzey Kampüs",
+      "İkbalkent Kampüsü",
+      "İskilip Meslek Yüksekokulu Kampüsü",
+      "Sungurlu Meslek Yüksekokulu Kampüsü",
+      "Alaca Avni Çelik Meslek Yüksekokulu Kampüsü"
+    ]
+  },
+  {
+    "university": "Zonguldak Bülent Ecevit Üniversitesi",
+    "source": "https://w3.beun.edu.tr/haberler/universitemiz-sifir-atik-calismalarina-hiz-kesmeden-devam-ediyor.html",
+    "campuses": [
+      "Farabi Kampüsü",
+      "İbn-i Sina Kampüsü"
+    ]
+  },
+  {
+    "university": "Kastamonu Üniversitesi",
+    "source": "https://ihtisas.kastamonu.edu.tr/wp-content/uploads/2025/02/Surdurulebilirlik-2021.pdf",
+    "campuses": [
+      "Kuzeykent Kampüsü",
+      "Eğitim Fakültesi Kampüsü"
+    ]
+  },
+  {
+    "university": "Karabük Üniversitesi",
+    "source": "https://tef.karabuk.edu.tr/icerikGoster.aspx?BA=metal-en&K=S&id=1045",
+    "campuses": [
+      "Demir Çelik Kampüsü"
+    ]
+  },
+  {
+    "university": "Giresun Üniversitesi",
+    "source": "https://giresun.edu.tr/tr/page/iletisim/9693",
+    "campuses": [
+      "Güre Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Artvin Çoruh Üniversitesi",
+    "source": "https://www.artvin.edu.tr/universitemiz-hakkinda",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Seyitler Yerleşkesi",
+      "Arhavi Yerleşkesi",
+      "Hopa Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Recep Tayyip Erdoğan Üniversitesi",
+    "source": "https://ydyo.erdogan.edu.tr/Files/ckFiles/ydyo-erdogan-edu-tr/%C3%96%C4%9Frenci%20El%20Kitab%C4%B1/%C3%96%C4%9Frenci%20El%20Kitab%C4%B1%202024-2025%20RTE%C3%9C%20YDYO.pdf",
+    "campuses": [
+      "Zihni Derin Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Niğde Ömer Halisdemir Üniversitesi",
+    "source": "https://www.ohu.edu.tr/anasayfa",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Aşağı Kayabaşı Yerleşkesi",
+      "Spor Bilimleri Fakültesi Yerleşkesi",
+      "Bor Yerleşkesi",
+      "Derbent Yerleşkesi",
+      "Ulukışla Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Karamanoğlu Mehmetbey Üniversitesi",
+    "source": "https://kmu.edu.tr/sayfa/16046/yerleskelerimiz/",
+    "campuses": [
+      "Yunus Emre Yerleşkesi",
+      "Kazım Karabekir Yerleşkesi",
+      "Ermenek Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Nevşehir Hacı Bektaş Veli Üniversitesi",
+    "source": "https://www.nevsehir.edu.tr/tr/53357",
+    "campuses": [
+      "Damat İbrahim Paşa Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Afyon Kocatepe Üniversitesi",
+    "source": "https://greenmetric.aku.edu.tr/green-metric-hakkinda/kampuslerimiz/ahmet-necdet-sezer-kampusu/",
+    "campuses": [
+      "Ahmet Necdet Sezer Kampüsü"
+    ]
+  },
+  {
+    "university": "Kütahya Dumlupınar Üniversitesi",
+    "source": "https://www.dpu.edu.tr/index/sayfa/131/dpude-ne-nerede",
+    "campuses": [
+      "Evliya Çelebi Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Manisa Celal Bayar Üniversitesi",
+    "source": "https://ime.cbu.edu.tr/WebFiles/Senato-Kararlari-03-01-2025.pdf",
+    "campuses": [
+      "Şehit Prof. Dr. İlhan Varank Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Aydın Adnan Menderes Üniversitesi",
+    "source": "https://haber.adu.edu.tr/haber/universitemizde-akilli-ve-guvenli-kampus-yonetimi-uygulaniyor-1000168980",
+    "campuses": [
+      "Merkez Kampüs - Eğitim Kampüsü",
+      "Merkez Kampüs - Sağlık Kampüsü"
+    ]
+  },
+  {
+    "university": "Pamukkale Üniversitesi",
+    "source": "https://www.pau.edu.tr/adayogrenci/tr/sayfa/iletisim-338",
+    "campuses": [
+      "Kınıklı Yerleşkesi",
+      "Çamlık Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Kahramanmaraş Sütçü İmam Üniversitesi",
+    "source": "https://www.ksu.edu.tr/depo/belgeler/2026%20PERFORMANS%20PROGRAMI%20bask%C4%B1_2602111648526081.pdf",
+    "campuses": [
+      "Avşar Yerleşkesi",
+      "Göksun Arslanbey Yerleşkesi",
+      "Afşin Aşık Mahzuni Şerif Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Osmaniye Korkut Ata Üniversitesi",
+    "source": "https://aday.osmaniye.edu.tr/",
+    "campuses": [
+      "Karacaoğlan Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Kilis 7 Aralık Üniversitesi",
+    "source": "https://erasmus.kilis.edu.tr/tr/page/5312",
+    "campuses": [
+      "Merkez Kampüs"
+    ]
+  },
+  {
+    "university": "Hatay Mustafa Kemal Üniversitesi",
+    "source": "https://files.mku.edu.tr/uploads/website/files/0d0aaf00-c54d-43f3-8dcf-8a98b8767df4.pdf",
+    "campuses": [
+      "Tayfur Sökmen Kampüsü"
+    ]
+  },
+  {
+    "university": "Bandırma Onyedi Eylül Üniversitesi",
+    "source": "https://ubf.bandirma.edu.tr/tr",
+    "campuses": [
+      "Merkez Yerleşke"
+    ]
+  },
+  {
+    "university": "Bursa Teknik Üniversitesi",
+    "source": "https://tercih.btu.edu.tr/tr/sayfa/detay/3044/yerleskeler",
+    "campuses": [
+      "Mimar Sinan Yerleşkesi",
+      "Yıldırım Bayezid Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Bartın Üniversitesi",
+    "source": "https://oidb.bartin.edu.tr/iletisim-01285919.html",
+    "campuses": [
+      "Kutlubey Yerleşkesi",
+      "Ağdacı Yerleşkesi",
+      "Kurucaşile Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Kırklareli Üniversitesi",
+    "source": "https://yidb.klu.edu.tr/Cerceveler/62-kayali-yerleskesi.klu",
+    "campuses": [
+      "Kayalı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Amasya Üniversitesi",
+    "source": "https://yitdb.amasya.edu.tr/yerleskeler/ipekkoy-yerleskesi",
+    "campuses": [
+      "İpekköy Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Çankırı Karatekin Üniversitesi",
+    "source": "https://mf.karatekin.edu.tr/ulasim-28562-sayfasi.karatekin",
+    "campuses": [
+      "Uluyazı Kampüsü"
+    ]
+  },
+  {
+    "university": "Yozgat Bozok Üniversitesi",
+    "source": "https://bozok.edu.tr/kurumsal",
+    "campuses": [
+      "Erdoğan Akdağ Doğu Kampüsü",
+      "Bilal Şahin Batı Kampüsü"
+    ]
+  },
+  {
+    "university": "Gümüşhane Üniversitesi",
+    "source": "https://iletisim.gumushane.edu.tr/sayfa/iletisim",
+    "campuses": [
+      "Gümüşhanevi Kampüsü"
+    ]
+  },
+  {
+    "university": "Siirt Üniversitesi",
+    "source": "https://yonetim.siirt.edu.tr/detay/tarihce/599433.html",
+    "campuses": [
+      "Kezer Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Batman Üniversitesi",
+    "source": "https://batman.edu.tr/kampuste-yasam/spor-tesisleri",
+    "campuses": [
+      "Batı Raman Kampüsü"
+    ]
+  },
+  {
+    "university": "Bitlis Eren Üniversitesi",
+    "source": "https://adayogrenci.beu.edu.tr/",
+    "campuses": [
+      "Rahva Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Sabancı Üniversitesi",
+    "source": "https://www.sabanciuniv.edu/tr/iletisim/iletisim/telefon-ve-adresler",
+    "campuses": [
+      "Tuzla Kampüsü",
+      "Altunizade Dijital Kampüs"
+    ]
+  },
+  {
+    "university": "TED Üniversitesi",
+    "source": "https://www.tedu.edu.tr/sikca-sorulan-sorular",
+    "campuses": [
+      "Kolej Kampüsü"
+    ]
+  },
+  {
+    "university": "Özyeğin Üniversitesi",
+    "source": "https://www.ozyegin.edu.tr/tr/iletisim",
+    "campuses": [
+      "Çekmeköy Kampüsü"
+    ]
+  },
+  {
+    "university": "Yalova Üniversitesi",
+    "source": "https://yalova.edu.tr/Uploads/www/Stratejik%20Plan/Yalova-Universitesi-2024-2028-Stratejik-Plani.pdf",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Safran Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Kırıkkale Üniversitesi",
+    "source": "https://kkys.kku.edu.tr/uploads/kanitlar/faaliyet_1077_B.3.3._Tesis_ve_altyapilar_ceb140a5e0df4461917e6fea4ce7f9b5.pdf",
+    "campuses": [
+      "Yahşihan Kampüsü"
+    ]
+  },
+  {
+    "university": "Tekirdağ Namık Kemal Üniversitesi",
+    "source": "https://esas.nku.edu.tr/dosyalar/protokoller/5636045A-5796-9627-8DC3-9E251F724451.pdf",
+    "campuses": [
+      "Değirmenaltı Merkez Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ordu Üniversitesi",
+    "source": "https://odu.edu.tr/Page/207/yerleskeler",
+    "campuses": [
+      "Cumhuriyet Yerleşkesi",
+      "Güzelyalı Yerleşkesi",
+      "Akyazı Yerleşkesi",
+      "Fatsa Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Erzincan Binali Yıldırım Üniversitesi",
+    "source": "https://evrakdogrulama.erzincan.edu.tr/tr/support",
+    "campuses": [
+      "Yalnızbağ Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Orta Doğu Teknik Üniversitesi",
+    "source": "https://otk.metu.edu.tr/tr/iletisim",
+    "campuses": [
+      "Ankara Kampüsü"
+    ]
+  },
+  {
+    "university": "Gazi Üniversitesi",
+    "source": "https://gazi-universitesi.gazi.edu.tr/view/page/153/iletisim-sayfasi",
+    "campuses": [
+      "Merkez Yerleşke",
+      "Gölbaşı Yerleşkesi",
+      "Emek Yerleşkesi",
+      "Maltepe Yerleşkesi",
+      "Kahraman Kazan Yerleşkesi",
+      "Ostim Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Dokuz Eylül Üniversitesi",
+    "source": "https://www.deu.edu.tr/tarihce/",
+    "campuses": [
+      "Merkez Yerleşke (Tınaztepe)"
+    ]
+  },
+  {
+    "university": "Samsun Üniversitesi",
+    "source": "https://oidb.samsun.edu.tr/kampuslerimize-ulasim-bilgileri/",
+    "campuses": [
+      "Ballıca Kampüsü",
+      "Canik Kampüsü"
+    ]
+  },
+  {
+    "university": "Kafkas Üniversitesi",
+    "source": "https://www.kafkas.edu.tr/dosyalar/veteriner/file/tanitim_rehberi.pdf",
+    "campuses": [
+      "Paşaçayırı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Iğdır Üniversitesi",
+    "source": "https://www.igdir.edu.tr/kampuslerimiz",
+    "campuses": [
+      "Şehit Bülent Yurtseven Yerleşkesi",
+      "Karaağaç Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Ardahan Üniversitesi",
+    "source": "https://ardahan.edu.tr/Home/Duyuru/6663",
+    "campuses": [
+      "Yenisey Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Şırnak Üniversitesi",
+    "source": "https://www.sirnak.edu.tr/tr/iletisim/",
+    "campuses": [
+      "Mehmet Emin Acar Kampüsü"
+    ]
+  },
+  {
+    "university": "Hakkari Üniversitesi",
+    "source": "https://www.hakkari.edu.tr/katalog/7/yerleskeler",
+    "campuses": [
+      "Zeynel Bey Yerleşkesi",
+      "Yüksekova Meslek Yüksekokulu Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Ticaret Üniversitesi",
+    "source": "https://ticaret.edu.tr/universite-iletisim/",
+    "campuses": [
+      "Sütlüce Yerleşkesi",
+      "Küçükyalı Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstinye Üniversitesi",
+    "source": "https://aday.istinye.edu.tr/iletisim",
+    "campuses": [
+      "Vadi Ana Kampüs",
+      "Vadi H Yerleşkesi",
+      "Topkapı Ana Kampüs",
+      "Topkapı Ek Yerleşkesi"
+    ]
+  },
+  {
+    "university": "MEF Üniversitesi",
+    "source": "https://www.mef.edu.tr/tr/ogrenci-isleri/universiteye-ilk-defa-kayit-olacaklar",
+    "campuses": [
+      "Maslak Kampüsü"
+    ]
+  },
+  {
+    "university": "Haliç Üniversitesi",
+    "source": "https://halic.edu.tr/tr/halicte-yasam/ulasim-ve-servisler",
+    "campuses": [
+      "5. Levent Kampüsü"
+    ]
+  },
+  {
+    "university": "Maltepe Üniversitesi",
+    "source": "https://maltepe.edu.tr/ogrenciyurdu/tr/ulasim",
+    "campuses": [
+      "Marmara Eğitim Köyü"
+    ]
+  },
+  {
+    "university": "İstanbul Nişantaşı Üniversitesi",
+    "source": "https://www.nisantasi.edu.tr/sayfa/engelli-ogrenci-birimi-koordinatorlugu-368518",
+    "campuses": [
+      "NeoTech Kampüsü"
+    ]
+  },
+  {
+    "university": "Üsküdar Üniversitesi",
+    "source": "https://uskudar.edu.tr/aday/yerleskeler",
+    "campuses": [
+      "Altunizade Merkez Yerleşke",
+      "Üsküdar Çarşı Yerleşkesi",
+      "Altunizade Güney Yerleşke",
+      "NP Sağlık Yerleşkesi",
+      "Tıp Fakültesi NP Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul Arel Üniversitesi",
+    "source": "https://aday.arel.edu.tr/bize-ulasin/",
+    "campuses": [
+      "Tepekent Kemal Gözükara Yerleşkesi",
+      "Sefaköy Yerleşkesi",
+      "Cevizlibağ Sağlık Yerleşkesi"
+    ]
+  },
+  {
+    "university": "İstanbul 29 Mayıs Üniversitesi",
+    "source": "https://www.29mayis.edu.tr/tr/iletisim/ulasim",
+    "campuses": [
+      "Ümraniye Elmalıkent Ana Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Atılım Üniversitesi",
+    "source": "https://www.atilim.edu.tr/tr/od/page/7217/2026---2027-akademik-yili-guz-donemi-programi",
+    "campuses": [
+      "İncek Kampüsü"
+    ]
+  },
+  {
+    "university": "Çankaya Üniversitesi",
+    "source": "https://www.cankaya.edu.tr/iletisim/",
+    "campuses": [
+      "Merkez Kampüs",
+      "Balgat Kampüsü"
+    ]
+  },
+  {
+    "university": "Ufuk Üniversitesi",
+    "source": "https://www.ufuk.edu.tr/ogrenci-isleri/onlisans-lisans-programlarimiz/incek-kampus",
+    "campuses": [
+      "İncek Kampüsü"
+    ]
+  },
+  {
+    "university": "İstanbul Beykent Üniversitesi",
+    "source": "https://www.beykent.edu.tr/ogrenci/beykent-te-yasam/servis-saatleri",
+    "campuses": [
+      "Hadımköy Yerleşkesi",
+      "Ayazağa Yerleşkesi"
+    ]
+  },
+  {
+    "university": "Işık Üniversitesi",
+    "source": "https://www.isikun.edu.tr/kampus",
+    "campuses": [
+      "Şile Kampüsü",
+      "Maslak Kampüsü"
+    ]
+  },
+  {
+    "university": "Yeditepe Üniversitesi",
+    "source": "https://www.yeditepe.edu.tr/tr/iletisim",
+    "campuses": [
+      "26 Ağustos Yerleşimi"
+    ]
+  },
+  {
+    "university": "Kadir Has Üniversitesi",
+    "source": "https://www.khas.edu.tr/kampusumuz/",
+    "campuses": [
+      "Cibali Kampüsü"
+    ]
+  },
+  {
+    "university": "Piri Reis Üniversitesi",
+    "source": "https://pirireis.edu.tr/iletisim/",
+    "campuses": [
+      "Deniz Kampüsü"
+    ]
+  }
+]

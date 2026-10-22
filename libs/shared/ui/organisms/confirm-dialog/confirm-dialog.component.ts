@@ -29,7 +29,14 @@ import { ButtonComponent } from '../../atoms/button/button.component';
     <div class="actions">
       <button #keep kxButton type="button" emphasis="outline" (click)="finish(false)">
         {{ t(cancelKey()) }}</button
-      ><button kxButton type="button" emphasis="outline" class="discard" (click)="finish(true)">
+      ><button
+        kxButton
+        type="button"
+        emphasis="outline"
+        [class.discard]="destructive()"
+        [disabled]="confirmDisabled()"
+        (click)="finish(true)"
+      >
         {{ t(confirmKey()) }}
       </button>
     </div>
@@ -41,6 +48,8 @@ export class ConfirmDialogComponent {
   readonly bodyKey = input.required<string>();
   readonly cancelKey = input.required<string>();
   readonly confirmKey = input.required<string>();
+  readonly confirmDisabled = input(false);
+  readonly destructive = input(true);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   private readonly keep = viewChild.required<unknown, ElementRef<HTMLButtonElement>>('keep', {
     read: ElementRef,

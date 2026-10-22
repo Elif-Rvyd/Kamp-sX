@@ -313,13 +313,17 @@ test('profile updates filter by user_id and never send roles or auth credentials
   assert.deepEqual(h.calls[0].update, [value]);
   assert.equal(h.calls[0].table, 'profiles');
 });
-test('missing profiles are inserted with the same user_id contract', async () => {
+test('missing profiles fail without manufacturing a client profile row', async () => {
   const h = harness(),
     value = { avatar_url: null, banner_url: h.base + OWNER + '/banner/x.png' };
-  h.results.push({ data: null, error: null }, { data: { user_id: OWNER }, error: null });
-  await h.repository.save(OWNER, value);
-  assert.deepEqual(h.calls[1].insert, [{ user_id: OWNER, ...value }]);
+  h.results.push({ data: null, error: null }, { data: null, error: null });
+  await assert.rejects(h.repository.save(OWNER, value), { key: 'media.errors.profileSave' });
+  assert.equal(
+    h.calls.some((q) => q.insert),
+    false,
+  );
 });
+
 test('a rejected profile write is reported; a confirmed commit survives a lost response', async () => {
   const h = harness(),
     value = { avatar_url: null, banner_url: null };
@@ -442,7 +446,7 @@ test('empty and oversized content is refused before any write', async () => {
 
 test('profile repository strips unexpected runtime fields including a forged user_id', async () => {
   const h = harness();
-  h.results.push({ data: null, error: null }, { data: { user_id: OWNER }, error: null });
+  h.results.push({ data: { user_id: OWNER }, error: null });
   await h.repository.save(OWNER, {
     avatar_url: null,
     banner_url: null,
@@ -451,7 +455,10 @@ test('profile repository strips unexpected runtime fields including a forged use
     password: 'not-a-real-password',
   });
   assert.deepEqual(h.calls[0].update, [{ avatar_url: null, banner_url: null }]);
-  assert.deepEqual(h.calls[1].insert, [{ user_id: OWNER, avatar_url: null, banner_url: null }]);
+  assert.equal(
+    h.calls.some((q) => q.insert),
+    false,
+  );
 });
 
 test('same-user re-login while verification is pending invalidates the old upload', async () => {

@@ -69,6 +69,49 @@ async function initialize(page, language, theme, signedIn = true) {
   });
   return errors;
 }
+for (const [language, theme] of [
+  ['tr', 'light'],
+  ['en', 'dark'],
+]) {
+  test(`production support uses the allowed API origin and keeps account identity out of the send payload ${language}/${theme}`, async ({
+    page,
+  }) => {
+    await initialize(page, language, theme);
+    await page.addInitScript(() => {
+      window.supportExecuted = false;
+    });
+    const sends = [];
+    await page.route(`${provider.origin}/functions/v1/support-email**`, (route) => {
+      if (route.request().method() === 'GET')
+        return route.fulfill({
+          status: 200,
+          json: { identity: { email: user.email, username: 'student' }, ready: true },
+        });
+      const payload = route.request().postDataJSON();
+      sends.push(payload);
+      return route.fulfill({ status: 200, json: { status: 'sent', request_id: payload.request_id } });
+    });
+    await page.goto('/help');
+    await expect(page.locator('#support-email')).toHaveValue(user.email);
+    await page
+      .locator('#support-description')
+      .fill('<img src=x onerror="window.supportExecuted=true"> A real problem.');
+    await page
+      .getByRole('button', {
+        name: language === 'tr' ? 'Destek başvurusu gönder' : 'Send support request',
+        exact: true,
+      })
+      .click();
+    await expect(page.locator('.receipt')).toBeVisible();
+    expect(sends).toHaveLength(1);
+    expect(Object.keys(sends[0]).sort()).toEqual(['description', 'request_id']);
+    expect(await page.evaluate(() => window.supportExecuted)).toBe(false);
+    expect(
+      await page.evaluate(() => window.securityViolations.filter((value) => value === 'connect-src')),
+    ).toEqual([]);
+    await expect(page.locator('kx-header,kx-footer')).toHaveCount(0);
+  });
+}
 const png = {
   name: 'avatar.png',
   mimeType: 'image/png',

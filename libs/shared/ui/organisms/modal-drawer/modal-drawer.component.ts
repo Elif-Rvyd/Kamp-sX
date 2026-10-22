@@ -19,6 +19,7 @@ import { horizontalSwipe, swipePoint, type SwipePoint } from '@kampusx/shared/ut
   template: `<dialog
     #dialog
     class="modal-drawer"
+    [class.bottom-sheet]="position() === 'bottom'"
     [class.closing]="closing()"
     [id]="drawerId()"
     [attr.aria-labelledby]="labelledBy()"
@@ -37,6 +38,7 @@ import { horizontalSwipe, swipePoint, type SwipePoint } from '@kampusx/shared/ut
 })
 export class ModalDrawerComponent {
   readonly drawerId = input.required<string>();
+  readonly position = input<'side' | 'bottom'>('side');
   readonly labelledBy = input.required<string>();
   readonly describedBy = input<string | null>(null);
   readonly changed = output<boolean>();
@@ -156,9 +158,9 @@ export class ModalDrawerComponent {
     this.dialog().nativeElement.close();
     this.closing.set(false);
     this.restoreScroll();
-    this.changed.emit(false);
     if (this.opener?.isConnected) this.opener.focus({ preventScroll: true });
     this.opener = null;
+    this.changed.emit(false);
   }
   private clearTimer(): void {
     if (this.closeTimer) clearTimeout(this.closeTimer);

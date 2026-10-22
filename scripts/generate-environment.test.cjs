@@ -97,13 +97,7 @@ test('local .env values support quotes, comments, and process overrides', (t) =>
 });
 
 test('secret, service role, arbitrary and malformed keys are rejected without value leakage', () => {
-  const invalidKeys = [
-    'sb_secret_do_not_show_this_value',
-    jwt('service_role'),
-    jwt('authenticated'),
-    'not-a-key',
-    'x.y.z',
-  ];
+  const invalidKeys = ['sb_secret_TEST', jwt('service_role'), jwt('authenticated'), 'not-a-key', 'x.y.z'];
   for (const key of invalidKeys) {
     assert.throws(
       () => validatePublishableKey(key),

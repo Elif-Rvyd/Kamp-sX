@@ -60,35 +60,23 @@ import type { DashboardProfile } from '../dashboard-profile';
     </div>
     <nav class="profile-menu" [attr.aria-label]="t('dashboard.navigationLabel')">
       @for (item of primary; track item.id) {
-        @if (item.id === 'home' || item.id === 'search') {
-          <a
-            class="profile-menu-item"
-            [routerLink]="item.id === 'home' ? '/dashboard' : '/search'"
-            routerLinkActive="active"
-            ariaCurrentWhenActive="page"
-            [attr.aria-label]="t(item.key)"
-            [title]="t(item.key)"
-          >
-            <kx-icon [name]="item.icon || 'home'" /><span class="menu-label">{{ t(item.key) }}</span>
-          </a>
-        } @else {
-          <button
-            type="button"
-            class="profile-menu-item"
-            disabled
-            [attr.aria-label]="t(item.key)"
-            [title]="t(item.key)"
-          >
-            <kx-icon [name]="item.icon || 'home'" /><span class="menu-label">{{ t(item.key) }}</span>
-          </button>
-        }
+        <a
+          class="profile-menu-item"
+          [routerLink]="item.id === 'home' ? '/dashboard' : item.id === 'messages' ? '/messages' : '/search'"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          [attr.aria-label]="t(item.key)"
+          [title]="t(item.key)"
+        >
+          <kx-icon [name]="item.icon || 'home'" /><span class="menu-label">{{ t(item.key) }}</span>
+        </a>
       }
       <div class="menu-divider" aria-hidden="true"></div>
       @for (item of menu; track item.id) {
-        @if (item.id === 'profile' || item.id === 'settings') {
+        @if (item.id === 'profile' || item.id === 'settings' || item.id === 'help') {
           <a
             class="profile-menu-item"
-            [routerLink]="item.id === 'profile' ? '/profile' : '/settings'"
+            [routerLink]="item.id === 'profile' ? '/profile' : item.id === 'help' ? '/help' : '/settings'"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
             [attr.aria-label]="t(item.key)"

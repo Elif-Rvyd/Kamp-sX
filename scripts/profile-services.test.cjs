@@ -74,7 +74,17 @@ function harness() {
     })),
   );
   const dependencies = new Map([
-    [AccountService, { profile: async () => null }],
+    [
+      AccountService,
+      {
+        profile: async () => null,
+        saveDetails: async (value) => {
+          academicCalls.push(value);
+          if (academicError) throw Error('rejected');
+          return { full_name: value.fullName, bio: value.bio };
+        },
+      },
+    ],
     [PostsService, { mine: ownPosts, ownCount: signal(6) }],
     [FollowsService, { counts: signal({ following: 0, followers: 0 }) }],
     [

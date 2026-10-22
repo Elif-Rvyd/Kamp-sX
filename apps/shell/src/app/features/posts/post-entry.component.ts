@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   effect,
   inject,
@@ -9,9 +10,19 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
-import { ButtonComponent, ConfirmDialogComponent, SocialPostCardComponent } from '@kampusx/shared/ui';
+import {
+  ButtonComponent,
+  ConfirmDialogComponent,
+  SocialPostCardComponent,
+  ReportReasonComponent,
+  FormFieldComponent,
+  EmbeddedPostComponent,
+  ModalDrawerComponent,
+} from '@kampusx/shared/ui';
 import type { PostAction } from '@kampusx/shared/ui';
 import type { PostAuthor, SocialPost } from '@kampusx/shared/util';
 import { PostActionsService, type ReportReason } from '../../core/post-actions.service';
@@ -20,16 +31,33 @@ import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { NoticeService } from '../../core/notice.service';
 import { MediaError } from '../../core/media.service';
+import { PostViewsService } from '../../core/post-views.service';
+import { PostViewDirective } from './post-view.directive';
+import { SharePostComponent } from '../messages/share-post.component';
 
 let instance = 0;
 @Component({
   selector: 'kx-post-entry',
   standalone: true,
-  imports: [TranslocoDirective, RouterLink, SocialPostCardComponent, ConfirmDialogComponent, ButtonComponent],
+  imports: [
+    TranslocoDirective,
+    RouterLink,
+    SocialPostCardComponent,
+    ConfirmDialogComponent,
+    ButtonComponent,
+    ReportReasonComponent,
+    FormFieldComponent,
+    EmbeddedPostComponent,
+    ModalDrawerComponent,
+    PostViewDirective,
+    SharePostComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-container *transloco="let t">
     @if (visible(); as value) {
       <kx-social-post-card
+        [kxPostView]="value.id"
+        [viewsCount]="views.totals()[value.id] ?? null"
         [post]="value"
         [author]="displayAuthor()"
         [ownerId]="owner()"
@@ -38,8 +66,24 @@ let instance = 0;
         [authorLink]="value.userId === owner() ? '/profile' : '/people/' + value.userId"
         [busy]="actions.busy(value.id)"
         [reactionsReady]="actions.reactionsReady(value.id)"
+        [repostsEnabled]="!repostUncertain()"
         (action)="run($event, value)"
-      />
+      >
+        @if (value.repostOfId) {
+          <kx-embedded-post
+            postEmbed
+            [post]="original()?.post ?? null"
+            [author]="original()?.author ?? null"
+            [loading]="originalLoading()"
+            [failed]="originalFailed()"
+          />
+        }
+      </kx-social-post-card>
+      @if (repostUncertain()) {
+        <p class="entry-error error-text" role="alert">
+          {{ t('social.repost.uncertain') }} <a routerLink="/profile">{{ t('profile.title') }}</a>
+        </p>
+      }
       @if (actions.reactionsFailed(value.id)) {
         <div class="entry-error">
           <p class="error-text" role="alert">{{ t(error() || 'social.errors.read') }}</p>
@@ -49,6 +93,24 @@ let instance = 0;
         </div>
       }
     }
+    <kx-share-post #shareSheet [postId]="post().id" />
+    <kx-modal-drawer
+      #viewsSheet
+      position="bottom"
+      [drawerId]="id + '-views'"
+      [labelledBy]="id + '-views-title'"
+    >
+      <div class="views-info">
+        <h2 [id]="id + '-views-title'">{{ t('social.views.title') }}</h2>
+        <p>{{ t('social.views.body') }}</p>
+        @if (views.failed()) {
+          <p class="error-text" role="status">{{ t('social.views.failed') }}</p>
+        }
+        <button kxButton type="button" emphasis="ghost" data-drawer-close (click)="viewsSheet.close()">
+          {{ t('common.close') }}
+        </button>
+      </div>
+    </kx-modal-drawer>
     @if (error() && !actions.reactionsFailed(post().id)) {
       <p class="entry-error error-text" role="alert">
         {{ t(error()) }}
@@ -57,6 +119,25 @@ let instance = 0;
         }
       </p>
     }
+    <kx-confirm-dialog
+      #quoteDialog
+      [dialogId]="id + '-quote'"
+      titleKey="social.repost.quote"
+      bodyKey="social.repost.quoteBody"
+      cancelKey="social.cancel"
+      confirmKey="social.repost.publish"
+      [destructive]="false"
+      [confirmDisabled]="quoteInvalid() || repostUncertain()"
+    >
+      <kx-form-field
+        [fieldId]="id + '-quote-content'"
+        labelKey="social.repost.quoteLabel"
+        placeholderKey="social.repost.quoteLabel"
+        [control]="quoteContent"
+        [multiline]="true"
+        [maxLength]="2000"
+      />
+    </kx-confirm-dialog>
     <kx-confirm-dialog
       #deleteDialog
       [dialogId]="id + '-delete'"
@@ -81,20 +162,11 @@ let instance = 0;
       cancelKey="social.cancel"
       confirmKey="social.menu.report"
     >
-      <fieldset>
-        <legend>{{ t('social.report.reason') }}</legend>
-        @for (reason of reasons; track reason) {
-          <label
-            ><input
-              type="radio"
-              [name]="id + '-reason'"
-              [value]="reason"
-              [checked]="reportReason() === reason"
-              (change)="reportReason.set(reason)"
-            />{{ t('social.report.' + reason) }}</label
-          >
-        }
-      </fieldset>
+      <kx-report-reason
+        [name]="id + '-reason'"
+        [value]="reportReason()"
+        (changed)="reportReason.set($event)"
+      />
     </kx-confirm-dialog>
   </ng-container>`,
   styles: `
@@ -110,26 +182,14 @@ let instance = 0;
       padding: 12px;
       text-decoration: underline;
     }
-    fieldset {
-      border: 0;
-      padding: 0;
-      margin: 16px 0;
+    .views-info {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      line-height: 1.7;
     }
-    legend {
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    label {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 44px;
-      cursor: pointer;
-    }
-    input {
-      accent-color: var(--color-primary);
-      width: 18px;
-      height: 18px;
+    .views-info h2 {
+      font-size: 1.125rem;
     }
   `,
 })
@@ -138,8 +198,23 @@ export class PostEntryComponent {
   readonly author = input<PostAuthor>();
   readonly mode = input<'active' | 'archive'>('active');
   readonly actions = inject(PostActionsService);
+  readonly views = inject(PostViewsService);
+  private readonly shareSheet = viewChild.required<SharePostComponent>('shareSheet');
+  private readonly viewsSheet = viewChild.required<ModalDrawerComponent>('viewsSheet');
   readonly language = inject(LanguageService);
   private readonly auth = inject(AuthService);
+  private readonly destroy = inject(DestroyRef);
+  private readonly quoteDialog = viewChild.required<ConfirmDialogComponent>('quoteDialog');
+  readonly quoteContent = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.maxLength(2000)],
+  });
+  private readonly quoteValue = toSignal(this.quoteContent.valueChanges, { initialValue: '' });
+  readonly quoteInvalid = computed(() => !this.quoteValue().trim() || this.quoteValue().length > 2000);
+  readonly repostUncertain = computed(() => this.actions.repostUncertain(this.post().id));
+  readonly original = signal<{ post: SocialPost; author: PostAuthor } | null>(null);
+  readonly originalLoading = signal(false);
+  readonly originalFailed = signal(false);
   private readonly profiles = inject(ProfileService);
   private readonly i18n = inject(TranslocoService);
   private readonly router = inject(Router);
@@ -150,7 +225,6 @@ export class PostEntryComponent {
   readonly id = 'post-entry-' + ++instance;
   readonly error = signal('');
   readonly reportReason = signal<ReportReason>('spam');
-  readonly reasons: readonly ReportReason[] = ['spam', 'harassment', 'inappropriate', 'other'];
   readonly owner = computed(() => this.auth.session()?.user.id ?? '');
   readonly current = computed(() => this.actions.view(this.post()));
   readonly visible = computed(() => {
@@ -173,6 +247,29 @@ export class PostEntryComponent {
       const post = this.post();
       untracked(() => this.actions.observe(post));
     });
+    effect((cleanup) => {
+      const post = this.post();
+      this.auth.sessionEpoch();
+      this.actions.readRevision();
+      this.original.set(null);
+      this.originalFailed.set(false);
+      this.originalLoading.set(false);
+      if (!post.repostOfId) return;
+      const request = new AbortController();
+      cleanup(() => request.abort());
+      this.originalLoading.set(true);
+      void this.actions
+        .embedded(post.repostOfId, AbortSignal.any([request.signal, AbortSignal.timeout(15000)]))
+        .then((value) => {
+          if (!request.signal.aborted && !this.destroy.destroyed) this.original.set(value);
+        })
+        .catch(() => {
+          if (!request.signal.aborted && !this.destroy.destroyed) this.originalFailed.set(true);
+        })
+        .finally(() => {
+          if (!request.signal.aborted && !this.destroy.destroyed) this.originalLoading.set(false);
+        });
+    });
   }
   retryReactions(id: string): void {
     this.error.set('');
@@ -181,14 +278,43 @@ export class PostEntryComponent {
   async run(action: PostAction, post: SocialPost): Promise<void> {
     if (this.actions.busy(post.id)) return;
     this.error.set('');
+    const owner = this.owner(),
+      epoch = this.auth.sessionEpoch();
+    const current = () =>
+      !this.destroy.destroyed &&
+      this.owner() === owner &&
+      this.auth.sessionEpoch() === epoch &&
+      this.post().id === post.id;
     try {
+      if (action === 'share') {
+        this.shareSheet().open();
+        return;
+      }
+      if (action === 'views') {
+        this.views.load(post.id, true);
+        this.viewsSheet().open();
+        return;
+      }
       if (action === 'comments') {
         await this.router.navigate(['/posts', post.id]);
         return;
       }
-      if (action === 'like' || action === 'bookmark') await this.actions.react(post, action);
+      if (action === 'repost' || action === 'quote') {
+        if (this.repostUncertain()) return;
+        if (action === 'quote') {
+          if (!(await this.quoteDialog().ask()) || !current()) return;
+          await this.actions.quote(post, this.quoteContent.value);
+          if (!current()) return;
+          this.quoteContent.reset();
+          this.notice.show('social.repost.quoted');
+        } else {
+          await this.actions.repost(post, !post.ownRepostId);
+          if (!current()) return;
+          this.notice.show(post.ownRepostId ? 'social.repost.removed' : 'social.repost.created');
+        }
+      } else if (action === 'like' || action === 'bookmark') await this.actions.react(post, action);
       else if (action === 'delete') {
-        if (!(await this.deleteDialog().ask())) return;
+        if (!(await this.deleteDialog().ask()) || !current()) return;
         await this.actions.remove(post);
         this.notice.show('social.notice.deleted');
       } else if (action === 'pin') {
@@ -198,15 +324,16 @@ export class PostEntryComponent {
         await this.actions.archive(post, action === 'archive');
         this.notice.show(action === 'archive' ? 'social.notice.archived' : 'social.notice.restored');
       } else if (action === 'block') {
-        if (!(await this.blockDialog().ask())) return;
+        if (!(await this.blockDialog().ask()) || !current()) return;
         await this.actions.block(post, this.displayAuthor().fullName);
         this.notice.show('social.notice.blocked');
       } else if (action === 'report') {
-        if (!(await this.reportDialog().ask())) return;
+        if (!(await this.reportDialog().ask()) || !current()) return;
         const created = await this.actions.report(post, this.reportReason());
         this.notice.show(created ? 'social.notice.reported' : 'social.notice.alreadyReported');
       }
     } catch (error) {
+      if (!current()) return;
       this.error.set(error instanceof MediaError ? error.key : 'social.errors.save');
     }
   }

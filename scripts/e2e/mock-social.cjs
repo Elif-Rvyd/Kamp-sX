@@ -18,6 +18,10 @@ async function mockSocial(page, options = {}) {
       studying: 'Bilgisayar Programcılığı',
       created_at: '2026-01-01T00:00:00Z',
       is_private: true,
+      university_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      campus_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      department_id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+      faculty_id: null,
       visible_department: false,
       visible_campus: false,
       visible_university: false,
@@ -44,6 +48,9 @@ async function mockSocial(page, options = {}) {
       comments_count: 0,
     })),
     requests: [],
+    views: new Map(),
+    viewSeen: new Set(),
+    failViews: false,
     objects: new Map(),
     following: options.following ?? 0,
     followers: options.followers ?? 0,
@@ -94,6 +101,81 @@ async function mockSocial(page, options = {}) {
       select: url.searchParams.get('select'),
       filters: Object.fromEntries(url.searchParams),
     });
+    if (url.pathname.endsWith('/kx_get_post_views') || url.pathname.endsWith('/kx_record_post_views')) {
+      if (state.failViews)
+        return route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'PGRST000', message: 'Unavailable' }),
+        });
+      const record = url.pathname.endsWith('/kx_record_post_views');
+      const rows = (payload.p_ids ?? [])
+        .filter((id) => state.posts.some((p) => p.id === id && !p.deleted_at && !p.archived_at))
+        .map((id) => {
+          const post = state.posts.find((p) => p.id === id);
+          if (record && post.user_id !== OWNER && !state.viewSeen.has(id)) {
+            state.viewSeen.add(id);
+            state.views.set(id, (state.views.get(id) ?? 0) + 1);
+          }
+          return { post_id: id, views_count: state.views.get(id) ?? 0 };
+        });
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(rows) });
+    }
+    if (url.pathname.endsWith('/kampusx_username_available'))
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(options.usernameTaken ? false : true),
+      });
+    if (['universities', 'campuses', 'departments'].some((t) => url.pathname.endsWith('/' + t))) {
+      const table = url.pathname.split('/').at(-1);
+      const needle = (url.searchParams.get('name') || '')
+        .replace(/^ilike[.]%|%$/g, '')
+        .toLocaleLowerCase('tr');
+      const defaults = {
+        universities: [
+          { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', name: 'Kırşehir Ahi Evran Üniversitesi' },
+          { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', name: 'İstanbul Teknik Üniversitesi' },
+        ],
+        campuses: [
+          {
+            id: 'campus-one',
+            university_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            name: 'Cacabey Yerleşkesi',
+          },
+          {
+            id: 'campus-two',
+            university_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            name: 'Ayazağa Kampüsü',
+          },
+        ],
+        departments: [
+          {
+            id: 'department-one',
+            university_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            name: 'Bilgisayar Programcılığı',
+          },
+          {
+            id: 'department-two',
+            university_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            name: 'Bilgisayar Mühendisliği',
+          },
+        ],
+      };
+      const rows = (options.academic?.[table] ?? defaults[table]).filter(
+        (row) =>
+          row.name.toLocaleLowerCase('tr').includes(needle) &&
+          (!url.searchParams.has('university_id') ||
+            'eq.' + row.university_id === url.searchParams.get('university_id')),
+      );
+      const offset = Number(url.searchParams.get('offset') ?? 0),
+        limit = Number(url.searchParams.get('limit') ?? 500);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(rows.slice(offset, offset + limit)),
+      });
+    }
     if (url.pathname.endsWith('/kampusx_follow_requests_version'))
       return route.fulfill({
         status: 200,
@@ -132,6 +214,9 @@ async function mockSocial(page, options = {}) {
           body: JSON.stringify({ code: '42501', message: 'post_unavailable' }),
         });
       post.deleted_at = new Date().toISOString();
+      state.posts.forEach(
+        (p) => (p.reposts_count = state.posts.filter((r) => r.repost_of_id === p.id && !r.deleted_at).length),
+      );
       post.pinned_at = null;
       return route.fulfill({ status: 200, contentType: 'application/json', body: 'true' });
     }
@@ -166,7 +251,7 @@ async function mockSocial(page, options = {}) {
         const peer = state.people.find((p) => p.user_id === payload.following_id);
         state.follows.push({
           ...payload,
-          status: peer?.is_private === false ? 'accepted' : 'pending',
+          status: peer?.visible_explore === true ? 'accepted' : 'pending',
           created_at: new Date().toISOString(),
         });
       } else if (method === 'PATCH') rows.forEach((row) => Object.assign(row, payload));
@@ -249,7 +334,7 @@ async function mockSocial(page, options = {}) {
       if (method === 'POST') {
         const duplicate = rows.some((r) =>
           table === 'reports'
-            ? r.reporter_id === payload.reporter_id && r.post_id === payload.post_id
+            ? !!payload.post_id && r.reporter_id === payload.reporter_id && r.post_id === payload.post_id
             : r.blocker_id === payload.blocker_id && r.blocked_id === payload.blocked_id,
         );
         if (duplicate) return fail('duplicate', '23505');
@@ -475,6 +560,23 @@ async function mockSocial(page, options = {}) {
           payload.user_id !== OWNER
         )
           return fail();
+        if (
+          payload.repost_of_id &&
+          !state.posts.some((p) => p.id === payload.repost_of_id && visible(p) && !p.deleted_at)
+        )
+          return fail();
+        if (
+          payload.repost_of_id &&
+          payload.content === '' &&
+          state.posts.some(
+            (p) =>
+              p.user_id === OWNER &&
+              p.repost_of_id === payload.repost_of_id &&
+              p.content === '' &&
+              !p.deleted_at,
+          )
+        )
+          return fail('duplicate_repost', '23505');
         if (payload.parent_id) {
           const parent = state.posts.find((p) => p.id === payload.parent_id);
           if (!parent || !visible(parent) || parent.deleted_at) return fail();
@@ -500,6 +602,10 @@ async function mockSocial(page, options = {}) {
         state.posts.unshift(post);
         state.posts.forEach(
           (p) =>
+            (p.reposts_count = state.posts.filter((r) => r.repost_of_id === p.id && !r.deleted_at).length),
+        );
+        state.posts.forEach(
+          (p) =>
             (p.replies_count = state.posts.filter(
               (r) => r.parent_id === p.id && !r.deleted_at && !r.archived_at,
             ).length),
@@ -514,6 +620,10 @@ async function mockSocial(page, options = {}) {
               (!value('parent_id') || value('parent_id') === post.parent_id) &&
               (!url.searchParams.has('user_id') ||
                 url.searchParams.get('user_id') === `eq.${post.user_id}`) &&
+              (!value('repost_of_id') ||
+                value('repost_of_id') === post.repost_of_id ||
+                (value('repost_of_id').startsWith('in.(') &&
+                  value('repost_of_id').slice(4, -1).split(',').includes(post.repost_of_id))) &&
               (!value('id') ||
                 value('id') === post.id ||
                 (value('id').startsWith('in.(') && value('id').slice(4, -1).split(',').includes(post.id))) &&
@@ -529,7 +639,7 @@ async function mockSocial(page, options = {}) {
                   return (
                     String(profile?.[k.slice(9)] ?? '').toLowerCase() ===
                     v
-                      .slice(6)
+                      .slice(v.startsWith('eq.') ? 3 : 6)
                       .replace(/\\([\\%_])/g, '$1')
                       .toLowerCase()
                   );
@@ -538,12 +648,14 @@ async function mockSocial(page, options = {}) {
               (!url.searchParams.has('deleted_at') || !post.deleted_at) &&
               (!url.searchParams.has('or') || post.archived_at || post.deletion_started_at) &&
               (!url.searchParams.has('content') ||
-                post.content.toLowerCase().includes(
-                  url.searchParams
-                    .get('content')
-                    .replace(/^ilike\.%|%$/g, '')
-                    .toLowerCase(),
-                )),
+                (url.searchParams.get('content').startsWith('eq.')
+                  ? post.content === url.searchParams.get('content').slice(3)
+                  : post.content.toLowerCase().includes(
+                      url.searchParams
+                        .get('content')
+                        .replace(/^ilike[.]%|%$/g, '')
+                        .toLowerCase(),
+                    ))),
           )
           .sort((a, b) =>
             url.searchParams.get('order')?.startsWith('pinned_at')

@@ -90,7 +90,7 @@
     "google": "Google öğrenci hesabıyla başla",
     "googleDemo": "Google ile giriş henüz etkin değil. E-posta ile kayıt olabilirsin.",
     "divider": "veya e-postanla",
-    "termsPrefix": "Kullanım şartlarını ve gizlilik politikasını okudum, kabul ediyorum.",
+    "termsPrefix": "Kullanım Şartları’nı kabul ediyorum ve Gizlilik Metni’ni okudum.",
     "termsLink": "Kullanım şartları",
     "privacyLink": "Gizlilik politikası",
     "strength": {
@@ -167,7 +167,9 @@
       "recoveryInvalid": "Bu şifre yenileme bağlantısı eksik, geçersiz veya süresi dolmuş. Yeni bir bağlantı iste.",
       "weakPassword": "Bu şifre kabul edilmedi. En az 8 karakter içeren daha güçlü bir şifre seç.",
       "signupFailed": "Kayıt işlemi tamamlanamadı. Bilgilerini kontrol edip tekrar dene.",
-      "signOut": "Şifren güncellendi. Çıkış işlemi sırasında bir sorun oldu. Devam etmek için yeniden dene."
+      "signOut": "Şifren güncellendi. Çıkış işlemi sırasında bir sorun oldu. Devam etmek için yeniden dene.",
+      "academicRequired": "Üniversite, kampüs ve bölüm bilgilerini doldur. Her alan en fazla 150 karakter olabilir.",
+      "consent": "Kullanım Şartları’nı kabul edip Gizlilik Metni’ni okuduğunu onaylamalısın."
     }
   },
   "validation": {
@@ -318,7 +320,25 @@
     "projectsText": "Eksik parçan belki bir kampüs ötede.",
     "events": "Etkinlik & seminer",
     "eventsText": "Bir sonraki ilhamını kaçırma.",
-    "cta": "Akademik ağı keşfet"
+    "cta": "Akademik ağı keşfet",
+    "customHint": "Listeden seçebilir veya listede yoksa kendin yazabilirsin.",
+    "loading": "Liste yükleniyor…",
+    "failed": "Liste okunamadı. Tekrar deneyebilir veya adı yazabilirsin.",
+    "noResults": "Öneri yok. Yazdığın ad kayıtta kullanılacak.",
+    "assigned": "Hesabının kullanıcı adı: @{{username}}",
+    "assignedAfterLogin": "Atanan kullanıcı adını e-postanı doğrulayıp giriş yaptıktan sonra profilinde görebilirsin.",
+    "continue": "Uygulamaya devam et",
+    "username": {
+      "idle": "Kullanıcı adı yazdığında müsaitliği kontrol edilir.",
+      "checking": "Kullanıcı adı kontrol ediliyor…",
+      "available": "Bu kullanıcı adı şu an müsait. Kayıtta yeniden doğrulanır.",
+      "taken": "Bu kullanıcı adı kullanılıyor. Başka bir ad seç.",
+      "unavailable": "Müsaitlik kontrolü yapılamadı. Tekrar Kaydol seçeneğini dene."
+    },
+    "select": "Seçiniz",
+    "unavailableOptions": "Bu üniversite için henüz seçim bulunamadı.",
+    "selectionOnly": "Listeden bir seçenek seç.",
+    "invalidSelection": "Üniversite, kampüs ve bölüm için listeden geçerli seçimler yap."
   },
   "cta": {
     "kicker": "Yeni dönem, yeni bağlantılar.",
@@ -333,14 +353,19 @@
     "privacy": "Gizlilik",
     "terms": "Kullanım şartları",
     "cookies": "Çerezler",
-    "copyright": "© {{year}} KampüsX Inc.",
+    "copyright": "© {{year}} KampüsX · Elif Rüveyda Ulama",
     "made": "Kampüs ruhuyla tasarlandı.",
     "demo": "Frontend tasarım önizlemesi"
   },
   "legal": {
-    "title": "Yasal metinler hazırlanıyor.",
-    "text": "Kullanım şartları ve gizlilik politikası henüz yayımlanmadı. E-posta ve şifren giriş veya kayıt işlemi için kimlik doğrulama hizmetine gönderilir. Formu göndermeden önce bu durumu dikkate al.",
-    "cookies": "Tema ve dil tercihleri bu tarayıcıda tutulur. Oturum tercihin, giriş bilgilerinin oturum boyunca veya bu cihazda kalıcı saklanmasını belirler. Ayrıntılı çerez ve gizlilik metinleri henüz yayımlanmadı."
+    "title": "KampüsX yasal metinleri",
+    "text": "KampüsX Kullanım Şartları • Sürüm: 22 Ekim 2026\n\n1. Hizmet ve işletmeci\nKampüsX, üniversite öğrencilerinin paylaşımda bulunması, birbirini takip etmesi ve bire bir mesajlaşması için sunulan bir sosyal platformdur. İşletmeci: Elif Rüveyda Ulama (elify.dev). İletişim ve başvuru: elifrvyd@protonmail.com. KampüsX, adı geçen üniversitelerin resmî hizmeti veya temsilcisi değildir.\n\n2. Kimler kullanabilir?\nÜyelik üniversite öğrencileri içindir. Kayıtta doğru ve güncel bilgi vermeli, hesabını başkasına kullandırmamalısın. Üniversite, kampüs ve bölüm seçimi öğrenci beyanıdır; tek başına resmî öğrenci doğrulaması sayılmaz. Reşit olmayan öğrenciler, kendi durumlarına uygulanabilen yasal temsilci izin ve onaylarını sağlamalıdır. Kullanıcı adı ve içerikle başka bir kişiyi veya kurumu taklit edemezsin.\n\n3. Hesap ve güvenlik\nErişim bilgilerini korumak ve şüpheli kullanımı bildirmek senin sorumluluğundadır. Hesap kurtarma, kayıtlı e-posta üzerinden yapılır. Üniversite, kampüs ve bölüm bilgileri kayıt sonrasında kullanıcı tarafından değiştirilemez; hata varsa iletişim adresinden düzeltme talebi gönderebilirsin. Güvenlik kontrollerini aşmaya, yetkisiz veri almaya, toplu istenmeyen mesaj göndermeye veya hizmeti aksatmaya yönelik kullanım yasaktır.\n\n4. İçerik ve topluluk kuralları\nYalnızca paylaşma hakkına sahip olduğun içerikleri yüklemelisin. Tehdit, taciz, nefret söylemi, ayrımcılık, dolandırıcılık, spam, kişisel verilerin izinsiz ifşası ve hukuka aykırı içerik yasaktır. Çocuklara yönelik istismar içeriğine izin verilmez. Başkasının fotoğrafını, mesajını veya özel bilgisini gerekli hak ve izinler olmadan paylaşma. İçeriğinin hakları sende kalır; hizmeti çalıştırmak için KampüsX'e, içeriğini seçtiğin görünürlük kapsamı ve teknik işleyiş içinde saklama, işleme ve gösterme izni verirsin.\n\n5. Görünürlük, paylaşma ve medya\nHesap durumu tercihleri profilin ve gönderilerin uygulama içinde kimlere görüneceğini belirler. Takip, engelleme ve görünürlük kontrolleri sunucuda uygulanır. Repost ve alıntı, kaynak gönderiye referans verir. Mesajla paylaşımda alıcının da kaynak gönderiye erişebilmesi gerekir; erişim sonradan değişebilir. Yüklenen medya herkese açık bağlantılarla sunulur: bağlantıyı bilen kişiler, uygulamadaki görünürlük veya engel tercihlerinden bağımsız olarak dosyayı açabilir. Hassas veya gizli dosyalar yükleme. Alıcıların aldığı ekran görüntülerini ve uygulama dışı kopyaları denetleyemeyiz.\n\n6. Mesajlaşma ve etkileşimler\nBire bir mesajlaşma, taraflardan en az birinin diğerini onaylı takip etmesine ve aralarında engel bulunmamasına bağlıdır. Takip sona erdiğinde yeni mesaj gönderimi kapanabilir; engelleme mevcut sohbetin görünürlüğünü de etkiler. Mesajlaşma uçtan uca şifreli değildir. Gönderi ve mesaj silme, arşivleme, sabitleme, beğeni ve kaydetme işlemleri ilgili ekranların kurallarıyla çalışır. Silinen içeriklerin teknik yedeklerden veya üçüncü kişi kopyalarından hemen kalktığı garanti edilmez.\n\n7. Şikâyet ve başvurular\nUygulamadaki raporlama ve engelleme seçeneklerini kullanabilir veya iletişim adresine başvurabilirsin. Başvuruda içeriği bulmaya yeterli bilgi ve gerekçeyi ilet; parola veya erişim anahtarı gönderme. Hukuka aykırı kullanım ve hak ihlallerinde içerik erişimi veya hesap, inceleme ve uygulanabilir mevzuat çerçevesinde sınırlandırılabilir. Karara ilişkin itirazını aynı iletişim kanalından iletebilirsin.\n\n8. Hizmetin değişmesi ve hesabın kapatılması\nBakım, güvenlik ve teknik sebeplerle kesinti yaşanabilir. Hizmetin kesintisiz veya hatasız olacağına dair taahhüt verilmez; kanundan doğan hakların saklıdır. Hesap kapatma ve kişisel veri talepleri için iletişim adresini kullanabilirsin. Esaslı şart değişiklikleri uygulama içinde yeni sürüm tarihiyle duyurulur; gerektiğinde yeniden kabul istenir. Bu metin, zorunlu yasal haklarını sınırlandırmaz.",
+    "cookies": "KampüsX Çerez ve Tarayıcı Depolaması Bilgilendirmesi • Sürüm: 22 Ekim 2026\n\nKampüsX, oturumun çalışması ve tercihlerinin korunması için tarayıcı depolaması kullanır. Bu uygulamada reklam takibi veya reklam amaçlı üçüncü taraf çerezi kurulmasına yönelik bir özellik bulunmaz.\n\nOturum: Supabase kimlik doğrulama bilgileri, seçtiğin “Beni hatırla” davranışına göre tarayıcı oturumu veya kalıcı yerel depolamada tutulabilir. Bu bilgi hesabına erişim sağlar; ortak cihazda oturumu kapatmalısın. Çıkışta uygulamanın oturum bilgisi temizlenir.\n\nTercihler: Dil ve açık/koyu tema seçimi cihazında saklanabilir. Form veya sohbet taslağı gibi geçici ekran durumları, ilgili ekranın işleyişi kapsamında bellekte tutulabilir. Reklam profili oluşturmak için kullanılmaz.\n\nAltyapı: Barındırma ve güvenlik sağlayıcıları isteklerin iletilmesi ve kötüye kullanımın önlenmesi için teknik kayıtlar veya gerekli depolama yöntemleri kullanabilir. Haricî bağlantıları açtığında o sitenin politikası geçerlidir.\n\nKontrol: Tarayıcı ayarlarından yerel/oturum depolamasını ve çerezleri temizleyebilir veya sınırlandırabilirsin. Gerekli depolamayı engellemek giriş yapmanı, oturumunu sürdürmeni veya tercihlerin hatırlanmasını engelleyebilir. İsteğe bağlı analiz veya reklam araçları eklenirse amaç ve sağlayıcıları ayrıca açıklanır ve gerektiğinde önceden seçim sunulur.\n\nİletişim: Elif Rüveyda Ulama (elify.dev) • elifrvyd@protonmail.com. Kişisel veri işleme ayrıntıları için Gizlilik ve Kişisel Verilerin İşlenmesi metnini inceleyebilirsin.",
+    "termsTitle": "Kullanım Şartları",
+    "privacyTitle": "Gizlilik ve Kişisel Verilerin İşlenmesi",
+    "cookiesTitle": "Çerezler ve Tarayıcı Depolaması",
+    "terms": "KampüsX Kullanım Şartları • Sürüm: 22 Ekim 2026\n\n1. Hizmet ve işletmeci\nKampüsX, üniversite öğrencilerinin paylaşımda bulunması, birbirini takip etmesi ve bire bir mesajlaşması için sunulan bir sosyal platformdur. İşletmeci: Elif Rüveyda Ulama (elify.dev). İletişim ve başvuru: elifrvyd@protonmail.com. KampüsX, adı geçen üniversitelerin resmî hizmeti veya temsilcisi değildir.\n\n2. Kimler kullanabilir?\nÜyelik üniversite öğrencileri içindir. Kayıtta doğru ve güncel bilgi vermeli, hesabını başkasına kullandırmamalısın. Üniversite, kampüs ve bölüm seçimi öğrenci beyanıdır; tek başına resmî öğrenci doğrulaması sayılmaz. Reşit olmayan öğrenciler, kendi durumlarına uygulanabilen yasal temsilci izin ve onaylarını sağlamalıdır. Kullanıcı adı ve içerikle başka bir kişiyi veya kurumu taklit edemezsin.\n\n3. Hesap ve güvenlik\nErişim bilgilerini korumak ve şüpheli kullanımı bildirmek senin sorumluluğundadır. Hesap kurtarma, kayıtlı e-posta üzerinden yapılır. Üniversite, kampüs ve bölüm bilgileri kayıt sonrasında kullanıcı tarafından değiştirilemez; hata varsa iletişim adresinden düzeltme talebi gönderebilirsin. Güvenlik kontrollerini aşmaya, yetkisiz veri almaya, toplu istenmeyen mesaj göndermeye veya hizmeti aksatmaya yönelik kullanım yasaktır.\n\n4. İçerik ve topluluk kuralları\nYalnızca paylaşma hakkına sahip olduğun içerikleri yüklemelisin. Tehdit, taciz, nefret söylemi, ayrımcılık, dolandırıcılık, spam, kişisel verilerin izinsiz ifşası ve hukuka aykırı içerik yasaktır. Çocuklara yönelik istismar içeriğine izin verilmez. Başkasının fotoğrafını, mesajını veya özel bilgisini gerekli hak ve izinler olmadan paylaşma. İçeriğinin hakları sende kalır; hizmeti çalıştırmak için KampüsX'e, içeriğini seçtiğin görünürlük kapsamı ve teknik işleyiş içinde saklama, işleme ve gösterme izni verirsin.\n\n5. Görünürlük, paylaşma ve medya\nHesap durumu tercihleri profilin ve gönderilerin uygulama içinde kimlere görüneceğini belirler. Takip, engelleme ve görünürlük kontrolleri sunucuda uygulanır. Repost ve alıntı, kaynak gönderiye referans verir. Mesajla paylaşımda alıcının da kaynak gönderiye erişebilmesi gerekir; erişim sonradan değişebilir. Yüklenen medya herkese açık bağlantılarla sunulur: bağlantıyı bilen kişiler, uygulamadaki görünürlük veya engel tercihlerinden bağımsız olarak dosyayı açabilir. Hassas veya gizli dosyalar yükleme. Alıcıların aldığı ekran görüntülerini ve uygulama dışı kopyaları denetleyemeyiz.\n\n6. Mesajlaşma ve etkileşimler\nBire bir mesajlaşma, taraflardan en az birinin diğerini onaylı takip etmesine ve aralarında engel bulunmamasına bağlıdır. Takip sona erdiğinde yeni mesaj gönderimi kapanabilir; engelleme mevcut sohbetin görünürlüğünü de etkiler. Mesajlaşma uçtan uca şifreli değildir. Gönderi ve mesaj silme, arşivleme, sabitleme, beğeni ve kaydetme işlemleri ilgili ekranların kurallarıyla çalışır. Silinen içeriklerin teknik yedeklerden veya üçüncü kişi kopyalarından hemen kalktığı garanti edilmez.\n\n7. Şikâyet ve başvurular\nUygulamadaki raporlama ve engelleme seçeneklerini kullanabilir veya iletişim adresine başvurabilirsin. Başvuruda içeriği bulmaya yeterli bilgi ve gerekçeyi ilet; parola veya erişim anahtarı gönderme. Hukuka aykırı kullanım ve hak ihlallerinde içerik erişimi veya hesap, inceleme ve uygulanabilir mevzuat çerçevesinde sınırlandırılabilir. Karara ilişkin itirazını aynı iletişim kanalından iletebilirsin.\n\n8. Hizmetin değişmesi ve hesabın kapatılması\nBakım, güvenlik ve teknik sebeplerle kesinti yaşanabilir. Hizmetin kesintisiz veya hatasız olacağına dair taahhüt verilmez; kanundan doğan hakların saklıdır. Hesap kapatma ve kişisel veri talepleri için iletişim adresini kullanabilirsin. Esaslı şart değişiklikleri uygulama içinde yeni sürüm tarihiyle duyurulur; gerektiğinde yeniden kabul istenir. Bu metin, zorunlu yasal haklarını sınırlandırmaz.",
+    "privacy": "KampüsX Gizlilik ve Aydınlatma Metni • Sürüm: 22 Ekim 2026\n\n1. Veri sorumlusu ve iletişim\nKampüsX kapsamında veri sorumlusu Elif Rüveyda Ulama (elify.dev)'dır. İletişim ve kişisel veri başvuruları: elifrvyd@protonmail.com. Bu metin, hesabın kurulması ve hizmetin kullanılması sırasında verilerinin nasıl işlendiğini açıklar. Metni okuduğunu onaylaman, reklam veya her türlü veri işleme için genel açık rıza verdiğin anlamına gelmez.\n\n2. İşlenen bilgiler ve toplanma yöntemi\nKayıt ve hesap işlemlerinden e-posta, kullanıcı adı, ad, üniversite, kampüs, bölüm ve isteğe bağlı bio; yüklemelerden profil/kapak fotoğrafı ve gönderi medyası; kullanımdan gönderiler, yorumlar, repost/alıntı referansları, takip istekleri, beğeniler, kaydetmeler, engeller ve şikâyetler alınır. Bire bir sohbetlerde taraflar, mesaj içeriği, gönderilme/silinme ve okunma bilgileri işlenir. Tekil görüntülenme için hesap-gönderi ilişkisi tutulur; diğer kullanıcılara izleyen hesapların listesi açılmaz. Kayıtta kabul edilen şart ve aydınlatma sürümleri ile sunucu zamanı saklanır. Bilgiler, formlar, yüklemeler ve hizmet kullanımı yoluyla elektronik olarak toplanır. Kimlik doğrulama ve barındırma sağlayıcıları güvenlik için IP, cihaz/tarayıcı ve istek kayıtlarını işleyebilir.\n\n3. Amaçlar ve hukuki sebepler\nHesap açma, oturum güvenliği, seçilen kitleye paylaşım, takip ve mesajlaşma hizmetin sunulması ve sözleşmenin ifası için; şikâyetlerin incelenmesi, güvenlik ve kötüye kullanımın önlenmesi, hakların tesisi ve korunması için ilgili yasal şartlar kapsamında yürütülür. Yasal bir bildirim veya saklama yükümlülüğü doğarsa yalnızca bu yükümlülüğün gerektirdiği işlem yapılır. Meşru menfaate dayanılan güvenlik işlemlerinde temel hak ve özgürlüklerin gözetilir. Açık rıza gerektiren yeni bir amaç, zorunlu üyelik kabulünün içine saklanmaz; ayrıca açıklanır ve uygun seçim sunulur.\n\n4. Kimler görebilir?\nProfil ve gönderi erişimi hesap durumu seçimine, takip ilişkilerine ve engel kurallarına göre değişir. Kaydetmelerin ve engel listen diğer kullanıcılara açılmaz. Şikâyetler hizmetin güvenlik ve inceleme süreçlerinde kullanılır. Sohbet mesajları sohbetin iki tarafına sunulur; sistemin işletilmesi ve güvenliği için yetkili teknik erişim bulunabilir. Mesajlar uçtan uca şifreli değildir. Gönderilerdeki toplam görüntülenme sayısı, görünür gönderiye erişen hesaplara gösterilebilir.\n\n5. Herkese açık medya bağlantıları\nFotoğraf ve videolar Supabase Storage içinde public bağlantılarla sunulur. Dosyanın bağlantısını bilen biri, uygulamada engellense veya gönderi görünürlüğü daraltılsa da dosyayı açabilir. Engelleme bu bağlantıları gizli dosyaya dönüştürmez. Dosyaları arşivlemek de bağlantıyı iptal etmez. Bu sınıra göre paylaşım yapmalı; kendine veya başkasına ait hassas bilgileri yüklememelisin.\n\n6. Hizmet sağlayıcıları ve aktarım\nKimlik doğrulama, veritabanı, dosya depolama ve canlı bağlantılar için Supabase; uygulamanın sunulması için barındırma altyapısı (Vercel) kullanılır. Bu sağlayıcılar hizmetin çalışması için gerekli verileri işleyebilir. Altyapı ve destek süreçleri yurt dışında veri işlenmesini içerebilir. Yurt dışına aktarım, uygulanabilir mevzuatın gerektirdiği şart ve güvenceler sağlanarak yürütülmelidir; bu metnin kabulü tek başına aktarım izni sayılmaz. Yetkili kamu kurumlarına ancak geçerli hukuki yükümlülük kapsamında veri verilir. Kişisel verilerin satılmasına veya reklam amacıyla paylaşılmasına dayalı bir kullanım bu hizmet kapsamında sunulmaz.\n\n7. Saklama, silme ve güvenlik\nVeriler, hizmet ve ilgili işlem için gereken süre ve varsa uygulanabilir yasal yükümlülükler boyunca tutulur; gereksiz verilerin silinmesi, yok edilmesi veya anonimleştirilmesi gerekir. Gönderi ve mesajların arayüzden silinmesi önce mantıksal silme olarak uygulanabilir; yedek ve teknik kayıtların yaşam döngüsü farklıdır. Mesaj silindiğinde içerik boşaltılır ve silinme kaydı gösterilir. Şifreleme, erişim kuralları ve oturum kontrolleri kullanılır; hiçbir sistem için mutlak güvenlik sözü verilmez. Yedekler veya başkalarının kaydettiği kopyalar aynı anda ortadan kalkmayabilir.\n\n8. Hakların ve başvuru\n6698 sayılı Kanun kapsamında verilerinin işlenip işlenmediğini öğrenme, işlenmişse bilgi isteme, amacı ve amaca uygun kullanımı öğrenme, aktarıldığı üçüncü kişileri bilme, eksik/yanlış verilerin düzeltilmesini ve şartları oluştuğunda silinmesini/yok edilmesini isteme; bu işlemlerin alıcılara bildirilmesini, yalnız otomatik analizle aleyhine sonuç doğmasına itiraz etmeyi ve hukuka aykırılık sebebiyle zararının giderilmesini talep etme hakların vardır. Başvurunu hesabındaki e-postadan elifrvyd@protonmail.com adresine, talebini ve hesabını belirlemeye yeterli bilgiyle iletebilirsin. Kimlik doğrulaması için ölçülü ek bilgi istenebilir; parolanı gönderme. Başvurular uygulanabilir mevzuattaki usul ve sürelerde değerlendirilir."
   },
   "dashboard": {
     "title": "Ana sayfa — KampüsX",
@@ -407,11 +432,11 @@
     "facultyMissing": "Fakülte bilgisi eklenmemiş",
     "joined": "{{date}} tarihinde katıldı",
     "postCount": "{{count}} gönderi",
+    "featured": "Öne çıkarılanlar",
     "compose": "Gönderi oluştur",
     "saved": "Profilin güncellendi.",
     "drawer": {
       "profile": "Profil",
-      "history": "Geçmiş",
       "community": "Topluluklar",
       "settings": "Ayarlar ve gizlilik",
       "help": "Yardım Merkezi",
@@ -563,6 +588,7 @@
     "unavailable": "Takip işlemlerine şu anda ulaşılamıyor. Tekrar dene."
   },
   "social": {
+    "profileMenu": "Profil seçenekleri",
     "settings": "Ayarlar ve gizlilik",
     "back": "Geri",
     "cancel": "İptal",
@@ -591,13 +617,18 @@
       "body": "Birbirinizin profilini ve gönderilerini uygulama içinde göremezsiniz; takip ve etkileşim kuramazsınız. İki yöndeki takip ilişkisi kaldırılır."
     },
     "report": {
+      "userTitle": "Kullanıcıyı şikâyet et",
+      "userBody": "Bu kullanıcıyı neden şikâyet ettiğini seç.",
+      "userReported": "Kullanıcı şikâyetin kaydedildi.",
+      "userDuplicate": "Bu kullanıcı için şikâyetin zaten kayıtlı.",
       "title": "Gönderiyi raporla",
       "body": "İçeriği neden raporladığını seç. Aynı gönderi için yalnızca bir rapor gönderebilirsin.",
       "reason": "Rapor nedeni",
       "spam": "Spam",
       "harassment": "Taciz",
       "inappropriate": "Uygunsuz içerik",
-      "other": "Diğer"
+      "other": "Diğer",
+      "impersonation": "Başkasının kimliğine bürünme"
     },
     "archive": {
       "title": "Arşivim",
@@ -663,7 +694,7 @@
       "busy": "Bu gönderideki önceki işlemin tamamlanmasını bekle.",
       "ownerSetup": "Gönderi işlemleri henüz etkinleştirilmemiş. Kurulumun tamamlanması gerekiyor.",
       "ownerUncertain": "İşlem sonucu doğrulanamadı. Tekrar işlem yapmadan önce sayfayı yenile.",
-      "pinReply": "Yanıtlar veya arşivlenmiş gönderiler öne çıkarılamaz."
+      "pinReply": "Yalnızca arşivlenmemiş orijinal gönderiler öne çıkarılabilir."
     },
     "notice": {
       "deleted": "Gönderi silindi.",
@@ -679,11 +710,31 @@
     },
     "openProfile": "Profili aç: {{name}}",
     "openPost": "Gönderiyi aç",
-    "profileUnavailable": "Bu profil görüntülenemiyor."
+    "profileUnavailable": "Bu profil görüntülenemiyor.",
+    "repost": {
+      "undo": "Repostu geri al",
+      "create": "Yeniden paylaş",
+      "quote": "Alıntıla",
+      "quoteBody": "Gönderiye kendi yorumunu ekleyerek paylaş.",
+      "quoteLabel": "Yorumun",
+      "publish": "Alıntıyı paylaş",
+      "created": "Gönderi yeniden paylaşıldı.",
+      "removed": "Repost geri alındı.",
+      "quoted": "Alıntı paylaşıldı.",
+      "hidden": "Orijinal gönderi şu anda görüntülenemiyor.",
+      "readError": "Orijinal gönderi yüklenemedi.",
+      "textError": "Alıntın 1–2000 karakter içermeli.",
+      "uncertain": "Paylaşımın sonucu doğrulanamadı. Tekrar paylaşmadan önce profilini kontrol et."
+    },
+    "views": {
+      "title": "Gönderi görüntülenmeleri",
+      "body": "Gönderiyi en az bir saniye ekranda gören farklı giriş yapmış hesaplar sayılır. Aynı hesap tekrar sayılmaz; gönderi sahibi dahil edilmez. Kimlerin baktığı paylaşılmaz.",
+      "failed": "Görüntülenme sayısı şu an alınamadı. Daha sonra tekrar deneyebilirsin."
+    }
   },
   "accountStatus": {
     "title": "Hesap durumu",
-    "description": "Profilini, gönderilerini ve arama sonuçlarındaki görünürlüğünü kimlerle paylaşacağını seç. Değişiklikler Kaydet ile uygulanır.",
+    "description": "Profilin ve gönderilerin için bir görünürlük seviyesi seç.",
     "legacy": "Henüz görünürlük tercihi kaydetmedin. Kaydedene kadar mevcut gizlilik ayarların geçerlidir.",
     "everyone": "Keşfet açık: profilin ve gönderilerin tüm üniversitelerdeki kullanıcılara görünür.",
     "onlyMe": "Tüm seçenekler kapalı: kaydettikten sonra profilini ve gönderilerini yalnızca sen görebilirsin.",
@@ -710,6 +761,107 @@
       "description": "Profilin ve gönderilerin KampüsX kullanan tüm üniversitelerde keşfedilebilir."
     },
     "discardTitle": "Değişikliklerden vazgeç?",
-    "discardBody": "Kaydetmediğin görünürlük tercihleri silinecek."
+    "discardBody": "Kaydetmediğin görünürlük tercihleri silinecek.",
+    "chooseLevel": "Görünürlük seviyesi",
+    "followersAlways": "Onayladığın takipçiler her seviyede gönderilerini görebilir. Engellediğin kişiler göremez.",
+    "missingAcademic": "Bu seviye için kayıtlı akademik kimliğin bulunmuyor.",
+    "levels": {
+      "followers": {
+        "title": "Takipçiler",
+        "description": "Yalnızca sen ve onayladığın takipçiler gönderilerini görebilir."
+      },
+      "department": {
+        "title": "Bölüm",
+        "description": "Aynı üniversite ve bölümdeki öğrenciler de gönderilerini görebilir."
+      },
+      "campus": {
+        "title": "Kampüs",
+        "description": "Aynı üniversite ve kampüsteki öğrenciler de gönderilerini görebilir."
+      },
+      "university": {
+        "title": "Üniversite",
+        "description": "Aynı üniversitedeki öğrenciler de gönderilerini görebilir."
+      },
+      "explore": {
+        "title": "Herkes",
+        "description": "Giriş yapmış tüm kullanıcılar gönderilerini görebilir."
+      }
+    }
+  },
+  "messaging": {
+    "title": "Mesajlar",
+    "conversation": "Sohbet",
+    "action": "Mesaj",
+    "checking": "Mesaj izni kontrol ediliyor…",
+    "notEligible": "Mesajlaşmak için iki kişiden en az birinin diğerini takip ediyor olması gerekir.",
+    "student": "Öğrenci",
+    "loading": "Mesajlar yükleniyor…",
+    "connecting": "Canlı bağlantı kuruluyor…",
+    "offline": "Canlı bağlantı kesildi. Mesajları yenileyerek kontrol edebilirsin.",
+    "unread": "{{count}} okunmamış mesaj",
+    "deleted": "Bu mesaj silindi",
+    "noMessages": "Henüz mesaj yok.",
+    "emptyTitle": "Gelen kutun hazır",
+    "emptyBody": "Takipleştiğin bir kişinin profilindeki Mesaj düğmesinden sohbet başlatabilirsin.",
+    "unavailableTitle": "Bu sohbet kullanılamıyor",
+    "history": "Sohbet mesajları",
+    "older": "Önceki mesajları yükle",
+    "readError": "Okundu bilgisi kaydedilemedi. Yenilediğinde tekrar denenecek.",
+    "readOnly": "Bu sohbete artık mesaj gönderemezsin. Önceki mesajları okuyabilirsin.",
+    "write": "Mesajını yaz",
+    "send": "Gönder",
+    "menu": "Mesaj işlemleri",
+    "delete": "Mesajı sil",
+    "deleteTitle": "Mesaj silinsin mi?",
+    "deleteBody": "Mesajın içeriği iki kişi için de kaldırılır. Bu işlem geri alınamaz.",
+    "discardTitle": "Taslak silinsin mi?",
+    "discardBody": "Yazdığın mesaj henüz gönderilmedi veya gönderim sonucu doğrulanamadı. Sohbeti kontrol ettikten sonra taslağı silebilirsin.",
+    "discard": "Taslağı sil",
+    "newDraft": "Sohbeti kontrol ettim, yeni mesaj yazacağım",
+    "errors": {
+      "unavailable": "Mesajlaşma izni yok veya sohbet artık kullanılamıyor.",
+      "setup": "Mesajlaşma kurulumu kullanılamıyor. Lütfen daha sonra tekrar dene.",
+      "request": "Mesajlar güncellenemedi. Bağlantını kontrol edip tekrar dene.",
+      "uncertain": "Gönderim sonucu doğrulanamadı. Tekrar göndermeden önce sohbeti yenileyip kontrol et.",
+      "content": "Mesaj 1–2000 karakter olmalı ve yalnızca boşluk içermemeli."
+    },
+    "shareTitle": "Gönderiyi mesajla paylaş",
+    "shareBody": "Gönderiyi göndermek istediğin sohbeti seç. Alıcının da gönderiye erişimi olmalı.",
+    "shareUnavailable": "Bu sohbet veya gönderi için paylaşım izni bulunmuyor.",
+    "checkConversation": "Sohbeti açıp gönderimi kontrol et",
+    "readOnlyShort": "Mesaj gönderilemiyor",
+    "findFriend": "Arkadaşını bul ve profilinden sohbet başlat",
+    "shared": "Gönderi mesajla paylaşıldı.",
+    "sharedPost": "Paylaşılan gönderi"
+  },
+  "support": {
+    "title": "Yardım Merkezi",
+    "intro": "Problemini açıklayarak destek ekibine ulaşabilirsin. Hesabının e-posta adresi ve kullanıcı adı başvuruna otomatik eklenir.",
+    "loading": "Hesap bilgilerin doğrulanıyor…",
+    "username": "Kullanıcı adı",
+    "email": "E-posta adresi",
+    "description": "Problemini açıkla",
+    "descriptionHint": "Ne oldu ve hangi adımlarda karşılaştın? Parola, doğrulama kodu veya özel mesaj içeriği paylaşma.",
+    "send": "Destek başvurusu gönder",
+    "sending": "Başvurun gönderiliyor…",
+    "sent": "Başvurun e-posta servisine iletildi.",
+    "reference": "Başvuru numarası:",
+    "pending": "Gönderim henüz doğrulanamadı. Aynı başvuruyu tekrar oluşturmadan önce durumunu kontrol et.",
+    "checkStatus": "Gönderim durumunu kontrol et",
+    "retrySame": "Gönderim doğrulanamadı. Aynı başvuru numarası ve açıklamayla yeniden deneyebilirsin.",
+    "discardTitle": "Destek formundan ayrıl?",
+    "discardBody": "Açıklaman bu cihazda kaydedilmez. Sayfadan ayrılmak, daha önce sunucuya ulaşmış bir e-postayı iptal etmez.",
+    "errors": {
+      "session": "Hesabın doğrulanamadı. Oturumunu kontrol edip tekrar dene.",
+      "unavailable": "Destek gönderimi şu anda kullanılamıyor. Açıklaman korunuyor; daha sonra tekrar dene.",
+      "rateLimit": "Kısa sürede çok fazla başvuru gönderdin. Bir süre bekleyip tekrar dene; saatte en fazla 3, günde en fazla 5 yeni başvuru gönderebilirsin.",
+      "rejected": "E-posta servisi başvurunu kabul etmedi. Açıklaman korunuyor; daha sonra tekrar deneyebilirsin.",
+      "uncertain": "Gönderimin sonucu belirsiz. Tekrar göndermeden önce durumunu kontrol et.",
+      "expired": "Bu başvurunun sonucu doğrulanamadı ve güvenli tekrar gönderim süresi doldu. Otomatik tekrar gönderilmeyecek.",
+      "status": "Başvurunun durumu şu anda okunamıyor. Yeniden göndermeden durumunu tekrar kontrol et.",
+      "invalid": "Boş olmayan, en fazla 4.000 karakterlik bir açıklama yaz."
+    },
+    "privacyTitle": "Başvuru bilgilerinin kullanımı",
+    "privacyBody": "Yardım Merkezi bilgilendirmesi — 22 Ekim 2026\n\nProblemini incelemek ve sana yanıt verebilmek için hesabındaki e-posta adresi, kullanıcı adı ve bu forma yazdığın açıklama işlenir. Gönder düğmesine basmak bu bilgilerin destek ekibine e-postayla iletilmesini ister.\n\nİleti Resend aracılığıyla işletmecinin yapılandırdığı Google/Gmail destek posta kutusuna gönderilir. Bu sağlayıcılar e-postanın içeriğini ve gerekli teknik kayıtları işler; hizmetin bulunduğu yere göre yurt dışında işleme söz konusu olabilir. Mesajlar uçtan uca şifreli değildir.\n\nUygulamanın özel güvenlik kaydında açıklama, e-posta veya kullanıcı adı tutulmaz; başvuru ve hesap kimlikleri, içerik özeti, zaman, deneme sayısı ve gönderim durumu bulunur. Bu kayıtlar spam ve yinelenen gönderimi önlemek için kullanılır ve hesap silinince kaldırılır. E-postanın Resend ve destek posta kutusundaki kopyaları ayrı sağlayıcı süreçlerine tabidir.\n\nAçıklamana parola, doğrulama kodu, sağlık bilgisi, özel mesaj içeriği veya başkasına ait gereksiz kişisel veri ekleme. Gizlilik ve hak başvuruları için mevcut Gizlilik Politikası geçerlidir. Veri sorumlusu Elif Rüveyda Ulama (elify.dev); kişisel veri başvurusu: elifrvyd@protonmail.com."
   }
 }

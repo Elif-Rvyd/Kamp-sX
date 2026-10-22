@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AcademicService, type AcademicOption } from '../../../core/academic.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/auth.service';
 import { Router } from '@angular/router';
@@ -9,6 +11,7 @@ import {
   PasswordFieldComponent,
   IconComponent,
   LegalDialogComponent,
+  AcademicPickerComponent,
 } from '@kampusx/shared/ui';
 import { universityEmail, username, validateAndFocus } from '@kampusx/shared/util';
 @Component({
@@ -22,6 +25,7 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
     PasswordFieldComponent,
     IconComponent,
     LegalDialogComponent,
+    AcademicPickerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-container *transloco="let t"
@@ -57,36 +61,29 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         placeholderKey="auth.register.usernamePlaceholder"
         hintKey="auth.register.usernameHint"
         [control]="form.controls.username"
-      /><kx-form-field
+      />
+      <p class="field-message" role="status">{{ t('academic.username.' + usernameState()) }}</p>
+      <kx-form-field
         fieldId="register-bio"
         icon="notes"
         labelKey="auth.register.bio"
         placeholderKey="auth.register.bioPlaceholder"
         [control]="form.controls.bio"
         [maxLength]="160"
-      /><kx-form-field
-        fieldId="register-university"
-        icon="school"
-        autocomplete="organization"
-        labelKey="auth.register.university"
-        placeholderKey="auth.register.universityPlaceholder"
-        [control]="form.controls.university"
-        [maxLength]="150"
-      /><kx-form-field
-        fieldId="register-campus"
-        icon="apartment"
-        labelKey="auth.register.campus"
-        placeholderKey="auth.register.campusPlaceholder"
-        [control]="form.controls.campus"
-        [maxLength]="150"
-      /><kx-form-field
-        fieldId="register-department"
-        icon="code"
-        labelKey="auth.register.department"
-        placeholderKey="auth.register.departmentPlaceholder"
-        [control]="form.controls.department"
-        [maxLength]="150"
-      /><kx-form-field
+      />
+      @for (kind of academicKinds; track kind) {
+        <kx-academic-picker
+          [fieldId]="'register-' + kind"
+          [labelKey]="'auth.register.' + kind"
+          [control]="form.controls[kind]"
+          [options]="options()[kind]"
+          [loading]="lookupLoading()[kind]"
+          [failed]="lookupFailed()[kind]"
+          (queryChanged)="academicChanged(kind, $event)"
+          (retried)="searchAcademic(kind, '')"
+        />
+      }
+      <kx-form-field
         fieldId="register-email"
         type="email"
         autocomplete="email"
@@ -111,19 +108,28 @@ import { universityEmail, username, validateAndFocus } from '@kampusx/shared/uti
         {{ form.controls.consent.touched && form.controls.consent.invalid ? t('validation.required') : '' }}
       </p>
       <div class="legal-links">
-        <button type="button" class="text-button" (click)="legal.open('legal.text')">
+        <button type="button" class="text-button" (click)="legal.open('legal.terms')">
           {{ t('auth.termsLink') }}</button
         ><span aria-hidden="true">·</span
-        ><button type="button" class="text-button" (click)="legal.open('legal.text')">
+        ><button type="button" class="text-button" (click)="legal.open('legal.privacy')">
           {{ t('auth.privacyLink') }}
         </button>
       </div>
-      <button kxButton type="submit" class="full-width" [busy]="busy()">
+      <button kxButton type="submit" class="full-width" [busy]="busy()" [disabled]="done()">
         {{ t('auth.register.submit') }}<kx-icon name="arrow_forward" />
       </button>
       <div class="form-status" role="status">
         @if (done()) {
           <p class="success-message"><kx-icon name="check_circle" />{{ t('auth.register.success') }}</p>
+        }
+        @if (done() && assignedUsername()) {
+          <p>{{ t('academic.assigned', { username: assignedUsername() }) }}</p>
+        }
+        @if (done() && !assignedUsername()) {
+          <p>{{ t('academic.assignedAfterLogin') }}</p>
+        }
+        @if (done() && api.session()) {
+          <button kxButton type="button" (click)="continue()">{{ t('academic.continue') }}</button>
         }
         @if (errorKey()) {
           <p class="field-message error-text" role="alert">{{ t(errorKey()) }}</p>
@@ -139,7 +145,8 @@ export class RegisterFormComponent {
   readonly busy = signal(false);
   readonly done = signal(false);
   readonly googleNotice = signal(false);
-  private readonly api = inject(AuthService);
+  readonly api = inject(AuthService);
+  private readonly academic = inject(AcademicService);
   private readonly router = inject(Router);
   readonly errorKey = signal('');
   readonly form = new FormGroup({
@@ -188,26 +195,135 @@ export class RegisterFormComponent {
     consent: new FormControl(false, { nonNullable: true, validators: [Validators.requiredTrue] }),
   });
 
+  readonly academicKinds = ['university', 'campus', 'department'] as const;
+  readonly options = signal<Record<'university' | 'campus' | 'department', AcademicOption[]>>({
+    university: [],
+    campus: [],
+    department: [],
+  });
+  readonly lookupLoading = signal({ university: false, campus: false, department: false });
+  readonly lookupFailed = signal({ university: false, campus: false, department: false });
+  readonly usernameState = signal<'idle' | 'checking' | 'available' | 'taken' | 'unavailable'>('idle');
+  readonly assignedUsername = signal<string | null>(null);
+  private universityId: string | null = null;
+  private readonly requests = new Map<string, AbortController>();
+  private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
+  constructor() {
+    this.form.controls.username.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.requests.get('username')?.abort();
+      clearTimeout(this.timers.get('username'));
+      this.usernameState.set('idle');
+      if (this.form.controls.username.valid)
+        this.timers.set(
+          'username',
+          setTimeout(() => void this.checkUsername(), 350),
+        );
+    });
+    this.searchAcademic('university', '');
+    this.destroyRef.onDestroy(() => {
+      this.requests.forEach((r) => r.abort());
+      this.timers.forEach(clearTimeout);
+    });
+  }
+  academicChanged(kind: 'university' | 'campus' | 'department', text: string) {
+    if (kind !== 'university') return;
+    this.universityId = this.options().university.find((o) => o.name === text)?.id ?? null;
+    for (const child of ['campus', 'department'] as const) {
+      this.form.controls[child].reset('');
+      this.searchAcademic(child, '');
+    }
+  }
+  searchAcademic(kind: 'university' | 'campus' | 'department', text: string) {
+    void text;
+    this.requests.get(kind)?.abort();
+    this.options.update((v) => ({ ...v, [kind]: [] }));
+    this.lookupFailed.update((v) => ({ ...v, [kind]: false }));
+    const universityId = this.universityId;
+    if (kind !== 'university' && !universityId) {
+      this.lookupLoading.update((v) => ({ ...v, [kind]: false }));
+      return;
+    }
+    const request = new AbortController();
+    this.requests.set(kind, request);
+    this.lookupLoading.update((v) => ({ ...v, [kind]: true }));
+    void this.academic
+      .search(
+        kind === 'university' ? 'universities' : kind === 'campus' ? 'campuses' : 'departments',
+        '',
+        universityId,
+        AbortSignal.any([request.signal, AbortSignal.timeout(20000)]),
+      )
+      .then((rows) => {
+        if (!request.signal.aborted && !this.destroyRef.destroyed)
+          this.options.update((v) => ({ ...v, [kind]: rows }));
+      })
+      .catch(() => {
+        if (!request.signal.aborted && !this.destroyRef.destroyed)
+          this.lookupFailed.update((v) => ({ ...v, [kind]: true }));
+      })
+      .finally(() => {
+        if (!request.signal.aborted && !this.destroyRef.destroyed)
+          this.lookupLoading.update((v) => ({ ...v, [kind]: false }));
+      });
+  }
+  private async checkUsername(): Promise<boolean> {
+    this.requests.get('username')?.abort();
+    clearTimeout(this.timers.get('username'));
+    const request = new AbortController();
+    this.requests.set('username', request);
+    const value = this.form.controls.username.value;
+    this.usernameState.set('checking');
+    try {
+      const available = await this.academic.usernameAvailable(
+        value,
+        AbortSignal.any([request.signal, AbortSignal.timeout(15000)]),
+      );
+      if (request.signal.aborted || this.destroyRef.destroyed || this.form.controls.username.value !== value)
+        return false;
+      this.usernameState.set(available ? 'available' : 'taken');
+      return available;
+    } catch {
+      if (!request.signal.aborted && !this.destroyRef.destroyed) this.usernameState.set('unavailable');
+      return false;
+    }
+  }
+  async continue() {
+    await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+  }
   async submit() {
     if (this.busy() || !validateAndFocus(this.form, this.host)) return;
+    if (
+      this.academicKinds.some(
+        (kind) => !this.options()[kind].some((option) => option.name === this.form.controls[kind].value),
+      )
+    ) {
+      this.errorKey.set('academic.invalidSelection');
+      return;
+    }
     this.done.set(false);
     this.errorKey.set('');
     this.busy.set(true);
     const v = this.form.getRawValue();
     try {
+      if (!(await this.checkUsername())) return;
+      if (this.destroyRef.destroyed || JSON.stringify(v) !== JSON.stringify(this.form.getRawValue())) return;
       const { data, error } = await this.api.signUp(v.email.trim(), v.password, v.username.trim(), {
         university: v.university.trim(),
         department: v.department.trim(),
         campus: v.campus.trim(),
         fullName: v.fullName.trim(),
         bio: v.bio.trim(),
+        consent: v.consent,
       });
       if (this.destroyRef.destroyed) return;
       if (error) this.errorKey.set(this.api.errorKey(error));
       else {
         this.form.controls.password.reset();
         this.done.set(true);
-        if (data.session) await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+        if (data.session)
+          this.assignedUsername.set(
+            await this.academic.assignedUsername(data.session.user.id, AbortSignal.timeout(15000)),
+          );
       }
     } catch (error) {
       if (!this.destroyRef.destroyed) this.errorKey.set(this.api.errorKey(error));

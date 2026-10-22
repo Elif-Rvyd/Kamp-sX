@@ -8,13 +8,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { ButtonComponent, SwitchComponent, ConfirmDialogComponent } from '@kampusx/shared/ui';
+import { ButtonComponent, ConfirmDialogComponent } from '@kampusx/shared/ui';
 import {
   AccountService,
   AUDIENCE_KEYS,
+  audienceFlags,
+  audienceLevel,
+  type AudienceLevel,
   type AccountPreferences,
   type Audience,
-  type AudienceKey,
 } from '../../core/account.service';
 import { AuthService } from '../../core/auth.service';
 import { PostsService } from '../../core/posts.service';
@@ -25,13 +27,7 @@ import { bindProfilePage } from '../profile/profile-page-context';
 import { SocialPageFrameComponent } from './social-page-frame.component';
 @Component({
   standalone: true,
-  imports: [
-    TranslocoDirective,
-    ButtonComponent,
-    SwitchComponent,
-    ConfirmDialogComponent,
-    SocialPageFrameComponent,
-  ],
+  imports: [TranslocoDirective, ButtonComponent, ConfirmDialogComponent, SocialPageFrameComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './social-pages.css',
   template: `<kx-social-page-frame titleKey="accountStatus.title" back="/settings"
@@ -49,37 +45,30 @@ import { SocialPageFrameComponent } from './social-page-frame.component';
         </div>
       }
       @if (baseline(); as current) {
-        @if (!current.audience_configured) {
-          <p class="status" role="status">{{ t('accountStatus.legacy') }}</p>
-        }
         <form novalidate (submit)="save($event)" [attr.aria-busy]="saving()">
-          @for (key of keys; track key) {
-            <div class="audience-row">
-              <div>
-                <h2 [id]="key + '-label'">{{ t('accountStatus.' + key + '.title') }}</h2>
-                <p [id]="key + '-description'">{{ t('accountStatus.' + key + '.description') }}</p>
-              </div>
-              <button
-                kxSwitch
-                [checked]="values()[key]"
-                [disabled]="saving() || loading() || uncertain()"
-                [attr.aria-labelledby]="key + '-label'"
-                [attr.aria-describedby]="key + '-description'"
-                (changed)="change(key, $event)"
-              ></button>
-            </div>
-          }
-          <p class="status" role="status">
-            {{
-              t(
-                values().visible_explore
-                  ? 'accountStatus.everyone'
-                  : !anyEnabled()
-                    ? 'accountStatus.onlyMe'
-                    : 'accountStatus.combined'
-              )
-            }}
-          </p>
+          <fieldset>
+            <legend class="status">{{ t('accountStatus.chooseLevel') }}</legend>
+            @for (level of levels; track level) {
+              <label class="audience-row">
+                <div>
+                  <strong>{{ t('accountStatus.levels.' + level + '.title') }}</strong>
+                  <p>{{ t('accountStatus.levels.' + level + '.description') }}</p>
+                  @if (disabledLevel(level)) {
+                    <p>{{ t('accountStatus.missingAcademic') }}</p>
+                  }
+                </div>
+                <input
+                  type="radio"
+                  name="audience"
+                  [value]="level"
+                  [checked]="selected() === level"
+                  [disabled]="saving() || loading() || uncertain() || disabledLevel(level)"
+                  (change)="change(level)"
+                />
+              </label>
+            }
+          </fieldset>
+          <p class="status">{{ t('accountStatus.followersAlways') }}</p>
           <div class="more">
             <button
               kxButton
@@ -102,6 +91,17 @@ import { SocialPageFrameComponent } from './social-page-frame.component';
       /> </ng-container
   ></kx-social-page-frame>`,
   styles: `
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+    input[type='radio'] {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      accent-color: var(--color-primary);
+    }
     .audience-row {
       display: flex;
       align-items: center;
@@ -144,13 +144,18 @@ export class AccountStatusPage {
     visible_university: false,
     visible_explore: false,
   });
-  readonly anyEnabled = computed(() => this.keys.some((key) => this.values()[key]));
+  readonly levels: readonly AudienceLevel[] = ['followers', 'department', 'campus', 'university', 'explore'];
+  readonly selected = computed(() => audienceLevel(this.values()));
+  disabledLevel(level: AudienceLevel): boolean {
+    return (
+      (level === 'campus' && !this.baseline()?.campus_id) ||
+      (level === 'department' && !this.baseline()?.department_id)
+    );
+  }
   readonly dirty = computed(
     () => !!this.baseline() && this.keys.some((key) => this.baseline()![key] !== this.values()[key]),
   );
-  readonly canSave = computed(
-    () => !!this.baseline() && (!this.baseline()!.audience_configured || this.dirty()),
-  );
+  readonly canSave = computed(() => !!this.baseline() && this.dirty());
   private readonly discard = viewChild.required<ConfirmDialogComponent>('discard');
   canLeave(): boolean | Promise<boolean> {
     return !this.current() || (!this.dirty() && !this.saving())
@@ -167,8 +172,8 @@ export class AccountStatusPage {
   private current() {
     return !this.destroy.destroyed && this.auth.sessionEpoch() === this.epoch && !!this.auth.session();
   }
-  change(key: AudienceKey, value: boolean) {
-    this.values.update((old) => ({ ...old, [key]: value }));
+  change(level: AudienceLevel) {
+    if (!this.disabledLevel(level)) this.values.set(audienceFlags(level));
   }
   async load() {
     this.request.abort();
@@ -180,7 +185,7 @@ export class AccountStatusPage {
       const value = await this.account.preferences(this.request.signal);
       if (this.current() && version === this.loadVersion) {
         this.baseline.set(value);
-        this.values.set(value);
+        this.values.set(audienceFlags(audienceLevel(value)));
         this.uncertain.set(false);
       }
     } catch (error) {
@@ -199,7 +204,7 @@ export class AccountStatusPage {
       const value = await this.account.save(this.values());
       if (!this.current()) return;
       this.baseline.set(value);
-      this.values.set(value);
+      this.values.set(audienceFlags(audienceLevel(value)));
       this.notice.show('accountStatus.saved');
       await Promise.all([this.posts.load(), this.follows.refresh()]);
     } catch (error) {

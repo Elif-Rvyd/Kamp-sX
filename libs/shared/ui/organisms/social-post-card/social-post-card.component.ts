@@ -5,8 +5,21 @@ import { LocalizedNumberPipe, profileInitials, type PostAuthor, type SocialPost 
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { ActionMenuComponent, type ActionMenuItem } from '../../molecules/action-menu/action-menu.component';
+import { ActionSheetComponent } from '../../molecules/action-sheet/action-sheet.component';
 export type PostAction =
-  'like' | 'bookmark' | 'comments' | 'delete' | 'pin' | 'archive' | 'restore' | 'report' | 'block';
+  | 'share'
+  | 'views'
+  | 'repost'
+  | 'quote'
+  | 'like'
+  | 'bookmark'
+  | 'comments'
+  | 'delete'
+  | 'pin'
+  | 'archive'
+  | 'restore'
+  | 'report'
+  | 'block';
 @Component({
   selector: 'kx-social-post-card',
   standalone: true,
@@ -17,6 +30,7 @@ export type PostAction =
     AvatarComponent,
     IconComponent,
     ActionMenuComponent,
+    ActionSheetComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './social-post-card.component.css',
@@ -76,6 +90,7 @@ export type PostAction =
         loading="lazy"
       />
     }
+    <ng-content select="[postEmbed]" />
     @if (post().createdAt) {
       <a class="post-date" [routerLink]="postLink()">
         <time [attr.datetime]="post().createdAt">{{ date() }}</time>
@@ -83,29 +98,40 @@ export type PostAction =
     }
     <div class="post-actions">
       @for (action of actions; track action.id) {
-        <button
-          type="button"
-          [disabled]="
-            busy() ||
-            !interactive(action.id) ||
-            ((action.id === 'like' || action.id === 'bookmark') && !reactionsReady()) ||
-            !!post().archivedAt ||
-            post().deletionPending
-          "
-          [class.selected]="
-            action.id === 'like' ? post().liked : action.id === 'bookmark' && post().bookmarked
-          "
-          [attr.aria-pressed]="
-            action.id === 'like' ? !!post().liked : action.id === 'bookmark' ? !!post().bookmarked : null
-          "
-          [attr.aria-label]="t(action.labelKey)"
-          (click)="activate(action.id)"
-        >
-          <kx-icon [name]="action.icon" />
-          @if (action.stat) {
-            <span>{{ post().stats[action.stat] | kxNumber }}</span>
-          }
-        </button>
+        @if (action.id === 'retweet') {
+          <kx-action-sheet
+            icon="repeat"
+            labelKey="profile.actions.retweet"
+            [items]="repostMenu()"
+            [count]="post().stats.retweets"
+            [disabled]="busy() || !reactionsReady() || !!post().archivedAt || !repostsEnabled()"
+            (selected)="this.action.emit($event === 'quote' ? 'quote' : 'repost')"
+          />
+        } @else {
+          <button
+            type="button"
+            [disabled]="
+              busy() ||
+              !interactive(action.id) ||
+              ((action.id === 'like' || action.id === 'bookmark') && !reactionsReady()) ||
+              !!post().archivedAt ||
+              post().deletionPending
+            "
+            [class.selected]="
+              action.id === 'like' ? post().liked : action.id === 'bookmark' && post().bookmarked
+            "
+            [attr.aria-pressed]="
+              action.id === 'like' ? !!post().liked : action.id === 'bookmark' ? !!post().bookmarked : null
+            "
+            [attr.aria-label]="t(action.labelKey)"
+            (click)="activate(action.id)"
+          >
+            <kx-icon [name]="action.icon" />
+            @if (action.stat) {
+              <span>{{ (action.id === 'views' ? viewsCount() : post().stats[action.stat]) | kxNumber }}</span>
+            }
+          </button>
+        }
       }
     </div>
   </article>`,
@@ -117,6 +143,8 @@ export class SocialPostCardComponent {
   readonly ownerId = input('');
   readonly busy = input(false);
   readonly reactionsReady = input(false);
+  readonly repostsEnabled = input(true);
+  readonly viewsCount = input<number | null>(null);
   readonly action = output<PostAction>();
   readonly own = computed(() => !!this.ownerId() && this.post().userId === this.ownerId());
   readonly menuItems = computed<readonly ActionMenuItem[]>(() =>
@@ -124,7 +152,7 @@ export class SocialPostCardComponent {
       ? this.post().deletionPending
         ? [{ id: 'delete', labelKey: 'social.menu.retryDelete', icon: 'delete', danger: true }]
         : [
-            ...(!this.post().archivedAt && !this.post().parentId
+            ...(!this.post().archivedAt && !this.post().parentId && this.post().kind === 'post'
               ? [
                   {
                     id: 'pin',
@@ -152,8 +180,16 @@ export class SocialPostCardComponent {
           { id: 'block', labelKey: 'social.menu.block', icon: 'block', danger: true },
         ],
   );
+  readonly repostMenu = computed<readonly ActionMenuItem[]>(() => [
+    {
+      id: 'repost',
+      labelKey: this.post().ownRepostId ? 'social.repost.undo' : 'social.repost.create',
+      icon: 'repeat',
+    },
+    { id: 'quote', labelKey: 'social.repost.quote', icon: 'format_quote' },
+  ]);
   interactive(id: string): boolean {
-    return ['reply', 'like', 'bookmark'].includes(id);
+    return ['reply', 'like', 'bookmark', 'views', 'share'].includes(id);
   }
   activate(id: string): void {
     if (!this.busy() && this.interactive(id))

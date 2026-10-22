@@ -15,6 +15,7 @@ const person = (id, username, is_private = true) => ({
   bio: null,
   created_at: '2026-10-18T10:00:00Z',
   is_private,
+  visible_explore: !is_private,
 });
 const relation = (a, b, status = 'pending') => ({
   follower_id: a,

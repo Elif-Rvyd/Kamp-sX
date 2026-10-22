@@ -6,29 +6,46 @@ import {
   inject,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { ButtonComponent } from '@kampusx/shared/ui';
+import {
+  ActionMenuComponent,
+  ButtonComponent,
+  ConfirmDialogComponent,
+  ReportReasonComponent,
+  type ActionMenuItem,
+} from '@kampusx/shared/ui';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AccountService } from '../../core/account.service';
 import { SupabaseService } from '../../core/supabase.service';
 import type { Database } from '../../core/database.generated';
 import { AuthService } from '../../core/auth.service';
 import { FollowsService } from '../../core/follows.service';
-import { PostActionsService } from '../../core/post-actions.service';
+import { PostActionsService, type ReportReason } from '../../core/post-actions.service';
+import { NoticeService } from '../../core/notice.service';
 import { PostsService, POST_COLUMNS, type StoredPost } from '../../core/posts.service';
-import { MediaService } from '../../core/media.service';
+import { MediaError, MediaService } from '../../core/media.service';
 import { LanguageService } from '../../core/language.service';
 import { ThemeService } from '../../core/theme.service';
+import { MessagingApiService, MessagingError } from '../../core/messaging-api.service';
 import type { Profile } from '../../core/profile.model';
 import { ProfileHeaderComponent } from './components/profile-header.component';
 import { ProfilePostListComponent } from './components/profile-post-list.component';
 import { bindProfilePage } from './profile-page-context';
 @Component({
   standalone: true,
-  imports: [TranslocoDirective, ButtonComponent, ProfileHeaderComponent, ProfilePostListComponent],
+  imports: [
+    TranslocoDirective,
+    ButtonComponent,
+    ProfileHeaderComponent,
+    ProfilePostListComponent,
+    ActionMenuComponent,
+    ConfirmDialogComponent,
+    ReportReasonComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: '../social/social-pages.css',
   template: `<section class="social-page" *transloco="let t">
@@ -51,11 +68,25 @@ import { bindProfilePage } from './profile-page-context';
         (languageChanged)="language.set($event)"
         (themeChanged)="theme.toggle()"
       >
+        <kx-action-menu
+          profileMenu
+          labelKey="social.profileMenu"
+          [surface]="true"
+          [items]="menu"
+          [disabled]="saving() || moderating()"
+          (selected)="moderate($event)"
+        />
         <div profileAction class="profile-action">
           @if (follows.setupError()) {
             <p class="error-text" role="status">{{ t(follows.setupError()) }}</p>
           }
-          <button kxButton type="button" [busy]="saving()" [disabled]="!follows.ready()" (click)="follow()">
+          <button
+            kxButton
+            type="button"
+            [busy]="saving()"
+            [disabled]="!follows.ready() || moderating()"
+            (click)="follow()"
+          >
             {{
               t(
                 'follows.actions.' +
@@ -63,8 +94,26 @@ import { bindProfilePage } from './profile-page-context';
               )
             }}
           </button>
+          <button
+            kxButton
+            type="button"
+            emphasis="outline"
+            [busy]="messageBusy()"
+            [disabled]="!canMessage() || saving() || moderating()"
+            (click)="message()"
+          >
+            {{ t('messaging.action') }}
+          </button>
+          @if (messageError()) {
+            <p class="error-text" role="status">{{ t(messageError()) }}</p>
+          } @else if (!canMessage()) {
+            <p role="status">{{ t(messageChecking() ? 'messaging.checking' : 'messaging.notEligible') }}</p>
+          }
           @if (actionError()) {
             <p class="error-text" role="alert">{{ t('follows.saveError') }}</p>
+          }
+          @if (moderationError()) {
+            <p class="error-text" role="alert">{{ t(moderationError()) }}</p>
           }
         </div>
       </kx-profile-header>
@@ -74,10 +123,40 @@ import { bindProfilePage } from './profile-page-context';
         <h1>{{ t('social.profileUnavailable') }}</h1>
       </div>
     }
+    <kx-confirm-dialog
+      #blockDialog
+      dialogId="profile-block"
+      titleKey="social.block.title"
+      bodyKey="social.block.body"
+      cancelKey="social.cancel"
+      confirmKey="social.menu.block"
+    />
+    <kx-confirm-dialog
+      #reportDialog
+      dialogId="profile-report"
+      titleKey="social.report.userTitle"
+      bodyKey="social.report.userBody"
+      cancelKey="social.cancel"
+      confirmKey="social.menu.report"
+    >
+      <kx-report-reason
+        name="profile-report-reason"
+        [value]="reportReason()"
+        (changed)="reportReason.set($event)"
+      />
+    </kx-confirm-dialog>
   </section>`,
   styles: `
     .profile-action {
       margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .profile-action p {
+      flex-basis: 100%;
+      font-size: 0.875rem;
+      margin: 0;
     }
   `,
 })
@@ -90,6 +169,10 @@ export class PublicProfilePage {
   private readonly api = inject(PostsService);
   private readonly media = inject(MediaService);
   private readonly destroy = inject(DestroyRef);
+  private readonly notice = inject(NoticeService);
+  private readonly messaging = inject(MessagingApiService);
+  private readonly blockDialog = viewChild.required<ConfirmDialogComponent>('blockDialog');
+  private readonly reportDialog = viewChild.required<ConfirmDialogComponent>('reportDialog');
   private readonly client = inject(SupabaseService).client as SupabaseClient<Database> | null;
   readonly follows = inject(FollowsService);
   readonly language = inject(LanguageService);
@@ -101,12 +184,32 @@ export class PublicProfilePage {
   readonly error = signal(false);
   readonly saving = signal(false);
   readonly actionError = signal(false);
+  readonly moderating = signal(false);
+  readonly moderationError = signal('');
+  readonly reportReason = signal<ReportReason>('spam');
+  readonly canMessage = signal(false);
+  readonly messageChecking = signal(false);
+  readonly messageBusy = signal(false);
+  readonly messageError = signal('');
+  readonly menu: readonly ActionMenuItem[] = [
+    { id: 'report', labelKey: 'social.menu.report', icon: 'flag' },
+    { id: 'block', labelKey: 'social.menu.block', icon: 'block', danger: true },
+  ];
+  private moderationTicket?: symbol;
   private readonly id = signal('');
   private request?: AbortController;
   private revision = 0;
   constructor() {
     bindProfilePage('profile.title');
-    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => this.id.set(params.get('id') ?? ''));
+    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const id = params.get('id') ?? '';
+      if (id !== this.id()) {
+        this.moderationTicket = undefined;
+        this.moderating.set(false);
+        this.moderationError.set('');
+      }
+      this.id.set(id);
+    });
     effect(() => {
       this.id();
       this.auth.sessionEpoch();
@@ -120,6 +223,40 @@ export class PublicProfilePage {
   back() {
     void this.router.navigateByUrl('/search');
   }
+  async moderate(action: string): Promise<void> {
+    if (!['report', 'block'].includes(action) || this.moderating() || this.saving()) return;
+    const target = this.id(),
+      epoch = this.auth.sessionEpoch(),
+      owner = this.auth.session()?.user.id;
+    if (!owner || target === owner || this.profile()?.id !== target) return;
+    const ticket = (this.moderationTicket = Symbol());
+    const current = () =>
+      !this.destroy.destroyed &&
+      this.id() === target &&
+      this.auth.session()?.user.id === owner &&
+      this.auth.sessionEpoch() === epoch &&
+      this.moderationTicket === ticket;
+    this.moderating.set(true);
+    this.moderationError.set('');
+    try {
+      if (!(await (action === 'block' ? this.blockDialog() : this.reportDialog()).ask()) || !current())
+        return;
+      if (action === 'block') {
+        await this.actions.blockUser(target);
+        if (!current()) return;
+        this.notice.show('social.notice.blocked');
+        await this.router.navigateByUrl('/search', { replaceUrl: true });
+      } else {
+        const created = await this.actions.reportUser(target, this.reportReason());
+        if (current())
+          this.notice.show(created ? 'social.report.userReported' : 'social.report.userDuplicate');
+      }
+    } catch (error) {
+      if (current()) this.moderationError.set(error instanceof MediaError ? error.key : 'social.errors.save');
+    } finally {
+      if (current()) this.moderating.set(false);
+    }
+  }
   async load() {
     this.request?.abort();
     const controller = (this.request = new AbortController());
@@ -132,6 +269,10 @@ export class PublicProfilePage {
     this.posts.set([]);
     this.error.set(false);
     this.status.set('none');
+    this.canMessage.set(false);
+    this.messageError.set('');
+    this.messageChecking.set(false);
+    this.messageBusy.set(false);
     this.loading.set(false);
     if (id === owner) {
       await this.router.navigateByUrl('/profile', { replaceUrl: true });
@@ -205,10 +346,50 @@ export class PublicProfilePage {
         followersCount: followers.error ? null : followers.count,
         postCount: posts.count ?? posts.data?.length ?? 0,
       });
+      this.messageChecking.set(true);
+      void this.messaging
+        .canMessage(id, signal)
+        .then((allowed) => {
+          if (current()) this.canMessage.set(allowed);
+        })
+        .catch((error) => {
+          if (current())
+            this.messageError.set(error instanceof MessagingError ? error.key : 'messaging.errors.request');
+        })
+        .finally(() => {
+          if (current()) this.messageChecking.set(false);
+        });
     } catch {
       if (current()) this.error.set(true);
     } finally {
       if (current()) this.loading.set(false);
+    }
+  }
+  async message(): Promise<void> {
+    if (!this.canMessage() || this.messageBusy() || !this.request) return;
+    const id = this.id(),
+      epoch = this.auth.sessionEpoch(),
+      revision = this.revision;
+    const current = () =>
+      !this.destroy.destroyed &&
+      id === this.id() &&
+      epoch === this.auth.sessionEpoch() &&
+      revision === this.revision;
+    this.messageBusy.set(true);
+    this.messageError.set('');
+    try {
+      const conv = await this.messaging.start(
+        id,
+        AbortSignal.any([this.request.signal, AbortSignal.timeout(20000)]),
+      );
+      if (current()) await this.router.navigate(['/messages', conv]);
+    } catch (error) {
+      if (current()) {
+        this.canMessage.set(false);
+        this.messageError.set(error instanceof MessagingError ? error.key : 'messaging.errors.request');
+      }
+    } finally {
+      if (current()) this.messageBusy.set(false);
     }
   }
   async follow() {

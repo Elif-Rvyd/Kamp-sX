@@ -111,22 +111,21 @@ export class PostsService {
     if (!(await this.account.installed(signal))) throw new MediaError('accountStatus.setup');
     const academic = await this.account.profile(owner, signal);
     if (
-      !academic?.university?.trim() ||
-      (scope !== 'university' && !academic.campus.trim()) ||
-      (scope === 'department' && !academic.studying?.trim())
+      !academic?.university_id ||
+      (scope === 'campus' && !academic.campus_id) ||
+      (scope === 'department' && !academic.department_id)
     )
       throw new MediaError('posts.academicMissing');
-    const literal = (value: string) => value.trim().replace(/[\\%_]/g, '\\$&');
     let query = this.client!.schema('public')
       .from('posts')
       .select(
-        'id,user_id,content,media_url,media_type,created_at,archived_at,deleted_at,pinned_at,likes_count,replies_count,reposts_count,parent_id,repost_of_id,profiles!inner(university,campus,studying)',
+        'id,user_id,content,media_url,media_type,created_at,archived_at,deleted_at,pinned_at,likes_count,replies_count,reposts_count,parent_id,repost_of_id,profiles!inner(university_id,campus_id,department_id)',
       )
       .is('archived_at', null)
       .is('deleted_at', null)
-      .ilike('profiles.university', literal(academic.university));
-    if (scope !== 'university') query = query.ilike('profiles.campus', literal(academic.campus));
-    if (scope === 'department') query = query.ilike('profiles.studying', literal(academic.studying!));
+      .eq('profiles.university_id', academic.university_id);
+    if (scope === 'campus') query = query.eq('profiles.campus_id', academic.campus_id!);
+    if (scope === 'department') query = query.eq('profiles.department_id', academic.department_id!);
     return query
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
@@ -204,6 +203,7 @@ export class PostsService {
       id: String(row['id']),
       userId: String(row['user_id']),
       parentId: typeof row['parent_id'] === 'string' ? row['parent_id'] : undefined,
+      repostOfId: typeof row['repost_of_id'] === 'string' ? row['repost_of_id'] : undefined,
       kind: row['parent_id'] ? 'reply' : row['repost_of_id'] ? 'retweet' : 'post',
       text: typeof row['content'] === 'string' ? row['content'] : '',
       createdAt:

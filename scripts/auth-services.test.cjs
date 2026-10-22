@@ -402,6 +402,7 @@ test('registration normalizes display metadata without accepting roles', async (
     university: 'Uni',
     campus: 'North',
     department: 'Computing',
+    consent: true,
   });
   assert.deepEqual(calls.signUp, [
     {
@@ -410,6 +411,10 @@ test('registration normalizes display metadata without accepting roles', async (
       options: {
         data: {
           username: 'student',
+          terms_accepted: true,
+          privacy_acknowledged: true,
+          terms_version: '2026-10-22',
+          privacy_version: '2026-10-22',
           university_name: 'Uni',
           campus_name: 'North',
           department_name: 'Computing',
@@ -439,10 +444,15 @@ test('registration sends only the declared academic display metadata', async () 
     campus: ' North ',
     fullName: ' Campus Student ',
     bio: ' Hello ',
+    consent: true,
     role: 'admin',
   });
   assert.deepEqual(calls.signUp[0].options.data, {
     username: 'student',
+    terms_accepted: true,
+    privacy_acknowledged: true,
+    terms_version: '2026-10-22',
+    privacy_version: '2026-10-22',
     university_name: 'Example University',
     department_name: 'Computer Science',
     campus_name: 'North',
@@ -459,6 +469,20 @@ test('registration refuses missing, blank and overlong academic fields before Au
         (await h.service.signUp('student@itu.edu.tr', 'password', 'student', { ...valid, [field]: value }))
           .error,
       );
+  assert.equal(h.calls.signUp.length, 0);
+});
+
+test('registration without explicit document acceptance never calls Auth', async () => {
+  const h = harness();
+  for (const consent of [undefined, false, 'true', 1]) {
+    const result = await h.service.signUp('student@itu.edu.tr', 'password', 'student', {
+      university: 'Uni',
+      campus: 'North',
+      department: 'Computing',
+      consent,
+    });
+    assert.equal(h.service.errorKey(result.error), 'auth.errors.consent');
+  }
   assert.equal(h.calls.signUp.length, 0);
 });
 

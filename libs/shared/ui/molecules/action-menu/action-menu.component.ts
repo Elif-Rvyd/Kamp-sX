@@ -32,7 +32,10 @@ let nextMenuId = 0;
     <button
       #trigger
       type="button"
-      class="menu-trigger"
+      class="action-trigger"
+      [class.menu-trigger]="icon() === 'more_horiz'"
+      [class.repost-trigger]="icon() === 'repeat'"
+      [class.surface]="surface()"
       aria-haspopup="menu"
       [attr.aria-expanded]="opened()"
       [attr.aria-controls]="id"
@@ -42,7 +45,10 @@ let nextMenuId = 0;
       (click)="toggle($event)"
       (keydown.arrowdown)="open($event)"
     >
-      <kx-icon name="more_horiz" />
+      <kx-icon [name]="icon()" />
+      @if (count() !== null) {
+        <span>{{ count() }}</span>
+      }
     </button>
     @if (opened()) {
       <div
@@ -73,6 +79,9 @@ export class ActionMenuComponent {
   readonly items = input.required<readonly ActionMenuItem[]>();
   readonly labelKey = input('social.menu.label');
   readonly disabled = input(false);
+  readonly surface = input(false);
+  readonly icon = input('more_horiz');
+  readonly count = input<number | null>(null);
   readonly selected = output<string>();
   readonly opened = signal(false);
   readonly id = `kx-actions-${++nextMenuId}`;
@@ -88,7 +97,23 @@ export class ActionMenuComponent {
     event.preventDefault();
     if (this.disabled()) return;
     this.opened.set(true);
-    afterNextRender(() => this.options()[0]?.focus(), { injector: this.injector });
+    afterNextRender(
+      () => {
+        const menu = this.element.nativeElement.querySelector<HTMLElement>('[role=menu]');
+        const window = this.document.defaultView;
+        if (menu && window) {
+          const box = menu.getBoundingClientRect();
+          const offset = Math.max(8 - box.left, Math.min(0, window.innerWidth - 8 - box.right));
+          menu.style.translate = `${offset}px 0`;
+          if (box.bottom > window.innerHeight - 8) {
+            menu.style.top = 'auto';
+            menu.style.bottom = '100%';
+          }
+        }
+        this.options()[0]?.focus({ preventScroll: true });
+      },
+      { injector: this.injector },
+    );
   }
   close(restore = false): void {
     this.opened.set(false);

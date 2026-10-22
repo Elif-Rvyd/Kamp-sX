@@ -14,8 +14,8 @@ import { LogoComponent, LegalDialogComponent } from '@kampusx/shared/ui';
       </div>
       <nav [attr.aria-label]="t('nav.about')">
         <a routerLink="/" fragment="hakkinda">{{ t('nav.about') }}</a
-        ><button type="button" (click)="legal.open('legal.text')">{{ t('footer.privacy') }}</button
-        ><button type="button" (click)="legal.open('legal.text')">{{ t('footer.terms') }}</button
+        ><button type="button" (click)="legal.open('legal.privacy')">{{ t('footer.privacy') }}</button
+        ><button type="button" (click)="legal.open('legal.terms')">{{ t('footer.terms') }}</button
         ><button type="button" (click)="legal.open('legal.cookies')">{{ t('footer.cookies') }}</button>
       </nav>
     </div>

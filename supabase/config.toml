@@ -1,0 +1,6 @@
+project_id = "kampusx"
+
+[functions.support-email]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/support-email/index.ts"

@@ -89,7 +89,7 @@
     "google": "Start with your Google student account",
     "googleDemo": "Google sign-in is not enabled yet. You can sign up with your email.",
     "divider": "or use your email",
-    "termsPrefix": "I have read and accept the terms of use and privacy policy.",
+    "termsPrefix": "I accept the Terms of Use and have read the Privacy Notice.",
     "termsLink": "Terms of use",
     "privacyLink": "Privacy policy",
     "serverError": "We could not complete this request. Please try again.",
@@ -167,7 +167,9 @@
       "recoveryInvalid": "This password reset link is missing, invalid, or expired. Request a new link.",
       "weakPassword": "This password was not accepted. Choose a stronger password with at least 8 characters.",
       "signupFailed": "We could not complete sign-up. Check your details and try again.",
-      "signOut": "Your password was updated. There was a problem during sign-out. Try again to continue."
+      "signOut": "Your password was updated. There was a problem during sign-out. Try again to continue.",
+      "academicRequired": "Enter your university, campus and department. Each field can contain up to 150 characters.",
+      "consent": "Accept the Terms of Use and acknowledge the Privacy Notice."
     }
   },
   "validation": {
@@ -318,7 +320,25 @@
     "projectsText": "Your missing piece might be one campus away.",
     "events": "Events & seminars",
     "eventsText": "Find your next spark of inspiration.",
-    "cta": "Explore the academic network"
+    "cta": "Explore the academic network",
+    "customHint": "Choose a suggestion or enter a name if it is missing.",
+    "loading": "Loading suggestions…",
+    "failed": "Suggestions could not load. Retry or enter the name.",
+    "noResults": "No suggestions. Your entered name will be used.",
+    "assigned": "Your account username: @{{username}}",
+    "assignedAfterLogin": "Your assigned username will appear on your profile after email confirmation and sign-in.",
+    "continue": "Continue to the app",
+    "username": {
+      "idle": "Availability is checked as you enter a username.",
+      "checking": "Checking username…",
+      "available": "This username is currently available. Registration checks it again.",
+      "taken": "This username is taken. Choose another.",
+      "unavailable": "Availability could not be checked. Try Sign up again."
+    },
+    "select": "Select an option",
+    "unavailableOptions": "No options are available for this university yet.",
+    "selectionOnly": "Choose an option from the list.",
+    "invalidSelection": "Choose valid university, campus and department options from the lists."
   },
   "cta": {
     "kicker": "New semester. New connections.",
@@ -333,14 +353,19 @@
     "privacy": "Privacy",
     "terms": "Terms of use",
     "cookies": "Cookies",
-    "copyright": "© {{year}} KampüsX Inc.",
+    "copyright": "© {{year}} KampüsX · Elif Rüveyda Ulama",
     "made": "Made with campus spirit.",
     "demo": "Frontend design preview"
   },
   "legal": {
-    "title": "Legal documents are being prepared.",
-    "text": "The terms of use and privacy policy have not been published yet. Your email and password are sent to the authentication service when you sign in or sign up. Consider this before submitting the form.",
-    "cookies": "Theme and language preferences are saved in this browser. Your sign-in preference determines whether session credentials last for the browser session or remain on this device. Detailed cookie and privacy documents have not been published yet."
+    "title": "KampüsX legal documents",
+    "text": "KampüsX Terms of Use • Version: 22 October 2026\n\n1. Service and operator\nKampüsX is a social platform for university students to publish posts, follow one another and exchange direct messages. Operator: Elif Rüveyda Ulama (elify.dev). Contact and requests: elifrvyd@protonmail.com. KampüsX is not an official service or representative of the universities named in the application.\n\n2. Eligibility\nMembership is for university students. Provide accurate, current registration information and do not let others use your account. University, campus and department selections are self-declarations, not official student verification. Students who are minors must obtain any consent or representation required by the law applicable to them. Do not impersonate another person or institution.\n\n3. Accounts and security\nProtect your credentials and report suspected misuse. Account recovery uses your registered email. University, campus and department cannot be edited by users after registration; contact us to request correction of an error. Circumventing access controls, obtaining data without authorization, sending bulk unsolicited messages and disrupting the service are prohibited.\n\n4. Content and community rules\nUpload only content you have the right to share. Threats, harassment, hate speech, discrimination, fraud, spam, unauthorized disclosure of personal information and unlawful content are prohibited. Child sexual abuse material is not permitted. Do not share another person's photographs, messages or private information without the necessary rights and permissions. You retain your content rights and permit KampüsX to store, process and display your content as needed to operate the service within your selected audience and the technical behavior described here.\n\n5. Audiences, sharing and media\nAccount status preferences determine who can find your profile and see posts inside the application. Follow, block and visibility rules are enforced by the server. Reposts and quotes refer to their source post. Sharing a post in a message requires the recipient to have access too; access can change later. Uploaded media uses public URLs: anyone who knows a URL may open the file independently of application visibility or blocking choices. Do not upload sensitive or confidential files. We cannot control recipients' screenshots or copies outside the application.\n\n6. Messages and interactions\nDirect messaging requires an accepted follow in at least one direction and no block between the participants. Losing that relationship can disable sending; blocking also affects conversation visibility. Messages are not end-to-end encrypted. Deleting, archiving, pinning, liking and bookmarking follow the rules of their respective screens. Deletion does not guarantee immediate removal from technical backups or third-party copies.\n\n7. Reports and requests\nUse the report and block controls or contact the address above. Include enough information to identify the content and explain your request; never send passwords or access tokens. Content or account access may be restricted following review of unlawful use or rights violations and applicable law. You can challenge a decision through the same contact channel.\n\n8. Changes and account closure\nMaintenance, security and technical issues may interrupt the service. Uninterrupted or error-free operation is not promised; mandatory legal rights remain unaffected. Contact us for account closure or personal data requests. Material changes to these terms will be communicated in the application with an updated version date and renewed acceptance where needed. These terms do not limit rights that cannot lawfully be waived.",
+    "cookies": "KampüsX Cookies and Browser Storage Notice • Version: 22 October 2026\n\nKampüsX uses browser storage to keep sessions working and remember preferences. The application does not include an advertising tracking feature or advertising cookies.\n\nSessions: Supabase authentication information may be held in session or persistent local storage according to the “Remember me” option. This information grants access to your account; sign out on shared devices. Signing out clears the application's session information.\n\nPreferences: Language and light/dark theme choices may be saved on your device. Temporary form or conversation drafts can be held in memory as part of the relevant screen's operation. They are not used to create advertising profiles.\n\nInfrastructure: Hosting and security providers may use technical logs or necessary storage to deliver requests and prevent abuse. External sites have their own policies when you open their links.\n\nControl: You can clear or restrict cookies, local storage and session storage in browser settings. Blocking necessary storage may prevent signing in, maintaining a session or remembering preferences. If optional analytics or advertising tools are introduced, their purposes and providers will be disclosed separately and prior choices offered when required.\n\nContact: Elif Rüveyda Ulama (elify.dev) • elifrvyd@protonmail.com. See the Privacy and Personal Data Notice for processing details.",
+    "termsTitle": "Terms of Use",
+    "privacyTitle": "Privacy and Personal Data Notice",
+    "cookiesTitle": "Cookies and Browser Storage",
+    "terms": "KampüsX Terms of Use • Version: 22 October 2026\n\n1. Service and operator\nKampüsX is a social platform for university students to publish posts, follow one another and exchange direct messages. Operator: Elif Rüveyda Ulama (elify.dev). Contact and requests: elifrvyd@protonmail.com. KampüsX is not an official service or representative of the universities named in the application.\n\n2. Eligibility\nMembership is for university students. Provide accurate, current registration information and do not let others use your account. University, campus and department selections are self-declarations, not official student verification. Students who are minors must obtain any consent or representation required by the law applicable to them. Do not impersonate another person or institution.\n\n3. Accounts and security\nProtect your credentials and report suspected misuse. Account recovery uses your registered email. University, campus and department cannot be edited by users after registration; contact us to request correction of an error. Circumventing access controls, obtaining data without authorization, sending bulk unsolicited messages and disrupting the service are prohibited.\n\n4. Content and community rules\nUpload only content you have the right to share. Threats, harassment, hate speech, discrimination, fraud, spam, unauthorized disclosure of personal information and unlawful content are prohibited. Child sexual abuse material is not permitted. Do not share another person's photographs, messages or private information without the necessary rights and permissions. You retain your content rights and permit KampüsX to store, process and display your content as needed to operate the service within your selected audience and the technical behavior described here.\n\n5. Audiences, sharing and media\nAccount status preferences determine who can find your profile and see posts inside the application. Follow, block and visibility rules are enforced by the server. Reposts and quotes refer to their source post. Sharing a post in a message requires the recipient to have access too; access can change later. Uploaded media uses public URLs: anyone who knows a URL may open the file independently of application visibility or blocking choices. Do not upload sensitive or confidential files. We cannot control recipients' screenshots or copies outside the application.\n\n6. Messages and interactions\nDirect messaging requires an accepted follow in at least one direction and no block between the participants. Losing that relationship can disable sending; blocking also affects conversation visibility. Messages are not end-to-end encrypted. Deleting, archiving, pinning, liking and bookmarking follow the rules of their respective screens. Deletion does not guarantee immediate removal from technical backups or third-party copies.\n\n7. Reports and requests\nUse the report and block controls or contact the address above. Include enough information to identify the content and explain your request; never send passwords or access tokens. Content or account access may be restricted following review of unlawful use or rights violations and applicable law. You can challenge a decision through the same contact channel.\n\n8. Changes and account closure\nMaintenance, security and technical issues may interrupt the service. Uninterrupted or error-free operation is not promised; mandatory legal rights remain unaffected. Contact us for account closure or personal data requests. Material changes to these terms will be communicated in the application with an updated version date and renewed acceptance where needed. These terms do not limit rights that cannot lawfully be waived.",
+    "privacy": "KampüsX Privacy and Personal Data Notice • Version: 22 October 2026\n\n1. Controller and contact\nThe controller for KampüsX is Elif Rüveyda Ulama (elify.dev). Contact and personal data requests: elifrvyd@protonmail.com. This notice explains processing during account creation and use of the service. Acknowledging this notice is not blanket consent to advertising or every form of processing.\n\n2. Information and collection\nAccount forms collect email, username, name, university, campus, department and optional biography. Uploads provide profile/cover images and post media. Use of the service creates posts, replies, repost/quote references, follow requests, likes, bookmarks, blocks and reports. Direct messaging processes participants, message content, sending/deletion times and read status. Unique view counts store an account-to-post relationship; other users cannot access the list of viewing accounts. Accepted terms and privacy versions are recorded with a server timestamp at registration. Information is collected electronically through forms, uploads and service use. Authentication and hosting providers may process IP, device/browser and request logs for security.\n\n3. Purposes and grounds\nAccounts, sessions, audience-based publishing, following and messaging are processed to provide the service and perform the contract. Reports, security, abuse prevention and the establishment, exercise or protection of rights are handled under the applicable legal grounds. If a legal disclosure or retention obligation arises, processing is limited to that obligation. Security processing based on legitimate interests must respect fundamental rights and freedoms. A new purpose requiring consent will be explained separately with an appropriate choice, rather than hidden in mandatory membership acceptance.\n\n4. Access to information\nProfile and post access depends on audience preferences, follow relationships and blocking. Your bookmarks and block list are not exposed to other users. Reports are used for safety and review. Messages are available to the two conversation participants; authorized technical access may be necessary for operation and security. Messages are not end-to-end encrypted. A post's aggregate view count can be shown to accounts allowed to see that post.\n\n5. Public media URLs\nPhotographs and videos are served through public Supabase Storage URLs. Someone who knows a URL may still open the file after being blocked or after a post's audience is restricted. Blocking does not turn public files into private files. Archiving does not revoke their URLs either. Consider this limitation when sharing and do not upload sensitive information about yourself or others.\n\n6. Providers and transfers\nSupabase provides authentication, database, storage and live connections; hosting infrastructure (Vercel) serves the application. These providers may process information necessary to operate the service. Infrastructure and support can involve processing abroad. International transfers must meet the conditions and safeguards required by applicable law; accepting this notice alone does not authorize a transfer. Disclosures to public authorities require a valid legal obligation. This service does not offer a use of personal data based on selling it or sharing it for advertising.\n\n7. Retention, deletion and security\nInformation is kept for the period necessary for the relevant service or operation and any applicable legal obligations; unnecessary data must be deleted, destroyed or anonymized. Removing posts or messages through the interface may initially use soft deletion; backups and technical records have different lifecycles. Deleting a message clears its content and displays a deletion record. Access controls, session controls and encryption are used, but no system can promise absolute security. Backups and copies kept by other people may not disappear simultaneously.\n\n8. Rights and requests\nUnder Turkish Law No. 6698, you may ask whether your data is processed, request processing information, learn its purposes and whether it is used accordingly, and learn the recipients of transfers. You may request correction of incomplete or inaccurate data, deletion/destruction when the conditions apply, and notification of those actions to recipients. You may object to adverse results based solely on automated analysis and seek compensation for damage caused by unlawful processing. Send requests from your account email to elifrvyd@protonmail.com with enough information to identify your account and request. Proportionate identity checks may be needed; never send your password. Requests are assessed under the procedures and deadlines of applicable law."
   },
   "dashboard": {
     "title": "Home — KampüsX",
@@ -407,11 +432,11 @@
     "facultyMissing": "Faculty not added",
     "joined": "Joined {{date}}",
     "postCount": "{{count}} posts",
+    "featured": "Featured posts",
     "compose": "Create a post",
     "saved": "Your profile was updated.",
     "drawer": {
       "profile": "Profile",
-      "history": "History",
       "community": "Communities",
       "settings": "Settings and privacy",
       "help": "Help Center",
@@ -563,6 +588,7 @@
     "unavailable": "Follow actions are currently unavailable. Try again."
   },
   "social": {
+    "profileMenu": "Profile options",
     "settings": "Settings and privacy",
     "back": "Back",
     "cancel": "Cancel",
@@ -591,13 +617,18 @@
       "body": "You will no longer see each other’s profile or posts in the app, or be able to follow or interact. Following connections in both directions will be removed."
     },
     "report": {
+      "userTitle": "Report user",
+      "userBody": "Choose why you are reporting this user.",
+      "userReported": "Your user report was saved.",
+      "userDuplicate": "You have already reported this user.",
       "title": "Report post",
       "body": "Choose a reason. You can submit one report per post.",
       "reason": "Report reason",
       "spam": "Spam",
       "harassment": "Harassment",
       "inappropriate": "Inappropriate content",
-      "other": "Other"
+      "other": "Other",
+      "impersonation": "Impersonation"
     },
     "archive": {
       "title": "My archive",
@@ -663,7 +694,7 @@
       "busy": "Wait for the previous action on this post to finish.",
       "ownerSetup": "Post management is not enabled yet. Setup must be completed.",
       "ownerUncertain": "The result could not be confirmed. Refresh before trying another action.",
-      "pinReply": "Replies and archived posts cannot be pinned."
+      "pinReply": "Only active original posts can be featured."
     },
     "notice": {
       "deleted": "Post deleted.",
@@ -679,11 +710,31 @@
     },
     "openProfile": "Open profile: {{name}}",
     "openPost": "Open post",
-    "profileUnavailable": "This profile is unavailable."
+    "profileUnavailable": "This profile is unavailable.",
+    "repost": {
+      "undo": "Undo repost",
+      "create": "Repost",
+      "quote": "Quote",
+      "quoteBody": "Share this post with your own comment.",
+      "quoteLabel": "Your comment",
+      "publish": "Publish quote",
+      "created": "Post reposted.",
+      "removed": "Repost undone.",
+      "quoted": "Quote published.",
+      "hidden": "The original post is currently unavailable.",
+      "readError": "The original post could not load.",
+      "textError": "Your quote must contain 1–2000 characters.",
+      "uncertain": "The result could not be confirmed. Check your profile before posting again."
+    },
+    "views": {
+      "title": "Post views",
+      "body": "Counts distinct signed-in accounts that see the post on screen for at least one second. Repeat views and the author are excluded. Viewer identities are not disclosed.",
+      "failed": "View count is unavailable. Please try again later."
+    }
   },
   "accountStatus": {
     "title": "Account visibility",
-    "description": "Choose who can discover your profile and see your posts and search results. Save to apply your changes.",
+    "description": "Choose one audience for your profile and posts.",
     "legacy": "You have not saved audience preferences yet. Your existing privacy rules remain in effect until you save.",
     "everyone": "Explore is on: people at all universities can see your profile and posts.",
     "onlyMe": "All options are off: after saving, only you can see your profile and posts.",
@@ -710,6 +761,107 @@
       "description": "People at every university on KampüsX can discover your profile and posts."
     },
     "discardTitle": "Discard changes?",
-    "discardBody": "Your unsaved audience preferences will be discarded."
+    "discardBody": "Your unsaved audience preferences will be discarded.",
+    "chooseLevel": "Audience level",
+    "followersAlways": "Accepted followers can see your posts at every level. Blocked people cannot.",
+    "missingAcademic": "Your registered academic identity is missing for this level.",
+    "levels": {
+      "followers": {
+        "title": "Followers",
+        "description": "Only you and your accepted followers can see your posts."
+      },
+      "department": {
+        "title": "Department",
+        "description": "Students at the same university and department can also see your posts."
+      },
+      "campus": {
+        "title": "Campus",
+        "description": "Students at the same university and campus can also see your posts."
+      },
+      "university": {
+        "title": "University",
+        "description": "Students at the same university can also see your posts."
+      },
+      "explore": {
+        "title": "Everyone",
+        "description": "All signed-in users can see your posts."
+      }
+    }
+  },
+  "messaging": {
+    "title": "Messages",
+    "conversation": "Conversation",
+    "action": "Message",
+    "checking": "Checking messaging permission…",
+    "notEligible": "To message, at least one of you must be following the other.",
+    "student": "Student",
+    "loading": "Loading messages…",
+    "connecting": "Connecting to live updates…",
+    "offline": "Live updates disconnected. Refresh to check for new messages.",
+    "unread": "{{count}} unread messages",
+    "deleted": "This message was deleted",
+    "noMessages": "No messages yet.",
+    "emptyTitle": "Your inbox is ready",
+    "emptyBody": "Start a conversation using the Message button on the profile of someone you follow or who follows you.",
+    "unavailableTitle": "This conversation is unavailable",
+    "history": "Conversation messages",
+    "older": "Load earlier messages",
+    "readError": "Could not save read status. Refresh to try again.",
+    "readOnly": "You can no longer send messages here. You can still read the conversation.",
+    "write": "Write your message",
+    "send": "Send",
+    "menu": "Message actions",
+    "delete": "Delete message",
+    "deleteTitle": "Delete this message?",
+    "deleteBody": "The message content will be removed for both people. This cannot be undone.",
+    "discardTitle": "Discard draft?",
+    "discardBody": "Your message has not been sent or its delivery could not be confirmed. Check the conversation before discarding the draft.",
+    "discard": "Discard draft",
+    "newDraft": "I checked the conversation, start a new draft",
+    "errors": {
+      "unavailable": "Messaging is not permitted or this conversation is no longer available.",
+      "setup": "Messaging is not configured. Please try again later.",
+      "request": "Messages could not be updated. Check your connection and try again.",
+      "uncertain": "Delivery could not be confirmed. Refresh and check the conversation before sending again.",
+      "content": "Use 1–2000 characters, including at least one non-whitespace character."
+    },
+    "shareTitle": "Share post in a message",
+    "shareBody": "Choose a conversation. The recipient must also have access to the post.",
+    "shareUnavailable": "This conversation or post is unavailable for sharing.",
+    "checkConversation": "Open the conversation to check delivery",
+    "readOnlyShort": "Sending unavailable",
+    "findFriend": "Find a friend and start a chat from their profile",
+    "shared": "Post shared in a message.",
+    "sharedPost": "Shared post"
+  },
+  "support": {
+    "title": "Help Center",
+    "intro": "Describe the problem to contact support. Your account email and username are added to your request automatically.",
+    "loading": "Verifying your account details…",
+    "username": "Username",
+    "email": "Email address",
+    "description": "Describe the problem",
+    "descriptionHint": "What happened, and which steps led to it? Do not include passwords, verification codes or private messages.",
+    "send": "Send support request",
+    "sending": "Sending your request…",
+    "sent": "Your request was accepted by the email service.",
+    "reference": "Request reference:",
+    "pending": "Delivery has not been confirmed. Check its status before creating another request.",
+    "checkStatus": "Check delivery status",
+    "retrySame": "Delivery was not confirmed. You can retry with the same request reference and description.",
+    "discardTitle": "Leave the support form?",
+    "discardBody": "Your description is not saved on this device. Leaving does not cancel an email that has already reached the server.",
+    "errors": {
+      "session": "Your account could not be verified. Check your session and try again.",
+      "unavailable": "Support delivery is currently unavailable. Your description is preserved; try again later.",
+      "rateLimit": "Too many requests were submitted recently. Wait before trying again; you can create up to 3 requests per hour and 5 per day.",
+      "rejected": "The email service did not accept your request. Your description is preserved; try again later.",
+      "uncertain": "The delivery result is uncertain. Check its status before sending again.",
+      "expired": "This request could not be confirmed and its safe retry period has expired. It will not be resent automatically.",
+      "status": "The request status is currently unavailable. Check again before resending.",
+      "invalid": "Enter a non-empty description of no more than 4,000 characters."
+    },
+    "privacyTitle": "How support request data is used",
+    "privacyBody": "Help Center notice — 22 October 2026\n\nYour account email, username and the description you enter are processed to investigate the issue and reply to you. Selecting Send requests that these details be emailed to support.\n\nThe message is sent through Resend to the operator’s configured Google/Gmail support mailbox. These providers process the email content and necessary technical records; processing may take place abroad depending on their infrastructure. Messages are not end-to-end encrypted.\n\nThe application’s private security record contains no description, email address or username. It stores request/account identifiers, a content hash, timestamps, attempt count and delivery state to prevent spam and duplicate dispatch. These records are removed when the account is deleted. Email copies at Resend and in the support mailbox follow those providers’ separate processes.\n\nDo not include passwords, verification codes, health information, private messages or unnecessary personal data about others. The existing Privacy Policy applies to privacy rights and requests. Data controller: Elif Rüveyda Ulama (elify.dev); privacy requests: elifrvyd@protonmail.com."
   }
 }

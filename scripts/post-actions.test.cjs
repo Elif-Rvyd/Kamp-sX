@@ -67,6 +67,8 @@ function harness() {
       user_id: A,
       username: 'student',
       campus: 'North',
+      campus_id: B,
+      department_id: B,
       visible_department: false,
       visible_campus: false,
       visible_university: false,
@@ -192,6 +194,8 @@ function harness() {
                 created_at: '2026-10-21T10:00:01Z',
                 replies_count: 0,
                 reposts_count: 0,
+                deleted_at: null,
+                archived_at: null,
                 ...q.insert[0],
               };
               state.postRows.push(row);
@@ -298,6 +302,54 @@ const snapshot = (extra = {}) => ({
   liked: false,
   bookmarked: false,
   ...extra,
+});
+
+test('user reports use the real reported_user_id without fabricating a post', async () => {
+  const h = harness();
+  assert.equal(await h.actions.reportUser(B, 'harassment'), true);
+  const write = h.calls.find((q) => q.table === 'reports' && q.insert);
+  assert.deepEqual(write.insert[0], {
+    reporter_id: A,
+    post_id: null,
+    reported_user_id: B,
+    reason: 'harassment',
+  });
+  assert.equal(
+    h.calls.some((q) => q.table === 'posts' && q.insert),
+    false,
+  );
+  await assert.rejects(h.actions.reportUser(A, 'spam'));
+  await assert.rejects(h.actions.reportUser('invalid', 'spam'));
+  await assert.rejects(h.actions.reportUser(B, 'invalid'));
+  assert.equal(h.calls.filter((q) => q.table === 'reports' && q.insert).length, 1);
+  h.destroy();
+});
+
+test('user blocking writes only session ownership and invalidates other visible surfaces', async () => {
+  const h = harness();
+  await h.actions.blockUser(B);
+  const write = h.calls.find((q) => q.table === 'blocks' && q.insert);
+  assert.deepEqual(write.insert[0], { blocker_id: A, blocked_id: B });
+  assert.equal(h.actions.view({ ...h.post, userId: B }), null);
+  assert.equal(h.actions.readRevision(), 1);
+  await assert.rejects(h.actions.blockUser(A));
+  await assert.rejects(h.actions.blockUser('invalid'));
+  assert.equal(h.calls.filter((q) => q.table === 'blocks' && q.insert).length, 1);
+  h.destroy();
+});
+
+test('a delayed profile block cannot hide content in a replacement session', async () => {
+  const h = harness();
+  let release;
+  h.replies.push(() => new Promise((resolve) => (release = resolve)));
+  const pending = h.actions.blockUser(B);
+  await new Promise((resolve) => setImmediate(resolve));
+  h.auth.sessionEpoch.set(2);
+  h.effects.forEach((run) => run());
+  release({ data: null, error: null });
+  await assert.rejects(pending, (error) => error.key === 'media.errors.session');
+  assert.notEqual(h.actions.view({ ...h.post, userId: B }), null);
+  h.destroy();
 });
 test('account visibility writes only four owned audience flags and requires a confirmed server receipt', async () => {
   const h = harness();
@@ -678,5 +730,87 @@ test('blocking hides the author across post surfaces and refreshes server state'
   assert.equal(h.actions.view(other), null);
   assert.ok(h.calls.includes('posts-refresh'));
   assert.ok(h.calls.includes('follow-refresh'));
+  h.destroy();
+});
+
+test('profile details persist with exactly the two mutable public fields', async () => {
+  const h = harness();
+  await h.account.saveDetails({
+    fullName: ' Canonical Name ',
+    bio: ' Bio ',
+    username: 'forged',
+    university: 'forged',
+  });
+  const q = h.calls.find((q) => q.table === 'profiles' && q.update);
+  assert.deepEqual(q.update[0], { full_name: 'Canonical Name', bio: 'Bio' });
+  assert.ok(q.filters.some((f) => f[1] === 'user_id' && f[2] === A));
+  h.destroy();
+});
+test('audience is exclusive and absent academic IDs cannot enable a level', async () => {
+  const h = harness();
+  await assert.rejects(
+    h.account.save({
+      visible_department: true,
+      visible_campus: true,
+      visible_university: false,
+      visible_explore: false,
+    }),
+    { key: 'accountStatus.saveError' },
+  );
+  h.state.profile.campus_id = null;
+  await assert.rejects(
+    h.account.save({
+      visible_department: false,
+      visible_campus: true,
+      visible_university: false,
+      visible_explore: false,
+    }),
+    { key: 'accountStatus.missingAcademic' },
+  );
+  assert.equal(
+    h.calls.some((q) => q.table === 'profiles' && q.update),
+    false,
+  );
+  h.destroy();
+});
+
+test('plain repost and quotes insert only six fields with no counter/identity writes', async () => {
+  const h = harness();
+  await h.actions.repost(h.post, true);
+  const first = h.calls.find((q) => q.table === 'posts' && q.insert);
+  assert.deepEqual(first.insert[0], {
+    user_id: A,
+    content: '',
+    parent_id: null,
+    repost_of_id: P,
+    media_url: null,
+    media_type: null,
+  });
+  await h.actions.quote(h.post, ' Quoted text ');
+  assert.equal(h.state.postRows.filter((r) => r.repost_of_id === P).length, 2);
+  await h.actions.repost(h.post, false);
+  assert.ok(h.state.postRows.find((r) => r.repost_of_id === P && r.content === '').deleted_at);
+  h.destroy();
+});
+test('invalid quote drafts and replies/reposts cannot be pinned', async () => {
+  const h = harness();
+  for (const text of ['', ' ', 'x'.repeat(2001)])
+    await assert.rejects(h.actions.quote(h.post, text), { key: 'social.repost.textError' });
+  h.state.postRows[0].repost_of_id = B;
+  await assert.rejects(h.actions.pin(h.post), { key: 'social.errors.pinReply' });
+  assert.equal(
+    h.calls.some((q) => q.insert || q.update),
+    false,
+  );
+  h.destroy();
+});
+test('an uncertain quote cannot be submitted again in the same session', async () => {
+  const h = harness();
+  h.replies.push(() => {
+    throw new TypeError('lost response');
+  });
+  await assert.rejects(h.actions.quote(h.post, 'Quote'), { key: 'social.repost.uncertain' });
+  await assert.rejects(h.actions.quote(h.post, 'Quote'), { key: 'social.repost.uncertain' });
+  assert.equal(h.calls.filter((q) => q.table === 'posts' && q.insert).length, 1);
   h.destroy();
 });

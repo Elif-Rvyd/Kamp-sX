@@ -72,6 +72,8 @@ async function openSocial(
     if (/\/rest\/v1\/|\/storage\/v1\/|\/functions\/v1\//.test(request.url())) backend.push(request.url());
   });
   const social = await mockSocial(page, options);
+  if (options.messaging)
+    social.messaging = await require('./mock-messaging.cjs').mockMessaging(page, options.messaging);
   social.authRequests = authRequests;
   await page.goto(url);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

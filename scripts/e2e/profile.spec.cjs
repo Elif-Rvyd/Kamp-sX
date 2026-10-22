@@ -102,15 +102,31 @@ for (const language of ['tr', 'en'])
         fullPage: true,
       });
       expect(errors).toEqual([]);
-      expect(backend.requests.filter((r) => !['GET', 'HEAD'].includes(r.method))).toEqual([]);
+      // Viewing a visible card now records a deduplicated server view; profile navigation
+      // must still perform no profile, post-content or reaction mutations.
+      const writes = backend.requests.filter((r) => !['GET', 'HEAD'].includes(r.method));
+      for (const request of writes) {
+        expect(request.method).toBe('POST');
+        expect(request.url).toBe('/rest/v1/rpc/kx_record_post_views');
+        expect(Object.keys(request.payload)).toEqual(['p_ids']);
+        expect(request.payload.p_ids.length).toBeLessThanOrEqual(50);
+        expect(request.payload.p_ids.every((id) => backend.posts.some((post) => post.id === id))).toBe(true);
+      }
     });
   }
 test('permanent menu keeps profile navigation and unavailable items distinct', async ({ page }) => {
   await openProfile(page, 'tr', 'light', '/dashboard');
   const menu = page.locator('.profile-menu button[disabled]');
-  await expect(menu).toHaveCount(4);
+  await expect(menu).toHaveCount(1);
+  await expect(
+    page.locator('.profile-menu').getByRole('link', { name: 'Yardım Merkezi', exact: true }),
+  ).toHaveAttribute('href', '/help');
+  await expect(
+    page.locator('.profile-menu').getByRole('link', { name: 'Mesajlar', exact: true }),
+  ).toHaveAttribute('href', '/messages');
+  await expect(page.locator('.profile-menu').getByText('Geçmiş', { exact: true })).toHaveCount(0);
   await expect(page.locator('.profile-menu .compose-link')).toBeEnabled();
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 1; i++) {
     await expect(menu.nth(i)).toBeDisabled();
     await expect(page).toHaveURL(/\/dashboard$/);
   }
@@ -160,7 +176,8 @@ test('save updates profile, own post cards, dashboard avatar and drawer immediat
   await expect(page.locator('.profile-avatar-link img')).toBeVisible();
   expect(backend.requests.filter((request) => request.storage && request.method === 'POST')).toHaveLength(2);
   const saved = backend.requests.find(
-    (request) => request.table === 'profiles' && request.method === 'PATCH',
+    (request) =>
+      request.table === 'profiles' && request.method === 'PATCH' && 'avatar_url' in request.payload,
   );
   expect(Object.keys(saved.payload).sort()).toEqual(['avatar_url', 'banner_url']);
   expect(saved.payload.avatar_url).toContain(`/uploads/${backend.profile.user_id}/avatar/`);

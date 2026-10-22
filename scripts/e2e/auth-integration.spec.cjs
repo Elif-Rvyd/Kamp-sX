@@ -249,9 +249,9 @@ test('registration sends metadata and displays email-verification guidance', asy
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-campus').fill('Faculty of Engineering');
-  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
-  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
+  await page.locator('#register-university').selectOption({ label: 'Kırşehir Ahi Evran Üniversitesi' });
+  await page.locator('#register-campus').selectOption({ label: 'Cacabey Yerleşkesi' });
+  await page.locator('#register-department').selectOption({ label: 'Bilgisayar Programcılığı' });
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   await page.locator('#auth-panel button[type=submit]').click();
@@ -261,7 +261,9 @@ test('registration sends metadata and displays email-verification guidance', asy
   expect(submitted.body.email).toBe(email);
   expect(submitted.body.data.username).toBe('student');
   expect(submitted.body.data.full_name).toBe('Campus Student');
-  expect(submitted.body.data.campus_name).toBe('Faculty of Engineering');
+  expect(submitted.body.data.campus_name).toBe('Cacabey Yerleşkesi');
+  expect(submitted.body.data.terms_accepted).toBe(true);
+  expect(submitted.body.data.privacy_version).toBe('2026-10-22');
   expect(submitted.body.data).not.toHaveProperty('role');
 });
 
@@ -277,14 +279,15 @@ test('registration requires name, university, campus and department before conta
   const submit = page.locator('#auth-panel button[type=submit]');
   for (const [id, value] of [
     ['name', 'Campus Student'],
-    ['university', 'University'],
-    ['campus', 'North'],
-    ['department', 'Department'],
+    ['university', 'Kırşehir Ahi Evran Üniversitesi'],
+    ['campus', 'Cacabey Yerleşkesi'],
+    ['department', 'Bilgisayar Programcılığı'],
   ]) {
     await submit.click();
     await expect(page.locator('#register-' + id)).toBeFocused();
     expect(requests.filter((r) => r.operation === 'signup')).toHaveLength(0);
-    await page.locator('#register-' + id).fill(value);
+    if (id === 'name') await page.locator('#register-' + id).fill(value);
+    else await page.locator('#register-' + id).selectOption({ label: value });
   }
 });
 
@@ -311,9 +314,9 @@ test('registration distinguishes email quota from request limits in Turkish and 
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-campus').fill('Faculty of Engineering');
-  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
-  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
+  await page.locator('#register-university').selectOption({ label: 'Kırşehir Ahi Evran Üniversitesi' });
+  await page.locator('#register-campus').selectOption({ label: 'Cacabey Yerleşkesi' });
+  await page.locator('#register-department').selectOption({ label: 'Bilgisayar Programcılığı' });
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   const submit = page.locator('#auth-panel button[type=submit]');
@@ -372,17 +375,28 @@ test('sign-out clears the session and denies dashboard until the next login', as
   await expect(page).toHaveURL(/\/auth\/login$/);
 });
 
-test('registration opens dashboard only when Supabase returns a session', async ({ page }) => {
+test('registration shows actual assigned username before continuing with a session', async ({ page }) => {
   await mockAuth(page, { signup: () => ({ body: sessionResponse() }) });
+  await page.route('**/rest/v1/profiles?**', (route) => {
+    if (new URL(route.request().url()).searchParams.get('select') === 'username')
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ username: 'user_assigned' }]),
+      });
+    return route.fallback();
+  });
   await page.goto('/auth/register');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-username').fill('student');
   await page.locator('#register-name').fill('Campus Student');
-  await page.locator('#register-campus').fill('Faculty of Engineering');
-  await page.locator('#register-university').fill('Kırşehir Ahi Evran Üniversitesi');
-  await page.locator('#register-department').fill('Bilgisayar Programcılığı');
+  await page.locator('#register-university').selectOption({ label: 'Kırşehir Ahi Evran Üniversitesi' });
+  await page.locator('#register-campus').selectOption({ label: 'Cacabey Yerleşkesi' });
+  await page.locator('#register-department').selectOption({ label: 'Bilgisayar Programcılığı' });
   await page.locator('#register-password').fill('LocalTestPassword123!');
   await page.locator('#register-consent').check();
   await page.locator('#auth-panel button[type=submit]').click();
+  await expect(page.locator('#auth-panel')).toContainText('@user_assigned');
+  await page.getByRole('button', { name: 'Uygulamaya devam et', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 });

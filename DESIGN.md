@@ -70,8 +70,9 @@ the explicit language choice overrides it and survives reloads.
 
 Avoid a generic dashboard card grid as the page's overall composition. The community
 directory is deliberately a consistent card grid because its items are comparable.
-Do not add invented legal policy: the legal dialog states that the legal documents are not yet
-published and describes the authentication data flow without presenting a placeholder as a policy.
+The legal dialog contains separate TR/EN terms, privacy and cookie texts dated 22 October 2026.
+Operator identity is the user's supplied Elif Rüveyda Ulama (elify.dev), with the supplied contact email.
+Do not invent a corporation, postal address, age restriction, student verification or certified legal compliance.
 
 ## Colors
 
@@ -143,7 +144,7 @@ Stickers use outlined corners or a circle with a small offset ink shadow.
 
 Shared atoms: native button, native input directive, badge, logo, icon, sticker, toggle.
 Molecules own form-field association, password reveal/strength, feature/stat cards, theme/language controls.
-Organisms own post/community previews, marquee, and legal preview dialog.
+Organisms own post/community previews, marquee, and legal dialog.
 Shell features own auth business state and landing sections; shared UI never imports shell services.
 `libs/shared/ui/styles.css` owns atomic component appearance and responsive variants.
 Every consuming app imports it once after `tokens.css`; shell CSS owns campaign/layout composition.
@@ -177,7 +178,7 @@ The sidebar's expanded header
 contains the signed-in user's display name, handle, university, department and real, nullable follow counts. Profile metadata is
 display content only; missing university/department values use honest localized placeholders.
 The sidebar's sign-out control closes the real Supabase session. Home, Profile and Publish navigate;
-Search and Settings use real routes; messages, history, communities and help remain disabled visual entries.
+Search, Settings, Messages and Help Center use real routes; communities remain a disabled visual entry. History is removed.
 The skip link targets the content after the sidebar. Discovery uses a single selected index
 for tab clicks, Arrow/Home/End keys and horizontal touch swipes. Vertical document scrolling
 remains native; the shared sidebar replaces the duplicate bottom navigation and floating compose control. Motion is transform/opacity
@@ -229,6 +230,10 @@ A post is at most 2000 characters with one optional image/video. Post image sele
 MP4/WEBM videos at or below 50 MiB are remuxed without re-encoding their primary audio/video packets. Descriptive container tags, attachments and source track names are omitted. Larger sources, bounded to 512 MiB and 30 minutes, use bounded compression with the same metadata cleanup. Both paths use the shared post-video preparation utility and a local Web Worker with pinned Mediabunny; only compression needs WebCodecs encoders. The worker loads on video selection and has no Supabase client, credentials or network destination. Duration and primary audio are retained; unsupported audio/video conversion fails visibly instead of silently dropping sound. Resolution is scaled without upscaling and bitrate is calculated from duration, with up to three bounded passes and an independently checked 50 MiB final limit. The source is never truncated or uploaded as a fallback. Small-video remux uses the existing preparing status; actual compression progress is announced below 100% until completion. The attachment button becomes Cancel preparation. Cancel, component destruction, session replacement, malformed worker replies, worker failures and the ten-minute deadline release the worker, while text and any previously selected valid file remain intact. Source signatures and final playback metadata are validated before upload. At the user's request, the static compression and public-file hints are omitted from the composer; preparation, progress and actionable errors remain. Public Storage behavior is unchanged.
 Profile images are decoded locally (input at most 20 MiB / 32 megapixels), scaled without upscaling to 640×640 for avatars and 1920×1080 for banners, and always encoded from pixels as WebP at at most 1 MiB so source metadata is not published. The existing upload service revalidates the result. Bitmap/canvas/worker resources are released and pending work cannot cross sessions. Profile and media geometry stays reserved.
 The profile uses a 3:1 cover, an overlapping 96px avatar, a 64px sticky toolbar and sticky scrolling tabs.
+Other users' profiles place the canonical surfaced ActionMenu at the toolbar's right edge, matching
+the existing back control over cover images. Reporting reuses the shared reason picker and dialog.
+Pinned posts use a simple Featured posts heading and existing post cards, before the remaining list;
+the sidebar omits History. No palette, typography or layout tokens change for these additions.
 IntersectionObserver controls only opacity/transform header motion and is disconnected on teardown.
 The editor uses equal left/right action columns (Cancel and Save), with a centered single-line title, including 320px phones. Account information heads the fields. It blocks duplicate saves. Profile ImagePicker removes files through a translucent centered X revealed on hover or keyboard focus; coarse/touch pointers keep the action visible. The avatar camera stays at the lower-right edge. Informational format/size and account/public-file disclaimers are omitted from the editor by the user’s explicit request; actionable validation errors remain.
 Dirty route departures use the native shared confirmation dialog, Escape keeps edits, focus returns,
@@ -249,10 +254,20 @@ animations, reveal movement and smooth scrolling. No real video asset was suppli
 ### Account visibility and linked identity (22 October 2026)
 
 Post dates appear below text/media, independently of the username. Native links on identity, text and date open /people/:id or /posts/:id; media playback controls keep their native behavior. Public profiles reuse ProfileHeader with an explicit readonly variant, real permitted posts and the existing follow actions. No new palette or layout width is introduced.
-Account visibility reuses SocialPageFrame, Button, ConfirmDialog and a shared button[kxSwitch] with role=switch, visible focus, a 44px target and token-based appearance. Department, Campus, University and Across universities are ordered consistently. Explicit Save applies the union of enabled audiences. Explore includes every university; all off means owner only. A saved audience directly controls profile discovery and posts, as chosen by the user; legacy is_private/follow rules remain until the first preference save. Existing accounts are never silently made public. Failed/uncertain saves preserve the draft and require a fresh read; navigation guards unsaved changes. Blocking overrides all audiences. Public Storage URLs remain outside row privacy.
+Account visibility reuses SocialPageFrame, Button and ConfirmDialog with a native five-option radio group. Explicit Save writes one audience level. Followers are retained at every level; Everyone includes all authenticated users. Department uses university + department IDs without campus; Campus uses university + campus IDs. Legacy is_private/visibility fields are neither queried for privacy nor written. Missing academic IDs disable their choices. Failed/uncertain saves preserve the draft and require a fresh read; navigation guards unsaved changes. Blocking overrides all audiences. Public Storage URLs remain outside row privacy.
 The current implementation and confirmed SQL 19/20/22/23 status are tracked in docs/HESAP-VE-GONDERI-GUNCELLEMELERI-2026-10-22.md. Supabase public types are generated from the actual live schema, not a proposed extension.
 
 ## Do's and Don'ts
+
+Messaging uses the existing authenticated navigation shell and SocialPageFrame. InboxItem owns the
+native conversation link with Avatar, preview, localized date and unread count. MessageBubble owns
+plain text, localized time, a deleted-content placeholder and the existing ActionMenu. Incoming
+bubbles use surface-alt/text; outgoing bubbles use primary/on-primary. All colors, focus states,
+buttons, typography and borders map to existing tokens. The chat log is keyboard-scrollable and
+keeps the reading position when earlier history loads; live additions follow the bottom only when
+the reader is already there. FormField, Button and ConfirmDialog retain composer/draft/delete behavior.
+MessagesStore is scoped to the messaging layout component; it clears sensitive rows and unsubscribes
+on exit or identity replacement. Reconnect/token renewal never unlock an uncertain message receipt.
 
 - Do put campus-specific expression in the poster and editorial chapter artwork.
 - Do keep the same form validation, loading and actual-result feedback in every auth screen.
@@ -260,3 +275,15 @@ The current implementation and confirmed SQL 19/20/22/23 status are tracked in d
 - Don't invent an authenticated session, OAuth result, sent email, real member count or legal policy.
 - Don't reveal whether a particular email address already has an account in reset or sign-up feedback.
 - Don't allow decorations to obscure fields or remove actions on narrow screens.
+
+## 22 October live client contract update
+
+The latest audience contract supersedes the earlier independent-switch and legacy-privacy descriptions: use one five-option radio group (Followers, Department, Campus, University, Everyone), preserve accepted followers at every level and leave actual visibility to RLS. Department matching does not require a campus. Missing campus/department IDs disable their choices. Academic feed scopes use IDs. No palette, typography or global layout tokens change.
+
+Registration uses the shared AcademicPicker with a labelled native select and the established input styling. The operating system owns the option popup and keyboard/type-ahead behavior; free text is unavailable. AcademicService pages the approved catalog, scopes campuses/programs by university ID and cancels obsolete reads. Changing university clears both dependent values. Loading, empty and error/retry states are explicit. Campus coverage is partial; missing entries are not fabricated. SQL 30 validates the catalog relationship and versioned terms/privacy acceptance before signup, and records server-time receipts. Display-only shell services never enter shared UI. Username availability retains checking/available/taken/unavailable states; authenticated registration displays the server-assigned handle.
+
+The repost trigger uses shared ActionSheet, which extends the canonical ModalDrawer with a bottom position and transform/opacity animation. Reduced motion is respected. Repost/Quote choices use native buttons and Arrow/Home/End navigation. Drawer focus returns before a choice opens the quote dialog. EmbeddedPost owns the readonly original preview and missing-original placeholder. ConfirmDialog supports a disabled positive confirmation for quote validation while retaining its existing destructive defaults. Original-only pins remain grouped under Featured posts; repost/quote cards have no pin action.
+
+Post sharing opens the same bottom drawer, lists actual inbox recipients and sends only a post ID through the server RPC. A shared message loads its original through current RLS; an unavailable original becomes a localized placeholder. Ambiguous delivery disables repeat submission and links to the conversation. View totals come from the server; unavailable totals display an em dash. Visible cards record one authenticated account per post, excluding the author, after one second at half-card visibility in a visible tab. No viewer identity list is exposed. See docs/SOSYAL-YAYIN-2026-10-22.md for deployment and coverage limits.
+
+Help Center uses SocialPageFrame and shared FormField/Button/ConfirmDialog/LegalDialog owners. Identity fields are readonly server-confirmed values; only the problem description is editable. It retains full-width form geometry, tokens, native document scrolling and TR/EN theme behavior. Readiness, pending delivery, status-only recovery and a separate support data-use notice are explicit. An uncertain request preserves its ID and description; verified retries reuse both. Draft navigation uses the shared discard dialog; sign-out clears the old view. No palette or typography changes.

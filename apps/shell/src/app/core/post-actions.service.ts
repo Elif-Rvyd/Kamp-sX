@@ -1,5 +1,5 @@
 import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
-import type { SocialPost, PostComment } from '@kampusx/shared/util';
+import type { SocialPost, PostComment, ReportReason, PostAuthor } from '@kampusx/shared/util';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 import { MediaError, MediaService } from './media.service';
@@ -8,7 +8,7 @@ import { FollowsService } from './follows.service';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.generated';
 
-export type ReportReason = 'spam' | 'harassment' | 'inappropriate' | 'other';
+export type { ReportReason } from '@kampusx/shared/util';
 export interface BlockedPerson {
   blocked_id: string;
   blocked_label: string;
@@ -33,6 +33,14 @@ export class PostActionsService {
   private readonly changes = signal<ReadonlyMap<string, Partial<SocialPost> | null>>(new Map());
   private readonly hidden = signal<ReadonlySet<string>>(new Set());
   private readonly pending = signal<ReadonlySet<string>>(new Set());
+  private readonly uncertainReposts = signal<ReadonlySet<string>>(new Set());
+  repostUncertain(id: string): boolean {
+    return this.uncertainReposts().has(id);
+  }
+  private failRepost(target: string, context: Context): never {
+    if (this.owns(context)) this.uncertainReposts.update((v) => new Set(v).add(target));
+    throw new MediaError('social.repost.uncertain');
+  }
   private readonly reactionReady = signal<ReadonlySet<string>>(new Set());
   private readonly reactionFailed = signal<ReadonlySet<string>>(new Set());
   private readonly tickets = new Map<string, symbol>();
@@ -53,6 +61,7 @@ export class PostActionsService {
       this.hidden.set(new Set());
       this.pending.set(new Set());
       this.reactionReady.set(new Set());
+      this.uncertainReposts.set(new Set());
       this.reactionFailed.set(new Set());
       this.tickets.clear();
       this.versions.clear();
@@ -158,6 +167,13 @@ export class PostActionsService {
           .select('id,likes_count,replies_count,reposts_count')
           .in('id', ids)
           .abortSignal(AbortSignal.timeout(15000)),
+        this.database!.from('posts')
+          .select('id,repost_of_id')
+          .eq('user_id', context.owner)
+          .eq('content', '')
+          .in('repost_of_id', ids)
+          .is('deleted_at', null)
+          .abortSignal(AbortSignal.any([AbortSignal.timeout(15000), this.replyLifetime.signal])),
       ]);
       if (!this.owns(context)) return;
       if (results.some((r) => r.error)) throw new Error('reaction_read');
@@ -181,6 +197,7 @@ export class PostActionsService {
           this.patch(id, {
             liked: liked.has(id),
             bookmarked: saved.has(id),
+            ownRepostId: results[3].data?.find((row) => row.repost_of_id === id)?.id,
             ...(post
               ? {
                   stats: {
@@ -303,7 +320,8 @@ export class PostActionsService {
     const context = this.ownerContext(post);
     await this.action(post.id, context, async () => {
       const current = await this.ownerRow(post.id, context);
-      if (current.archived_at || current.parent_id) throw new MediaError('social.errors.pinReply');
+      if (current.archived_at || current.parent_id || current.repost_of_id)
+        throw new MediaError('social.errors.pinReply');
       await this.ownerUpdate(post.id, context, {
         pinned_at: current.pinned_at ? null : new Date().toISOString(),
       });
@@ -373,7 +391,7 @@ export class PostActionsService {
     this.assert(context);
     if (setup.error || setup.data !== '2026102201') throw new MediaError('social.errors.ownerSetup');
     const result = await this.database!.from('posts')
-      .select('id,user_id,media_url,pinned_at,archived_at,parent_id')
+      .select('id,user_id,media_url,pinned_at,archived_at,parent_id,repost_of_id')
       .eq('id', id)
       .eq('user_id', context.owner)
       .is('deleted_at', null)
@@ -405,18 +423,28 @@ export class PostActionsService {
     if (result.count !== 1) throw new MediaError('social.errors.ownerUncertain');
   }
   async report(post: SocialPost, reason: ReportReason): Promise<boolean> {
-    const context = this.context();
     this.postId(post);
-    if (post.userId === context.owner || !['spam', 'harassment', 'inappropriate', 'other'].includes(reason))
+    return this.reportTarget(post.userId ?? '', reason, post.id);
+  }
+  async reportUser(target: string, reason: ReportReason): Promise<boolean> {
+    return this.reportTarget(target, reason, null);
+  }
+  private async reportTarget(target: string, reason: ReportReason, postId: string | null): Promise<boolean> {
+    const context = this.context();
+    if (
+      !uuid(target) ||
+      target === context.owner ||
+      !['spam', 'harassment', 'inappropriate', 'impersonation', 'other'].includes(reason)
+    )
       throw new MediaError('social.errors.save');
     let created = false;
-    await this.action(post.id, context, async () => {
+    await this.action(postId ?? 'report-user:' + target, context, async () => {
       await this.verify(context);
       const result = await this.database!.from('reports')
         .insert({
           reporter_id: context.owner,
-          post_id: post.id,
-          reported_user_id: post.userId,
+          post_id: postId,
+          reported_user_id: target,
           reason,
         })
         .abortSignal(AbortSignal.timeout(20000));
@@ -429,21 +457,28 @@ export class PostActionsService {
   }
   async block(post: SocialPost, label: string): Promise<void> {
     void label;
-    const context = this.context();
     this.postId(post);
-    if (!uuid(post.userId) || post.userId === context.owner) throw new MediaError('social.errors.save');
-    await this.action(post.id, context, async () => {
+    return this.blockTarget(post.userId ?? '', post.id);
+  }
+  async blockUser(target: string): Promise<void> {
+    return this.blockTarget(target, 'block-user:' + target);
+  }
+  private async blockTarget(target: string, actionId: string): Promise<void> {
+    const context = this.context();
+    if (!uuid(target) || target === context.owner) throw new MediaError('social.errors.save');
+    await this.action(actionId, context, async () => {
       await this.verify(context);
       const result = await this.client!.schema('public')
         .from('blocks')
         .insert({
           blocker_id: context.owner,
-          blocked_id: post.userId,
+          blocked_id: target,
         })
         .abortSignal(AbortSignal.timeout(20000));
       this.assert(context);
       if (result.error?.code !== '23505') this.check(result.error);
-      this.hidden.update((previous) => new Set(previous).add(post.userId!));
+      this.hidden.update((previous) => new Set(previous).add(target));
+      this.readRevision.update((v) => v + 1);
       await Promise.all([this.posts.load(), this.follows.refresh()]);
     });
   }
@@ -530,6 +565,121 @@ export class PostActionsService {
     this.assert(context);
     this.check(result.error);
     return result.data ? this.posts.mapRow(result.data) : null;
+  }
+  async embedded(id: string, signal: AbortSignal): Promise<{ post: StoredPost; author: PostAuthor } | null> {
+    const context = this.context();
+    const post = await this.find(id, signal);
+    this.assert(context);
+    if (!post) return null;
+    const profile = await this.database!.from('profiles')
+      .select('full_name,username,avatar_url')
+      .eq('user_id', post.userId)
+      .abortSignal(signal)
+      .maybeSingle();
+    this.assert(context);
+    this.check(profile.error);
+    return {
+      post,
+      author: {
+        fullName: profile.data?.full_name || profile.data?.username || '',
+        username: profile.data?.username ?? undefined,
+        avatarUrl: this.media.isPublicUrl(profile.data?.avatar_url, post.userId, 'avatar')
+          ? profile.data!.avatar_url!
+          : undefined,
+      },
+    };
+  }
+  async repost(post: SocialPost, enabled: boolean): Promise<void> {
+    const context = this.context();
+    this.postId(post);
+    if (this.repostUncertain(post.id)) throw new MediaError('social.repost.uncertain');
+    await this.action(post.id, context, async () => {
+      await this.verify(context);
+      const request = AbortSignal.any([AbortSignal.timeout(20000), this.replyLifetime.signal]);
+      const own = await this.database!.from('posts')
+        .select('id,repost_of_id')
+        .eq('user_id', context.owner)
+        .eq('repost_of_id', post.id)
+        .eq('content', '')
+        .is('deleted_at', null)
+        .abortSignal(request)
+        .maybeSingle();
+      this.assert(context);
+      this.check(own.error);
+      if (!enabled) {
+        if (own.data) {
+          const result = await this.database!.rpc('kampusx_soft_delete_post', {
+            p_post_id: own.data.id,
+          }).abortSignal(request);
+          this.assert(context);
+          this.check(result.error);
+          if (result.data !== true) throw new MediaError('social.repost.uncertain');
+        }
+        this.patch(post.id, { ownRepostId: undefined });
+      } else if (own.data) this.patch(post.id, { ownRepostId: own.data.id });
+      else {
+        const row = await this.insertRepost(post.id, '', context, request);
+        if (row) this.patch(post.id, { ownRepostId: row.id });
+      }
+      this.readRevision.update((v) => v + 1);
+      this.retryReactions(post.id);
+      void this.posts.load();
+    });
+  }
+  async quote(post: SocialPost, text: string): Promise<void> {
+    const context = this.context();
+    this.postId(post);
+    if (this.repostUncertain(post.id)) throw new MediaError('social.repost.uncertain');
+    if (typeof text !== 'string' || !text.trim() || text.length > 2000)
+      throw new MediaError('social.repost.textError');
+    await this.action(post.id, context, async () => {
+      await this.verify(context);
+      await this.insertRepost(
+        post.id,
+        text.trim(),
+        context,
+        AbortSignal.any([AbortSignal.timeout(20000), this.replyLifetime.signal]),
+      );
+      this.readRevision.update((v) => v + 1);
+      this.retryReactions(post.id);
+      void this.posts.load();
+    });
+  }
+  private async insertRepost(target: string, text: string, context: Context, request: AbortSignal) {
+    let result;
+    try {
+      result = await this.database!.from('posts')
+        .insert({
+          user_id: context.owner,
+          content: text,
+          parent_id: null,
+          repost_of_id: target,
+          media_url: null,
+          media_type: null,
+        })
+        .select('id,user_id,content,parent_id,repost_of_id')
+        .abortSignal(request)
+        .single();
+    } catch {
+      this.failRepost(target, context);
+    }
+    this.assert(context);
+    if (result.error) {
+      if (result.error.code === '23505' && !text) return null;
+      if (!result.status || result.status >= 500) this.failRepost(target, context);
+      this.check(result.error);
+    }
+    const row = result.data;
+    if (
+      !row ||
+      !uuid(row.id) ||
+      row.user_id !== context.owner ||
+      row.content !== text ||
+      row.parent_id !== null ||
+      row.repost_of_id !== target
+    )
+      this.failRepost(target, context);
+    return row;
   }
   async search(term: string, signal: AbortSignal): Promise<StoredPost[]> {
     const context = this.context();

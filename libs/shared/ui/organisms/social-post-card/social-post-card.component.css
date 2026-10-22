@@ -2,6 +2,7 @@
   display: block;
 }
 .social-post {
+  container-type: inline-size;
   padding: 20px 20px 12px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -114,5 +115,11 @@ video.post-media {
 @media (max-width: 640px) {
   .social-post {
     padding-inline: 16px;
+  }
+}
+
+@container (max-width: 290px) {
+  .post-actions {
+    grid-template-columns: repeat(3, minmax(44px, 1fr));
   }
 }

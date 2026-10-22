@@ -14,6 +14,34 @@ export const routes: Routes = [
       import('./features/social/social-layout.component').then((m) => m.SocialLayoutComponent),
     children: [
       {
+        path: 'help',
+        canDeactivate: [
+          (component: import('./features/social/support.page').SupportPage) => component.canLeave(),
+        ],
+        loadComponent: () => import('./features/social/support.page').then((m) => m.SupportPage),
+      },
+      {
+        path: 'messages',
+        loadComponent: () =>
+          import('./features/messages/messages-layout.component').then((m) => m.MessagesLayoutComponent),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./features/messages/inbox.page').then((m) => m.InboxPage),
+          },
+          {
+            path: ':id',
+            canDeactivate: [
+              (component: import('./features/messages/conversation.page').ConversationPage) =>
+                component.canLeave(),
+            ],
+            loadComponent: () =>
+              import('./features/messages/conversation.page').then((m) => m.ConversationPage),
+          },
+        ],
+      },
+      {
         path: 'settings/account-status',
         canDeactivate: [
           (component: import('./features/social/account-status.page').AccountStatusPage) =>
