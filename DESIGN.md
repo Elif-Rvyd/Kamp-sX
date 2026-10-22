@@ -291,6 +291,7 @@ on exit or identity replacement. Reconnect/token renewal never unlock an uncerta
 - Don't invent an authenticated session, OAuth result, sent email, real member count or legal policy.
 - Don't reveal whether a particular email address already has an account in reset or sign-up feedback.
 - Don't allow decorations to obscure fields or remove actions on narrow screens.
+- Don't add decorative asterisk or starburst glyphs; the user removed this repeated motif on 22 October 2026.
 
 ## 22 October live client contract update
 

@@ -23,7 +23,7 @@ import { RevealDirective } from '@kampusx/shared/util';
       <h2 id="about-title">{{ t('about.title') }}</h2>
       <div>
         <p>{{ t('about.description') }}</p>
-        <blockquote>{{ t('about.quote') }}<span aria-hidden="true">✳</span></blockquote>
+        <blockquote>{{ t('about.quote') }}</blockquote>
       </div>
     </div>
     <div class="sharing-grid">

@@ -69,7 +69,6 @@ import { AuthUiService } from '../../../../core/auth-ui.service';
             />
           }
         </div>
-        <span class="academic-asterisk" aria-hidden="true">✳</span>
       </div>
     </div>
   </section>`,

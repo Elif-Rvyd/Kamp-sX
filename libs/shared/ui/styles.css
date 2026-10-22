@@ -587,10 +587,6 @@
   font-size: 11px;
   white-space: nowrap;
 }
-.trend-star {
-  font-size: 21px;
-  color: var(--color-accent);
-}
 .marquee-strip:hover .marquee-track,
 .marquee-strip:focus-within .marquee-track,
 .marquee-track.marquee-paused {

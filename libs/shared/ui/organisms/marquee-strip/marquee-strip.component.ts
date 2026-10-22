@@ -13,7 +13,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
         @for (copy of [0, 1]; track copy) {
           <div class="marquee-copy" [attr.aria-hidden]="copy === 1 ? 'true' : null">
             @for (key of trendKeys; track key) {
-              <span>{{ t(key) }}<span class="trend-star" aria-hidden="true">✳</span></span>
+              <span>{{ t(key) }}</span>
             }
           </div>
         }

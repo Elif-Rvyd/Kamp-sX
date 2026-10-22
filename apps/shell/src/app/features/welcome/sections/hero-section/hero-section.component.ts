@@ -47,8 +47,7 @@ import { AuthPanelComponent } from '../../../auth/auth-panel/auth-panel.componen
               <strong>{{ t('hero.welcome') }}</strong> {{ t('hero.description') }}
             </p>
             <div class="poster-scene" [attr.aria-label]="t('hero.posterLabel')">
-              <kx-sticker class="scene-sticker"
-                >{{ t('hero.sticker') }}<span aria-hidden="true"> ✳</span></kx-sticker
+              <kx-sticker class="scene-sticker">{{ t('hero.sticker') }}</kx-sticker
               ><kx-post-card-preview [post]="posts[0]" class="scene-photo" /><kx-post-card-preview
                 [post]="posts[1]"
                 class="scene-anonymous"
@@ -57,8 +56,7 @@ import { AuthPanelComponent } from '../../../auth/auth-panel/auth-panel.componen
                 class="scene-video"
               /><kx-sticker [round]="true" tone="coral" class="scene-round">{{
                 t('hero.roundSticker')
-              }}</kx-sticker
-              ><span class="scene-doodle" aria-hidden="true">✷</span>
+              }}</kx-sticker>
             </div>
             <div class="poster-footnote">
               <span><kx-icon name="public" />{{ 81 | kxNumber }} {{ t('hero.universities') }}</span

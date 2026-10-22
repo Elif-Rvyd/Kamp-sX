@@ -343,14 +343,6 @@
   font-size: 9px;
   box-shadow: 3px 3px 0 var(--color-ink);
 }
-.scene-doodle {
-  position: absolute;
-  font-size: 50px;
-  color: var(--color-poster-muted);
-  left: -14px;
-  bottom: 4px;
-  transform: rotate(10deg);
-}
 .poster-footnote {
   display: flex;
   align-items: center;
@@ -745,10 +737,6 @@
   line-height: 1.5;
   max-width: 420px;
 }
-.about-intro blockquote > span {
-  font-size: 43px;
-  color: var(--color-primary);
-}
 .sharing-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1082,15 +1070,6 @@
 .academic-features .micro-feature p {
   font-size: 9px;
   line-height: 1.6;
-}
-.academic-asterisk {
-  position: absolute;
-  right: -20px;
-  bottom: -76px;
-  font-size: 240px;
-  line-height: 1;
-  color: var(--color-soft-primary);
-  transform: rotate(15deg);
 }
 
 .closing-cta {
@@ -1542,9 +1521,6 @@
     width: 61px;
     height: 61px;
     font-size: 8px;
-  }
-  .scene-doodle {
-    display: none;
   }
   .auth-panel {
     padding: 25px;
